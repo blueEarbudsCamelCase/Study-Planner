@@ -133,7 +133,7 @@ console.log("iCal URL saved:", icalUrl);
 alert('Information saved!');
 
 
-//replace this link
+
 fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
   .then(response => response.text())
   .then(data => {
@@ -155,7 +155,7 @@ window.fetchIcalFeed = function fetchIcalFeed() {
   }
 
 
-  return fetch(`http://localhost:3000/proxy?url=${encodeURIComponent(icalUrl)}`)
+  return fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
     .then(response => response.text())
     .then(data => {
       console.log("Raw iCal Data: ", data); // Log the raw iCal data

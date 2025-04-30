@@ -1,0 +1,554 @@
+#dashboardSection {
+  position: relative; /* Ensure the section is the positioning context */
+}
+#dashboardContainer {
+max-width: 800px; /* Set a maximum width for the container */
+margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
+padding: 2rem; /* Add padding inside the container */
+background-color: #ffffff; /* White background */
+border-radius: 12px; /* Rounded corners */
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+border: 1px solid #e2e8f0; /* Light border for a clean look */
+}
+/* Dark Mode Styles */
+body.dark-mode {
+background-color: #1a202c; /* Dark background */
+color: #f7fafc; /* Light text */
+}
+
+body.dark-mode .bg-white {
+background-color: #2d3748; /* Darker background for containers */
+}
+
+body.dark-mode .text-gray-600 {
+color: #a0aec0; /* Lighter gray text */
+}
+
+body.dark-mode .text-blue-500 {
+color: #63b3ed; /* Lighter blue for links */
+}
+/* Dark Mode Styles for Containers */
+body.dark-mode #dashboardContainer,
+body.dark-mode #studyPlannerSection,
+body.dark-mode #runScreenBox,
+body.dark-mode #settingsPopup .bg-white {
+background-color: #2d3748; /* Darker background for containers */
+color: #f7fafc; /* Light text */
+border-color: #4a5568; /* Darker border */
+}
+
+body.dark-mode #studyPlanDisplay div,
+body.dark-mode #runScreenTasks div {
+background-color: #4a5568; /* Darker background for task items */
+color: #f7fafc; /* Light text */
+}
+
+body.dark-mode #studyPlanDisplay,
+body.dark-mode #studyTasks {
+background-color: #2d3748; /* Darker background for task lists */
+color: #f7fafc; /* Light text */
+border-color: #4a5568; /* Darker border */
+}
+
+body.dark-mode #tutorialPopup,
+body.dark-mode #taskPopup {
+background-color: #2d3748; /* Darker background for popups */
+color: #f7fafc; /* Light text */
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+background-color: #4a5568; /* Darker background for inputs */
+color: #f7fafc; /* Light text */
+border-color: #4a5568; /* Match border to background */
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode select::placeholder,
+body.dark-mode textarea::placeholder {
+color: #a0aec0; /* Lighter gray for placeholder text */
+}
+
+/* Ensure all input elements are styled in dark mode */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+background-color: #4a5568; /* Dark background */
+color: #f7fafc; /* Light text */
+border: 1px solid #4a5568; /* Dark border */
+border-radius: 8px; /* Rounded corners */
+padding: 0.75rem; /* Add padding */
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+outline: none; /* Remove default focus outline */
+border-color: #63b3ed; /* Blue border on focus */
+box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5); /* Subtle blue shadow */
+}
+/* Dark Mode Styles for Headings and Titles */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+color: #f7fafc; /* Light text for headings */
+}
+
+body.dark-mode .text-gray-500 {
+color: #a0aec0; /* Lighter gray for subtitles or secondary text */
+}
+
+body.dark-mode .text-gray-600 {
+color: #cbd5e0; /* Slightly lighter gray for task feed titles */
+}
+
+body.dark-mode .text-blue-500 {
+color: #63b3ed; /* Lighter blue for links */
+}
+/* Dark Mode Styles for Task Buttons */
+body.dark-mode #studyPlanDisplay button {
+background-color: #4a5568; /* Dark background */
+color: #f7fafc; /* Light text */
+border: 1px solid #4a5568; /* Match border to background */
+}
+
+body.dark-mode #studyPlanDisplay button:hover {
+background-color: #2d3748; /* Slightly darker on hover */
+}
+
+/* Transparent Background for Popups */
+#tutorialPopup,
+#taskPopup {
+background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+}
+
+/* Task Buttons in studyPlanDisplay */
+body.dark-mode #studyPlanDisplay button {
+background-color: #4a5568 !important; /* Dark background */
+color: #f7fafc !important; /* Light text */
+border: 1px solid #4a5568 !important; /* Match border to background */
+}
+
+body.dark-mode #studyPlanDisplay button:hover {
+background-color: #2d3748 !important; /* Slightly darker on hover */
+}
+
+/* Transparent Background for Popups */
+body.dark-mode #tutorialPopup,
+body.dark-mode #taskPopup {
+background-color: rgba(0, 0, 0, 0.5) !important; /* Semi-transparent black background */
+}
+
+#settingsBtn {
+width: 40px; /* Set a fixed width */
+height: 40px; /* Set a fixed height */
+display: flex;
+align-items: center;
+justify-content: center;
+background-color: #4a5568; /* Gray background */
+border-radius: 50%; /* Make it circular */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+#settingsBtn:hover {
+background-color: #2d3748; /* Darker gray on hover */
+}
+
+/* Popup Styles */
+#settingsPopup {
+visibility: hidden; /* Initially hidden */
+display: flex;
+align-items: center;
+justify-content: center;
+position: fixed;
+inset: 0; /* Fullscreen overlay */
+background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+z-index: 50; /* Ensure it appears above other elements */
+}
+
+#settingsPopup .bg-white {
+background-color: #ffffff; /* White background for the popup */
+padding: 1.5rem;
+border-radius: 12px;
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+max-width: 400px;
+width: 100%;
+}
+
+#settingsPopup .bg-black {
+background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+}
+#startStudyBtn {
+  background-color: #38a169; /* Green background */
+  color: #ffffff; /* White text */
+  padding: 0.75rem 1.5rem; /* Add padding */
+  font-size: 1rem; /* Standard font size */
+  font-weight: 600; /* Semi-bold text */
+  border: none; /* Remove default border */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+ }
+
+#startStudyBtn:hover {
+  background-color: #2f855a; /* Darker green on hover */
+}
+
+#logoutBtn {
+  background-color: #e53e3e; /* Red background */
+  color: #ffffff; /* White text */
+  padding: 0.75rem 1.5rem; /* Add padding */
+  font-size: 1rem; /* Standard font size */
+  font-weight: 600; /* Semi-bold text */
+  border: none; /* Remove default border */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  position: absolute;
+  bottom: 16px; /* Distance from the bottom */
+  right: 16px; /* Distance from the right */
+  margin: 0; /* Reset any margin applied by Tailwind */
+}
+#logoutBtn:hover {
+  background-color: #c53030; /* Darker red on hover */
+}
+
+#studyTasks {
+  display: none; /* Hide the tasks list initially */
+  max-height: 550px; /* Set the maximum height for the tasks list */
+  max-width: 400px; /* Set the maximum width for the tasks list */
+  overflow-y: auto; /* Enable vertical scrolling */
+  border: 1px solid #cdcece; /* Light border for a clean look */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 8px; /* Rounded corners for the tasks list */
+  padding: 10px; /* Add padding to avoid scrollbar overlap */
+  background-color: #ffffff;
+}
+
+#studyPlannerSection {
+  max-width: 800px; /* Set a maximum width for the section */
+  margin: 2rem auto; /* Center the section horizontally and add vertical spacing */
+  padding: 2rem; /* Add padding around the section */
+  background-color: #ffffff; /* White background for the section */
+  border-radius: 12px; /* Slightly larger rounded corners */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for depth */
+  border: 1px solid #e2e8f0; /* Light border for a clean look */
+}
+
+#studyPlannerSection h1 {
+  font-size: 2rem; /* Larger font size for the main heading */
+  font-weight: bold; /* Make the heading bold */
+  color: #2d3748; /* Dark gray color for the heading */
+  text-align: center; /* Center-align the heading */
+  margin-bottom: 1.5rem; /* Add spacing below the heading */
+}
+
+#studyPlannerSection h3 {
+  font-size: 1.25rem; /* Slightly larger font size for subheadings */
+  font-weight: 600; /* Semi-bold for subheadings */
+  color: #4a5568; /* Medium gray color for subheadings */
+  margin-top: 1rem; /* Add spacing above subheadings */
+  margin-bottom: 0.75rem; /* Add spacing below subheadings */
+}
+
+#studyPlannerSection ul {
+  list-style-type: disc; /* Use disc bullets for the list */
+  padding-left: 1.5rem; /* Add left padding for the list */
+  margin-bottom: 1.5rem; /* Add spacing below the list */
+}
+
+#studyPlannerSection li {
+  font-size: 1rem; /* Standard font size for list items */
+  color: #2d3748; /* Dark gray color for list items */
+  margin-bottom: 0.5rem; /* Add spacing between list items */
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center-align items vertically */
+}
+
+#studyPlannerSection li input[type="checkbox"] {
+  margin-right: 0.5rem; /* Add spacing between the checkbox and text */
+}
+
+#studyPlannerSection .flex {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+}
+
+#studyPlanDisplay {
+display: flex; /* Use flexbox for proportional sizing */
+flex-direction: column; /* Stack tasks vertically */
+height: 550px; /* Fixed height for the total time */
+border: 1px solid #cdcece;
+border-radius: 8px;
+overflow: hidden; /* Prevent overflow */
+background-color: #ffffff; /* Light background */
+padding: 8px;
+box-sizing: border-box;
+margin: 0;
+}
+
+#studyPlanDisplay div {
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow-wrap: break-word; /* Allow breaking long words */
+    word-wrap: break-word; /* Support for older browsers */
+    overflow: hidden; /* Hide overflowing content */
+    white-space: normal; /* Prevent wrapping to multiple lines */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+  }
+
+/* Default styles for the runButton */
+#runButton {
+background-color: #7e7e7e; /* Default grey background */
+color: #ffffff; /* White text */
+cursor: not-allowed; /* Disabled cursor */
+border-radius: 8px; /* Rounded corners */
+padding: 0.75rem 1.5rem; /* Add padding */
+font-size: 1rem; /* Standard font size */
+font-weight: 600; /* Semi-bold text */
+transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Enabled state */
+#runButton.enabled {
+background-color: #38a169; /* Green background */
+cursor: pointer; /* Pointer cursor */
+}
+
+/* Hover effect for enabled state */
+#runButton.enabled:hover {
+background-color: #2f855a; /* Darker green */
+}
+
+/* Run Screen Box */
+#runScreenBox {
+max-width: 800px; /* Set a maximum width for the box */
+margin: 2rem auto; /* Center the box horizontally and add vertical spacing */
+padding: 2rem; /* Add padding around the box */
+background-color: #ffffff; /* White background */
+border-radius: 12px; /* Rounded corners */
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for depth */
+border: 1px solid #e2e8f0; /* Light border for a clean look */
+}
+
+/* Sets the containers height and width */
+/* Center the timer */
+.base-timer {
+display: flex;
+align-items: center;
+justify-content: center;
+position: relative;
+height: 300px;
+width: 300px;
+margin: 0 auto; /* Center horizontally */
+}
+
+/* Removes SVG styling that would hide the time label */
+.base-timer__circle {
+fill: none;
+stroke: none;
+}
+
+/* The SVG path that displays the timer's progress */
+.base-timer__path-elapsed {
+stroke-width: 7px;
+stroke: rgb(232, 232, 232);
+}
+
+.base-timer__label {
+position: absolute;
+
+/* Size should match the parent container */
+width: 300px;
+height: 300px;
+
+/* Keep the label aligned to the top */
+top: 0;
+
+/* Create a flexible box that centers content vertically and horizontally */
+display: flex;
+align-items: center;
+justify-content: center;
+
+/* Sort of an arbitrary number; adjust to your liking */
+font-size: 48px;
+}
+
+.base-timer__path-remaining {
+/* Just as thick as the original ring */
+stroke-width: 7px;
+
+stroke: #38a169;
+
+/* Rounds the line endings to create a seamless circle */
+stroke-linecap: round;
+
+/* Makes sure the animation starts at the top of the circle */
+transform: rotate(90deg);
+transform-origin: center;
+
+/* One second aligns with the speed of the countdown timer */
+transition: 1s linear all;
+}
+
+.base-timer__svg {
+/* Flips the svg and makes the animation to move left-to-right */
+transform: scaleX(-1);
+}
+
+/* Dark Mode Styles for Buttons in studyTasks */
+body.dark-mode #studyTasks button {
+background-color: #4a5568 !important; /* Dark background */
+color: #f7fafc !important; /* Light text */
+border: 1px solid #4a5568 !important; /* Match border to background */
+padding: 0.5rem; /* Add padding for better spacing */
+border-radius: 8px; /* Rounded corners */
+text-align: left; /* Align text to the left */
+width: 100%; /* Make the button take full width */
+}
+
+body.dark-mode #studyTasks button:hover {
+background-color: #2d3748 !important; /* Slightly darker on hover */
+}
+
+#backToDashboardBtn {
+background-color: #e53e3e; /* Red background */
+color: #ffffff; /* White text */
+padding: 0.75rem 1.5rem; /* Add padding */
+font-size: 1rem; /* Standard font size */
+font-weight: 600; /* Semi-bold text */
+border: none; /* Remove default border */
+border-radius: 8px; /* Rounded corners */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+position: absolute;
+bottom: 16px; /* Distance from the bottom */
+right: 16px; /* Distance from the right */
+margin: 0; /* Reset any margin applied by Tailwind */
+}
+
+#backToDashboardBtn:hover {
+background-color: #c53030; /* Darker red on hover */
+}
+
+#backToPlanScreenBtn {
+background-color: #e53e3e; /* Red background */
+color: #ffffff; /* White text */
+padding: 0.75rem 1.5rem; /* Add padding */
+font-size: 1rem; /* Standard font size */
+font-weight: 600; /* Semi-bold text */
+border: none; /* Remove default border */
+border-radius: 8px; /* Rounded corners */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+position: absolute;
+bottom: 16px; /* Distance from the bottom */
+right: 16px; /* Distance from the right */
+margin: 0; /* Reset any margin applied by Tailwind */
+}
+
+#backToPlanScreenBtn:hover {
+background-color: #c53030; /* Darker red on hover */
+}
+
+#tutorialBtn {
+background-color: #3182ce; /* Blue background */
+color: #ffffff; /* White text */
+padding: 0.75rem 1.5rem; /* Add padding */
+font-size: 1rem; /* Standard font size */
+font-weight: 600; /* Semi-bold text */
+border: none; /* Remove default border */
+border-radius: 8px; /* Rounded corners */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#tutorialBtn:hover {
+background-color: #2b6cb0; /* Darker blue on hover */
+}  
+
+#scheduleSetupSection h2 {
+font-size: 2rem; /* Larger font size for the main heading */
+font-weight: bold; /* Make the heading bold */
+color: #2d3748; /* Dark gray color for the heading */
+text-align: center; /* Center-align the heading */
+margin-bottom: 1.5rem; /* Add spacing below the heading */
+}
+
+body.dark-mode #studyPlannerSection h1 {
+color: #f7fafc; /* Light text for the title in dark mode */
+}
+
+body.dark-mode #studyPlannerSection h3 {
+color: #f7fafc; /* Light text for the title in dark mode */
+}
+
+#scheduleSaveButton {
+display: inline-block; /* Ensure buttons are inline-block */
+padding: 0.75rem 1.5rem; /* Add padding for buttons */
+font-size: 1rem; /* Standard font size for buttons */
+font-weight: 600; /* Semi-bold for buttons */
+color: #ffffff; /* White text color */
+width: 100%;
+background-color: #3182ce; /* Blue background color */
+border: none; /* Remove default border */
+border-radius: 8px; /* Rounded corners for buttons */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#scheduleSaveButton:hover {
+background-color: #2b6cb0; /* Darker blue on hover */
+}
+
+#authSection h1 {
+font-size: 2rem; /* Larger font size for the main heading */
+font-weight: bold; /* Make the heading bold */
+color: #2d3748; /* Dark gray color for the heading */
+text-align: center; /* Center-align the heading */
+margin-bottom: 1.5rem; /* Add spacing below the heading */
+}
+
+body.dark-mode #authSection h1 {
+color: #f7fafc; /* Light text for the title in dark mode */
+}
+#authBtn {
+display: inline-block; /* Ensure buttons are inline-block */
+padding: 0.75rem 1.5rem; /* Add padding for buttons */
+font-size: 1rem; /* Standard font size for buttons */
+font-weight: 600; /* Semi-bold for buttons */
+color: #ffffff; /* White text color */
+background-color: #3182ce; /* Blue background color */
+border: none; /* Remove default border */
+border-radius: 8px; /* Rounded corners for buttons */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#authBtn:hover {
+background-color: #2b6cb0; /* Darker blue on hover */
+}
+
+#authSection input {
+width: 100%; /* Full width for inputs */
+padding: 0.75rem; /* Add padding inside inputs */
+font-size: 1rem; /* Standard font size */
+border: 1px solid #e2e8f0; /* Light border for inputs */
+border-radius: 8px; /* Rounded corners for inputs */
+margin-bottom: 1rem; /* Add spacing below inputs */
+}
+
+#authSection input:focus {
+outline: none; /* Remove default focus outline */
+border-color: #3182ce; /* Blue border on focus */
+box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2); /* Add a subtle blue shadow */
+}

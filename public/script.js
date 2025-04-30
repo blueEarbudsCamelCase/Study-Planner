@@ -956,18 +956,74 @@ document.getElementById('openPopupBtn').addEventListener('click', function () {
     'width=300,height=300,scrollbars=yes,resizable=yes'
   );
 
-  // Write the content of runScreen into the popup
-  popupWindow.document.write(`
+   // Write the content of runScreen into the popup
+   popupWindow.document.write(`
     <html>
       <head>
         <title>Run Screen</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
         <style>
           body { font-family: sans-serif; margin: 0; padding: 0; }
+          .base-timer {
+            position: relative;
+            width: 300px;
+            height: 300px;
+          }
+          .base-timer__svg {
+            transform: scaleX(-1);
+          }
+          .base-timer__circle {
+            fill: none;
+            stroke: none;
+          }
+          .base-timer__path-elapsed {
+            stroke-width: 7px;
+            stroke: #f0f0f0;
+          }
+          .base-timer__path-remaining {
+            stroke-width: 7px;
+            stroke-linecap: round;
+            transition: 1s linear all;
+            transform: rotate(90deg);
+            transform-origin: center;
+          }
+          .base-timer__label {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            text-align: center;
+          }
         </style>
       </head>
       <body>
-        ${runScreenContent}
+        <!-- Hide the "Open in Popup" button -->
+        <div style="display: none;">${runScreenContent}</div>
+
+        <!-- Timer Circle -->
+        <div class="base-timer">
+          <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="base-timer__circle">
+              <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+              <path
+                id="base-timer-path-remaining"
+                stroke-dasharray="283"
+                class="base-timer__path-remaining"
+                d="
+                  M 50, 50
+                  m -45, 0
+                  a 45,45 0 1,0 90,0
+                  a 45,45 0 1,0 -90,0
+                "
+              ></path>
+            </g>
+          </svg>
+          <span id="base-timer-label" class="base-timer__label">00:00</span>
+        </div>
+
         <script>
           // Timer Constants
           let TIME_LIMIT = ${TIME_LIMIT}; // Pass the current time limit

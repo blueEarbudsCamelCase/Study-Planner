@@ -134,7 +134,7 @@ alert('Information saved!');
 
 
 //replace this link
-fetch(`https://study-planner-js0n.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
+fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
   .then(response => response.text())
   .then(data => {
     console.log("Raw iCal Data:", data); // Log the raw iCal data

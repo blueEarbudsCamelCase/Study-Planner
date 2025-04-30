@@ -220,7 +220,7 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 
 #studyTasks {
   display: none; /* Hide the tasks list initially */
-  max-height: 550px; /* Set the maximum height for the tasks list */
+  max-height: 400px; /* Set the maximum height for the tasks list */
   max-width: 400px; /* Set the maximum width for the tasks list */
   overflow-y: auto; /* Enable vertical scrolling */
   border: 1px solid #cdcece; /* Light border for a clean look */
@@ -283,7 +283,7 @@ align-items: flex-start;
 #studyPlanDisplay {
 display: flex; /* Use flexbox for proportional sizing */
 flex-direction: column; /* Stack tasks vertically */
-height: 550px; /* Fixed height for the total time */
+height: 400px; /* Fixed height for the total time */
 border: 1px solid #cdcece;
 border-radius: 8px;
 overflow: hidden; /* Prevent overflow */

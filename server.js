@@ -1,11 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
+const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use the environment's port or default to 3000
+const PORT = process.env.PORT || 3000;
 
-app.use(cors()); // Enable CORS for all routes
+app.use(cors());
+
+// Serve static files from the "public" folder
+app.use(express.static(path.join(__dirname, "public")));
 
 // Proxy route for fetching iCal feed
 app.get("/proxy", async (req, res) => {
@@ -27,6 +31,11 @@ app.get("/proxy", async (req, res) => {
     console.error("Error fetching iCal feed:", error);
     res.status(500).send("Failed to fetch iCal feed.");
   }
+});
+
+// Catch-all route to serve the frontend for any other request
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Start the server

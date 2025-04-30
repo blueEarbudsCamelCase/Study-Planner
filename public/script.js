@@ -946,3 +946,32 @@ function updateRunScreenDisplay(taskIndex) {
     }
   });
 }
+document.getElementById('openPopupBtn').addEventListener('click', function () {
+  const runScreenContent = document.getElementById('runScreen').innerHTML;
+
+  // Open a new popup window
+  const popupWindow = window.open(
+    '',
+    'RunScreenPopup',
+    'width=400,height=600,scrollbars=yes,resizable=yes'
+  );
+
+  // Write the content of runScreen into the popup
+  popupWindow.document.write(`
+    <html>
+      <head>
+        <title>Run Screen</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <style>
+          body { font-family: sans-serif; margin: 0; padding: 0; }
+        </style>
+      </head>
+      <body>
+        ${runScreenContent}
+      </body>
+    </html>
+  `);
+
+  // Close the document to render the content
+  popupWindow.document.close();
+});

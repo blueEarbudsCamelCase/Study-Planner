@@ -953,7 +953,7 @@ document.getElementById('openPopupBtn').addEventListener('click', function () {
   const popupWindow = window.open(
     '',
     'RunScreenPopup',
-    'width=400,height=600,scrollbars=yes,resizable=yes'
+    'width=300,height=300,scrollbars=yes,resizable=yes'
   );
 
   // Write the content of runScreen into the popup
@@ -968,6 +968,61 @@ document.getElementById('openPopupBtn').addEventListener('click', function () {
       </head>
       <body>
         ${runScreenContent}
+        <script>
+          // Timer Constants
+          let TIME_LIMIT = ${TIME_LIMIT}; // Pass the current time limit
+          let timePassed = ${timePassed};
+          let timeLeft = ${timeLeft};
+          let timerInterval = null;
+
+          const FULL_DASH_ARRAY = 283;
+
+          // Format time as MM:SS
+          function formatTimeLeft(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            return \`\${minutes}:\${seconds < 10 ? "0" : ""}\${seconds}\`;
+          }
+
+          // Calculate the fraction of time left
+          function calculateTimeFraction() {
+            const rawTimeFraction = timeLeft / TIME_LIMIT;
+            return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+          }
+
+          // Update the circle's dash array
+          function setCircleDasharray() {
+            const circleDasharray = \`\${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283\`;
+            document
+              .getElementById("base-timer-path-remaining")
+              .setAttribute("stroke-dasharray", circleDasharray);
+          }
+
+          // Start the timer
+          function startTimer() {
+            document.getElementById("base-timer-label").textContent = formatTimeLeft(timeLeft);
+            setCircleDasharray();
+
+            timerInterval = setInterval(() => {
+              timePassed += 1;
+              timeLeft = TIME_LIMIT - timePassed;
+
+              document.getElementById("base-timer-label").textContent = formatTimeLeft(timeLeft);
+              setCircleDasharray();
+
+              if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document
+                  .getElementById("base-timer-path-remaining")
+                  .setAttribute("stroke-dasharray", "0 283");
+                alert('Time is up!');
+              }
+            }, 1000);
+          }
+
+          // Start the timer when the popup loads
+          startTimer();
+        </script>
       </body>
     </html>
   `);

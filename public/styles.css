@@ -405,6 +405,48 @@ transition: 1s linear all;
 transform: scaleX(-1);
 }
 
+#timerCanvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 300px;
+  width: 300px;
+  margin: 0 auto; /* Center horizontally */
+  background-color: transparent; /* Remove black background */
+}
+
+#timerCanvas__circle {
+  fill: none;
+  stroke: none;
+}
+
+#timerCanvas__path-elapsed {
+  stroke-width: 7px;
+  stroke: rgb(232, 232, 232); /* Light gray background circle */
+}
+
+#timerCanvas__path-remaining {
+  stroke-width: 7px;
+  stroke: #38a169; /* Green color for the remaining time */
+  stroke-linecap: round; /* Rounded ends for the timer path */
+  transform: rotate(90deg);
+  transform-origin: center;
+  transition: 1s linear all; /* Smooth transition for the timer */
+}
+
+#timerCanvas__label {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #000; /* Black text for the timer label */
+}
+
 /* Dark Mode Styles for Buttons in studyTasks */
 body.dark-mode #studyTasks button {
 background-color: #4a5568 !important; /* Dark background */

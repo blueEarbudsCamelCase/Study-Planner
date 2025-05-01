@@ -947,56 +947,55 @@ function updateRunScreenDisplay(taskIndex) {
   });
 }
 
-document.getElementById('openPopupBtn').addEventListener('click', function () {
-  const runScreenContent = document.getElementById('runScreen').innerHTML;
+const canvas = document.getElementById('timerCanvas');
+const ctx = canvas.getContext('2d');
 
-  // Open a new popup window
-  const popupWindow = window.open(
-    '',
-    'RunScreenPopup',
-    'width=300,height=300,scrollbars=yes,resizable=yes'
-  );
-  const floatingModal = document.getElementById('floatingModal');
-  const closeModal = document.getElementById('closeModal');
-  
-  document.getElementById('openPopupBtn').addEventListener('click', () => {
-    floatingModal.classList.remove('hidden'); // Show the modal
-    startTimerInModal(); // Start the timer in the modal
-  });
-  
-  closeModal.addEventListener('click', () => {
-    floatingModal.classList.add('hidden'); // Hide the modal
-    clearInterval(timerInterval); // Stop the timer
-  });
-  
-  // Timer logic for the modal
-  function startTimerInModal() {
-    let timePassed = 0;
-    let timeLeft = TIME_LIMIT;
-  
-    function updateTimer() {
-      document.getElementById('base-timer-label-modal').textContent = formatTimeLeft(timeLeft);
-      setCircleDasharrayModal();
-  
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        alert('Time is up!');
-      }
-    }
-  
-    function setCircleDasharrayModal() {
-      const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
-      document
-        .getElementById('base-timer-path-remaining-modal')
-        .setAttribute('stroke-dasharray', circleDasharray);
-    }
-  
-    timerInterval = setInterval(() => {
-      timePassed += 1;
-      timeLeft = TIME_LIMIT - timePassed;
-      updateTimer();
-    }, 1000);
-  
-    updateTimer(); // Initialize the timer display
+function drawTimer(timeLeft, timeLimit) {
+  const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
+  const radius = 45;
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the background circle
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fill();
+
+  // Draw the remaining time arc
+  const timeFraction = timeLeft / timeLimit;
+  const endAngle = -Math.PI / 2 + 2 * Math.PI * timeFraction;
+
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle);
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = '#4caf50'; // Green color
+  ctx.stroke();
+
+  // Draw the time label
+  ctx.font = '24px Arial';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  ctx.fillText(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`, centerX, centerY);
+}
+
+// Example: Update the timer every second
+let localTimeLeft = 60; // 1 minute
+const localTimeLimit = 60;
+
+const localTimerInterval = setInterval(() => {
+  drawTimer(localTimeLeft, localTimeLimit);
+
+  if (localTimeLeft <= 0) {
+    clearInterval(localTimerInterval);
+    console.log('Time is up!');
+  } else {
+    localTimeLeft -= 1;
   }
-});
+}, 1000);

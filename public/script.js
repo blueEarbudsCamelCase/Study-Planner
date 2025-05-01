@@ -949,8 +949,8 @@ function updateRunScreenDisplay(taskIndex) {
 
 // Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
-const displayWidth = 70; // Set the display width of the canvas
-const displayHeight = 70; // Set the display height of the canvas
+const displayWidth = 200; // Set the display width of the canvas
+const displayHeight = 200; // Set the display height of the canvas
 
 // Set the canvas width and height for high resolution
 canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio

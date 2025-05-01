@@ -437,13 +437,13 @@ transform: scaleX(-1);
 
 #timerCanvas__label {
   position: absolute;
-  width: 300px;
-  height: 300px;
+  width: 150px;
+  height: 150px;
   top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: 24px;
   color: #000; /* Black text for the timer label */
 }
 

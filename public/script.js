@@ -610,7 +610,6 @@ function addToAgenda(task, estimatedTime, zone) {
  // Set the content of the agenda item
   agendaItem.innerHTML = `
     <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
-    <span class="tooltip-text">${task.summary}</span>
     <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -997,10 +996,14 @@ canvas.style.height = `${fixedHeight}px`;
 const videoElement = document.createElement('video');
 videoElement.srcObject = canvas.captureStream(); // Use the canvas as a video stream
 videoElement.muted = true; // Mute the video (required for autoplay)
-videoElement.play().then(() => {
-  console.log("Video is playing.");
-}).catch(error => {
-  console.error("Error playing video:", error);
+
+// Wait for the video metadata to load before playing
+videoElement.addEventListener('loadedmetadata', () => {
+  videoElement.play().then(() => {
+    console.log("Video is playing.");
+  }).catch(error => {
+    console.error("Error playing video:", error);
+  });
 });
 
 // Add an event listener to the PiP button
@@ -1012,26 +1015,15 @@ pipButton.addEventListener('click', () => {
       console.error("Error exiting Picture-in-Picture:", error);
     });
   } else {
-    // Request PiP mode
-    videoElement.requestPictureInPicture().then(() => {
-      pipButton.textContent = "Hide Popup"; // Update button text
-    }).catch(error => {
-      console.error("Error enabling Picture-in-Picture:", error);
-    });
-  }
-});
-
-// Update the button text when exiting PiP
-videoElement.addEventListener('leavepictureinpicture', () => {
-  pipButton.textContent = "Show Popup"; // Reset button text
-});
-
-// Add an event listener to the Exit button
-const exitButton = document.getElementById('exitPiPButton');
-exitButton.addEventListener('click', () => {
-  if (document.pictureInPictureElement) {
-    document.exitPictureInPicture().catch(error => {
-      console.error("Error exiting Picture-in-Picture:", error);
-    });
+    // Ensure the video is ready before requesting PiP
+    if (videoElement.readyState >= 2) { // Check if the video is ready
+      videoElement.requestPictureInPicture().then(() => {
+        pipButton.textContent = "Hide Popup"; // Update button text
+      }).catch(error => {
+        console.error("Error enabling Picture-in-Picture:", error);
+      });
+    } else {
+      console.error("Video is not ready for Picture-in-Picture.");
+    }
   }
 });

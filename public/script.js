@@ -362,30 +362,51 @@ cancelTutorial.addEventListener('click', () => {
 });
 
 saveTutorial.addEventListener('click', () => {
-    const startTimeInput = document.getElementById('tutorialStart').value; // Get the start time
-    const durationInput = parseInt(document.getElementById('tutorialDuration').value, 10); // Get the duration in minutes
-    
-    if (!startTimeInput || isNaN(durationInput) || durationInput <= 0) {
-      alert("Please enter a valid start time and duration.");
-      return;
-    }
+  const startTimeInput = document.getElementById('tutorialStart').value; // Get the start time
+  const durationInput = parseInt(document.getElementById('tutorialDuration').value, 10); // Get the duration in minutes
 
-    // Parse the start time into a Date object
-    const [hours, minutes] = startTimeInput.split(':').map(Number);
-    const startTime = new Date();
-    startTime.setHours(hours, minutes, 0, 0); // Set the start time
-  
-    // Calculate the end time
-    const endTime = new Date(startTime);
-    endTime.setMinutes(endTime.getMinutes() + durationInput);
+  if (!startTimeInput || isNaN(durationInput) || durationInput <= 0) {
+    alert("Please enter a valid start time and duration.");
+    return;
+  }
 
-  // Calculate the study session start time (1 minute from now)
-  const studyStartTime = new Date();
-  studyStartTime.setMinutes(studyStartTime.getMinutes() + 1);
+  // Parse the start time into a Date object
+  const [hours, minutes] = startTimeInput.split(':').map(Number);
+  const startTime = new Date();
+  startTime.setHours(hours, minutes, 0, 0); // Set the start time
 
-  // Calculate the study session end time (60 minutes after the start time)
+  // Calculate the end time
+  const endTime = new Date(startTime);
+  endTime.setMinutes(endTime.getMinutes() + durationInput);
+
+  // Check if there are existing tasks
+  const studyPlanDisplayTasks = Array.from(studyPlanDisplay.children);
+  let studyStartTime;
+
+  if (studyPlanDisplayTasks.length === 0) {
+    // If this is the first task, start 1 minute from now
+    studyStartTime = new Date();
+    studyStartTime.setMinutes(studyStartTime.getMinutes() + 1);
+  } else {
+    // If there are previous tasks, start after the last task's end time
+    const lastTask = studyPlanDisplayTasks[studyPlanDisplayTasks.length - 1];
+    const lastTaskEndTime = new Date(lastTask.dataset.endTime); // Retrieve the end time from the dataset
+    studyStartTime = new Date(lastTaskEndTime);
+  }
+
+  // Ensure the tutorial task's start time is within the study session
   const studyEndTime = new Date(studyStartTime);
   studyEndTime.setMinutes(studyStartTime.getMinutes() + 60);
+
+  if (startTime < studyStartTime || startTime >= studyEndTime) {
+    alert("The start time of this task is outside the current study session.");
+    return;
+  }
+
+  if (endTime > studyEndTime) {
+    alert("This task would overlap the study session and cannot be added.");
+    return;
+  }
 
   // Calculate the total time if this task is added
   const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
@@ -393,38 +414,25 @@ saveTutorial.addEventListener('click', () => {
     return sum + taskTime;
   }, 0);
 
-  // Check if the tutorial task's start time is outside the study session
-  if (startTime < studyStartTime || startTime >= studyEndTime) {
-    alert("The start time of this task is outside the current study session.");
-    return;
-  }
-
-    // Check if the tutorial task's end time overlaps the study session
-    if (endTime > studyEndTime) {
-        alert("This task would overlap the study session and cannot be added.");
-        return;
-      }
-
-  // Check if the tutorial task exceeds the 60-minute limit
   if (currentTotalMinutes + durationInput > 60) {
     alert("This task would exceed the 60-minute limit for the study plan.");
     return;
   }
-  
-    // Create a new tutorial task object
-    const tutorialTask = {
-      summary: "Tutorial",
-      startDate: startTime.toISOString(),
-      estimatedTime: durationInput,
-    };
-  
-    // Add the tutorial task to the studyPlanDisplay
-    addToAgenda(tutorialTask, durationInput, "Independent");
-  
-    // Close the tutorial popup
-    tutorialPopup.classList.add('hidden');
-  
-    console.log(`Tutorial added: Start Time - ${startTime.toLocaleTimeString()}, End Time - ${endTime.toLocaleTimeString()}`);
+
+  // Create a new tutorial task object
+  const tutorialTask = {
+    summary: "Tutorial",
+    startDate: startTime.toISOString(),
+    estimatedTime: durationInput,
+  };
+
+  // Add the tutorial task to the studyPlanDisplay
+  addToAgenda(tutorialTask, durationInput, "Independent");
+
+  // Close the tutorial popup
+  tutorialPopup.classList.add('hidden');
+
+  console.log(`Tutorial added: Start Time - ${startTime.toLocaleTimeString()}, End Time - ${endTime.toLocaleTimeString()}`);
 });
 
 backToDashboardBtn.addEventListener("click", () => {
@@ -949,8 +957,8 @@ function updateRunScreenDisplay(taskIndex) {
 
 // Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
-const displayWidth = 10; // Set the display width of the canvas
-const displayHeight = 10; // Set the display height of the canvas
+const displayWidth = -200; // Set the display width of the canvas
+const displayHeight = -200; // Set the display height of the canvas
 
 // Set the canvas width and height for high resolution
 canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio

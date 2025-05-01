@@ -947,6 +947,31 @@ function updateRunScreenDisplay(taskIndex) {
   });
 }
 
+// Create a video element for PiP
+const videoElement = document.createElement('video');
+videoElement.srcObject = canvas.captureStream(); // Use the canvas as a video stream
+videoElement.muted = true; // Mute the video (required for autoplay)
+videoElement.play().then(() => {
+  console.log("Video is playing.");
+}).catch(error => {
+  console.error("Error playing video:", error);
+});
+
+// Add an event listener to the PiP button
+document.getElementById('enablePiPButton').addEventListener('click', () => {
+  if (document.pictureInPictureElement) {
+    // If already in PiP mode, exit PiP
+    document.exitPictureInPicture().catch(error => {
+      console.error("Error exiting Picture-in-Picture:", error);
+    });
+  } else {
+    // Request PiP mode
+    videoElement.requestPictureInPicture().catch(error => {
+      console.error("Error enabling Picture-in-Picture:", error);
+    });
+  }
+});
+
 const canvas = document.getElementById('timerCanvas');
 const ctx = canvas.getContext('2d');
 

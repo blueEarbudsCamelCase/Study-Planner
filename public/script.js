@@ -978,20 +978,20 @@ function updateRunScreenDisplay(taskIndex) {
 
 // Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
-const fixedWidth = 300; // Fixed width for the canvas
-const fixedHeight = 300; // Fixed height for the canvas
+const displayWidth = 150; // Smaller display width
+const displayHeight = 150; // Smaller display height
 
 // Set the canvas width and height for high resolution
-canvas.width = fixedWidth * window.devicePixelRatio; // Scale by device pixel ratio
-canvas.height = fixedHeight * window.devicePixelRatio; // Scale by device pixel ratio
+canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio
+canvas.height = displayHeight * window.devicePixelRatio; // Scale by device pixel ratio
 
 // Scale the canvas context to match the device pixel ratio
 const ctx = canvas.getContext('2d');
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
 // Set the CSS size of the canvas
-canvas.style.width = `${fixedWidth}px`;
-canvas.style.height = `${fixedHeight}px`;
+canvas.style.width = `${displayWidth}px`;
+canvas.style.height = `${displayHeight}px`;
 
 // Create a video element for PiP
 const videoElement = document.createElement('video');
@@ -1004,27 +1004,16 @@ videoElement.play().then(() => {
 });
 
 // Add an event listener to the PiP button
-const pipButton = document.getElementById('enablePiPButton');
-
-pipButton.addEventListener('click', () => {
+document.getElementById('enablePiPButton').addEventListener('click', () => {
   if (document.pictureInPictureElement) {
     // If already in PiP mode, exit PiP
-    document.exitPictureInPicture().then(() => {
-      pipButton.textContent = "Show Popup"; // Update button text to "Show Popup"
-    }).catch(error => {
+    document.exitPictureInPicture().catch(error => {
       console.error("Error exiting Picture-in-Picture:", error);
     });
   } else {
     // Request PiP mode
-    videoElement.requestPictureInPicture().then(() => {
-      pipButton.textContent = "Hide Popup"; // Update button text to "Hide Popup"
-    }).catch(error => {
+    videoElement.requestPictureInPicture().catch(error => {
       console.error("Error enabling Picture-in-Picture:", error);
     });
   }
-});
-
-// Update the button text when exiting PiP
-videoElement.addEventListener('leavepictureinpicture', () => {
-  pipButton.textContent = "Show Popup"; // Reset button text to "Show Popup"
 });

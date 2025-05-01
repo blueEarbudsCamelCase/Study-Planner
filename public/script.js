@@ -946,6 +946,7 @@ function updateRunScreenDisplay(taskIndex) {
     }
   });
 }
+
 document.getElementById('openPopupBtn').addEventListener('click', function () {
   const runScreenContent = document.getElementById('runScreen').innerHTML;
 
@@ -955,145 +956,47 @@ document.getElementById('openPopupBtn').addEventListener('click', function () {
     'RunScreenPopup',
     'width=300,height=300,scrollbars=yes,resizable=yes'
   );
-
-  // Write the content of runScreen into the popup
-  popupWindow.document.write(`
-    <html>
-      <head>
-        <title>Run Screen</title>
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        <style>
-          body { font-family: sans-serif; margin: 0; padding: 0; }
-          .base-timer {
-            position: relative;
-            width: 300px;
-            height: 300px;
-          }
-          .base-timer__svg {
-            transform: scaleX(-1);
-          }
-          .base-timer__circle {
-            fill: none;
-            stroke: none;
-          }
-          .base-timer__path-elapsed {
-            stroke-width: 7px;
-            stroke: #f0f0f0;
-          }
-          .base-timer__path-remaining {
-            stroke-width: 7px;
-            stroke-linecap: round;
-            transition: 1s linear all;
-            transform: rotate(90deg);
-            transform-origin: center;
-            stroke: #4caf50; /* Green color for the timer bar */
-          }
-          .base-timer__label {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            text-align: center;
-          }
-        </style>
-      </head>
-      <body>
-        <!-- Timer Circle -->
-        <div class="base-timer">
-          <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <g class="base-timer__circle">
-              <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
-              <path
-                id="base-timer-path-remaining"
-                stroke-dasharray="283"
-                class="base-timer__path-remaining"
-                d="
-                  M 50, 50
-                  m -45, 0
-                  a 45,45 0 1,0 90,0
-                  a 45,45 0 1,0 -90,0
-                "
-              ></path>
-            </g>
-          </svg>
-          <span id="base-timer-label" class="base-timer__label">00:00</span>
-        </div>
-
-        <script>
-          // Timer Constants
-          let TIME_LIMIT = ${TIME_LIMIT}; // Pass the current time limit
-          let timePassed = ${timePassed};
-          let timeLeft = TIME_LIMIT - timePassed;
-          let timerInterval = null;
-
-          const FULL_DASH_ARRAY = 283;
-
-          // Format time as MM:SS
-          function formatTimeLeft(time) {
-            const minutes = Math.floor(time / 60);
-            const seconds = time % 60;
-            return \`\${minutes}:\${seconds < 10 ? "0" : ""}\${seconds}\`;
-          }
-
-          // Calculate the fraction of time left
-          function calculateTimeFraction() {
-            const rawTimeFraction = timeLeft / TIME_LIMIT;
-            return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
-          }
-
-          // Update the circle's dash array
-          function setCircleDasharray() {
-            const circleDasharray = \`\${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283\`;
-            document
-              .getElementById("base-timer-path-remaining")
-              .setAttribute("stroke-dasharray", circleDasharray);
-          }
-
-          // Start the timer
-          function startTimer() {
-            document.getElementById("base-timer-label").textContent = formatTimeLeft(timeLeft);
-            setCircleDasharray();
-
-            timerInterval = setInterval(() => {
-              timePassed += 1;
-              timeLeft = TIME_LIMIT - timePassed;
-
-              document.getElementById("base-timer-label").textContent = formatTimeLeft(timeLeft);
-              setCircleDasharray();
-
-              if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                document
-                  .getElementById("base-timer-path-remaining")
-                  .setAttribute("stroke-dasharray", "0 283");
-                alert('Time is up!');
-              }
-            }, 1000);
-          }
-
-          // Initialize the timer with the correct values
-          document.getElementById("base-timer-label").textContent = formatTimeLeft(timeLeft);
-          setCircleDasharray();
-
-          // Start the timer when the popup loads
-          startTimer();
-        </script>
-      </body>
-    </html>
-  `);
-
-  // Close the document to render the content
-  popupWindow.document.close();
-
-  // Periodically bring the popup to the front
-  const focusInterval = setInterval(() => {
-    if (!popupWindow.closed) {
-      popupWindow.focus();
-    } else {
-      clearInterval(focusInterval); // Stop the interval if the popup is closed
+  const floatingModal = document.getElementById('floatingModal');
+  const closeModal = document.getElementById('closeModal');
+  
+  document.getElementById('openPopupBtn').addEventListener('click', () => {
+    floatingModal.classList.remove('hidden'); // Show the modal
+    startTimerInModal(); // Start the timer in the modal
+  });
+  
+  closeModal.addEventListener('click', () => {
+    floatingModal.classList.add('hidden'); // Hide the modal
+    clearInterval(timerInterval); // Stop the timer
+  });
+  
+  // Timer logic for the modal
+  function startTimerInModal() {
+    let timePassed = 0;
+    let timeLeft = TIME_LIMIT;
+  
+    function updateTimer() {
+      document.getElementById('base-timer-label-modal').textContent = formatTimeLeft(timeLeft);
+      setCircleDasharrayModal();
+  
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert('Time is up!');
+      }
     }
-  }, 1000); // Check every second
+  
+    function setCircleDasharrayModal() {
+      const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
+      document
+        .getElementById('base-timer-path-remaining-modal')
+        .setAttribute('stroke-dasharray', circleDasharray);
+    }
+  
+    timerInterval = setInterval(() => {
+      timePassed += 1;
+      timeLeft = TIME_LIMIT - timePassed;
+      updateTimer();
+    }, 1000);
+  
+    updateTimer(); // Initialize the timer display
+  }
 });

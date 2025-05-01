@@ -406,7 +406,7 @@ transform: scaleX(-1);
 }
 
 #timerCanvas {
-  display: flex;
+  display: block;
   align-items: center;
   justify-content: center;
   position: relative;
@@ -445,6 +445,50 @@ transform: scaleX(-1);
   justify-content: center;
   font-size: 24px;
   color: #000; /* Black text for the timer label */
+}
+
+/* Tooltip container */
+.task-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* Tooltip text */
+.task-tooltip .tooltip-text {
+  visibility: hidden;
+  width: max-content;
+  max-width: 300px; /* Limit the tooltip width */
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%; /* Position above the task */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.task-tooltip .tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%; /* Arrow at the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Show the tooltip on hover */
+.task-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* Dark Mode Styles for Buttons in studyTasks */

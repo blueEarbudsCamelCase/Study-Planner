@@ -447,13 +447,33 @@ backToPlanScreenBtn.addEventListener("click", () => {
   runScreenTasks.innerHTML = '';
   runButtonColorCheck();
  
+  // Exit PiP mode if active
+  if (document.pictureInPictureElement) {
+    document.exitPictureInPicture().catch(error => {
+      console.error("Error exiting Picture-in-Picture:", error);
+    });
+  }
+
   console.log("Study plan and run screen cleared.");
 
-  // Add a delay before fetching and parsing tasks
+  // Show a loading indicator
+  const loadingIndicator = document.createElement('p');
+  loadingIndicator.textContent = "Refreshing tasks...";
+  loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
+  dashboardSection.appendChild(loadingIndicator);
+
+  // Fetch, parse, and reload tasks
   setTimeout(() => {
-    fetchIcalFeed();
-    parseIcalFeed();
-    loadStudyTasks();
+    fetchIcalFeed()
+      .then(() => {
+        parseIcalFeed();
+        loadStudyTasks();
+        loadingIndicator.remove(); // Remove the loading indicator after tasks are loaded
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing tasks:", error);
+        loadingIndicator.textContent = "Failed to refresh tasks.";
+      });
   }, 2000); // 2000ms = 2 seconds delay
 });
 
@@ -590,6 +610,7 @@ function addToAgenda(task, estimatedTime, zone) {
  // Set the content of the agenda item
   agendaItem.innerHTML = `
     <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+    <span class="tooltip-text">${task.summary}</span>
     <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -957,20 +978,30 @@ function updateRunScreenDisplay(taskIndex) {
 
 // Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
-const displayWidth = -200; // Set the display width of the canvas
-const displayHeight = -200; // Set the display height of the canvas
+const fixedWidth = 300; // Fixed width for the canvas
+const fixedHeight = 300; // Fixed height for the canvas
 
 // Set the canvas width and height for high resolution
-canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio
-canvas.height = displayHeight * window.devicePixelRatio; // Scale by device pixel ratio
+canvas.width = fixedWidth * window.devicePixelRatio; // Scale by device pixel ratio
+canvas.height = fixedHeight * window.devicePixelRatio; // Scale by device pixel ratio
 
 // Scale the canvas context to match the device pixel ratio
 const ctx = canvas.getContext('2d');
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
 // Set the CSS size of the canvas
-canvas.style.width = `${displayWidth}px`;
-canvas.style.height = `${displayHeight}px`;
+canvas.style.width = `${fixedWidth}px`;
+canvas.style.height = `${fixedHeight}px`;
+
+// Create a video element for PiP
+const videoElement = document.createElement('video');
+videoElement.srcObject = canvas.captureStream(); // Use the canvas as a video stream
+videoElement.muted = true; // Mute the video (required for autoplay)
+videoElement.play().then(() => {
+  console.log("Video is playing.");
+}).catch(error => {
+  console.error("Error playing video:", error);
+});
 
 // Create a video element for PiP
 const videoElement = document.createElement('video');
@@ -983,7 +1014,8 @@ videoElement.play().then(() => {
 });
 
 // Add an event listener to the PiP button
-document.getElementById('enablePiPButton').addEventListener('click', () => {
+const pipButton = document.getElementById('enablePiPButton');
+pipButton.addEventListener('click', () => {
   if (document.pictureInPictureElement) {
     // If already in PiP mode, exit PiP
     document.exitPictureInPicture().catch(error => {
@@ -991,52 +1023,25 @@ document.getElementById('enablePiPButton').addEventListener('click', () => {
     });
   } else {
     // Request PiP mode
-    videoElement.requestPictureInPicture().catch(error => {
+    videoElement.requestPictureInPicture().then(() => {
+      pipButton.textContent = "Hide Popup"; // Update button text
+    }).catch(error => {
       console.error("Error enabling Picture-in-Picture:", error);
     });
   }
 });
 
-// Function to draw the timer on the canvas
-function drawTimer(timeLeft, timeLimit) {
-  const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
-  const radius = 30; // Adjust the radius to fit the canvas size
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
+// Update the button text when exiting PiP
+videoElement.addEventListener('leavepictureinpicture', () => {
+  pipButton.textContent = "Show Popup"; // Reset button text
+});
 
-  // Clear the canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Draw the background circle
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  ctx.fillStyle = '#f0f0f0';
-  ctx.fill();
-
-  // Draw the remaining time arc
-  const timeFraction = timeLeft / timeLimit;
-  const endAngle = -Math.PI / 2 + 2 * Math.PI * timeFraction;
-
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle);
-  ctx.lineWidth = 7;
-  ctx.strokeStyle = '#4caf50'; // Green color
-  ctx.stroke();
-
-  // Draw the time label
-  ctx.font = '20px Arial'; // Adjust font size to fit the canvas
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  ctx.fillText(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`, centerX, centerY);
-}
-
-// Synchronize the PiP timer with the task timer
-function updatePiPTimer() {
-  drawTimer(timeLeft, TIME_LIMIT); // Use the global `timeLeft` and `TIME_LIMIT` values
-}
-
-// Update the timer on the canvas every second
-setInterval(updatePiPTimer, 1000);
+// Add an event listener to the Exit button
+const exitButton = document.getElementById('exitPiPButton');
+exitButton.addEventListener('click', () => {
+  if (document.pictureInPictureElement) {
+    document.exitPictureInPicture().catch(error => {
+      console.error("Error exiting Picture-in-Picture:", error);
+    });
+  }
+});

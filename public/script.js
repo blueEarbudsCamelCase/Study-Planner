@@ -949,8 +949,8 @@ function updateRunScreenDisplay(taskIndex) {
 
 // Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
-canvas.width = 150; // Set the width of the canvas
-canvas.height = 150; // Set the height of the canvas
+canvas.width = 75; // Set the width of the canvas
+canvas.height = 75; // Set the height of the canvas
 const ctx = canvas.getContext('2d');
 
 // Create a video element for PiP
@@ -981,7 +981,7 @@ document.getElementById('enablePiPButton').addEventListener('click', () => {
 // Function to draw the timer on the canvas
 function drawTimer(timeLeft, timeLimit) {
   const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
-  const radius = 60; // Adjust the radius to fit the canvas size
+  const radius = 30; // Adjust the radius to fit the canvas size
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
 

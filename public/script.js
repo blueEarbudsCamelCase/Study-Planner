@@ -1005,17 +1005,19 @@ videoElement.play().then(() => {
 
 // Add an event listener to the PiP button
 const pipButton = document.getElementById('enablePiPButton');
+
 pipButton.addEventListener('click', () => {
   if (document.pictureInPictureElement) {
     // If already in PiP mode, exit PiP
-    document.exitPictureInPicture().catch(error => {
+    document.exitPictureInPicture().then(() => {
+      pipButton.textContent = "Show Popup"; // Update button text to "Show Popup"
+    }).catch(error => {
       console.error("Error exiting Picture-in-Picture:", error);
     });
   } else {
-    
     // Request PiP mode
     videoElement.requestPictureInPicture().then(() => {
-      pipButton.textContent = "Hide Popup"; // Update button text
+      pipButton.textContent = "Hide Popup"; // Update button text to "Hide Popup"
     }).catch(error => {
       console.error("Error enabling Picture-in-Picture:", error);
     });
@@ -1024,15 +1026,5 @@ pipButton.addEventListener('click', () => {
 
 // Update the button text when exiting PiP
 videoElement.addEventListener('leavepictureinpicture', () => {
-  pipButton.textContent = "Show Popup"; // Reset button text
-});
-
-// Add an event listener to the Exit button
-const exitButton = document.getElementById('exitPiPButton');
-exitButton.addEventListener('click', () => {
-  if (document.pictureInPictureElement) {
-    document.exitPictureInPicture().catch(error => {
-      console.error("Error exiting Picture-in-Picture:", error);
-    });
-  }
+  pipButton.textContent = "Show Popup"; // Reset button text to "Show Popup"
 });

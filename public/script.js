@@ -1003,16 +1003,6 @@ videoElement.play().then(() => {
   console.error("Error playing video:", error);
 });
 
-// Create a video element for PiP
-const videoElement = document.createElement('video');
-videoElement.srcObject = canvas.captureStream(); // Use the canvas as a video stream
-videoElement.muted = true; // Mute the video (required for autoplay)
-videoElement.play().then(() => {
-  console.log("Video is playing.");
-}).catch(error => {
-  console.error("Error playing video:", error);
-});
-
 // Add an event listener to the PiP button
 const pipButton = document.getElementById('enablePiPButton');
 pipButton.addEventListener('click', () => {

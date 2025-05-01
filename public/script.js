@@ -948,6 +948,8 @@ function updateRunScreenDisplay(taskIndex) {
 }
 
 // Create a video element for PiP
+const canvas = document.getElementById('timerCanvas');
+const ctx = canvas.getContext('2d');
 const videoElement = document.createElement('video');
 videoElement.srcObject = canvas.captureStream(); // Use the canvas as a video stream
 videoElement.muted = true; // Mute the video (required for autoplay)
@@ -972,8 +974,7 @@ document.getElementById('enablePiPButton').addEventListener('click', () => {
   }
 });
 
-const canvas = document.getElementById('timerCanvas');
-const ctx = canvas.getContext('2d');
+
 
 function drawTimer(timeLeft, timeLimit) {
   const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle

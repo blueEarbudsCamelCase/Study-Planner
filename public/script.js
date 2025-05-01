@@ -947,9 +947,13 @@ function updateRunScreenDisplay(taskIndex) {
   });
 }
 
-// Create a video element for PiP
+// Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
+canvas.width = 150; // Set the width of the canvas
+canvas.height = 150; // Set the height of the canvas
 const ctx = canvas.getContext('2d');
+
+// Create a video element for PiP
 const videoElement = document.createElement('video');
 videoElement.srcObject = canvas.captureStream(); // Use the canvas as a video stream
 videoElement.muted = true; // Mute the video (required for autoplay)
@@ -974,11 +978,10 @@ document.getElementById('enablePiPButton').addEventListener('click', () => {
   }
 });
 
-
-
+// Function to draw the timer on the canvas
 function drawTimer(timeLeft, timeLimit) {
   const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
-  const radius = 45;
+  const radius = 60; // Adjust the radius to fit the canvas size
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
 
@@ -1002,7 +1005,7 @@ function drawTimer(timeLeft, timeLimit) {
   ctx.stroke();
 
   // Draw the time label
-  ctx.font = '24px Arial';
+  ctx.font = '20px Arial'; // Adjust font size to fit the canvas
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -1011,17 +1014,10 @@ function drawTimer(timeLeft, timeLimit) {
   ctx.fillText(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`, centerX, centerY);
 }
 
-// Example: Update the timer every second
-let localTimeLeft = 60; // 1 minute
-const localTimeLimit = 60;
+// Synchronize the PiP timer with the task timer
+function updatePiPTimer() {
+  drawTimer(timeLeft, TIME_LIMIT); // Use the global `timeLeft` and `TIME_LIMIT` values
+}
 
-const localTimerInterval = setInterval(() => {
-  drawTimer(localTimeLeft, localTimeLimit);
-
-  if (localTimeLeft <= 0) {
-    clearInterval(localTimerInterval);
-    console.log('Time is up!');
-  } else {
-    localTimeLeft -= 1;
-  }
-}, 1000);
+// Update the timer on the canvas every second
+setInterval(updatePiPTimer, 1000);

@@ -978,8 +978,8 @@ function updateRunScreenDisplay(taskIndex) {
 
 // Adjust the canvas size to fit the timer
 const canvas = document.getElementById('timerCanvas');
-const displayWidth = 150; // Smaller display width
-const displayHeight = 150; // Smaller display height
+const displayWidth = 150; // Set the display width of the canvas
+const displayHeight = 150; // Set the display height of the canvas
 
 // Set the canvas width and height for high resolution
 canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio
@@ -1004,7 +1004,9 @@ videoElement.play().then(() => {
 });
 
 // Add an event listener to the PiP button
-document.getElementById('enablePiPButton').addEventListener('click', () => {
+const pipButton = document.getElementById('enablePiPButton');
+
+pipButton.addEventListener('click', () => {
   if (document.pictureInPictureElement) {
     // If already in PiP mode, exit PiP
     document.exitPictureInPicture().catch(error => {
@@ -1012,8 +1014,59 @@ document.getElementById('enablePiPButton').addEventListener('click', () => {
     });
   } else {
     // Request PiP mode
-    videoElement.requestPictureInPicture().catch(error => {
+    videoElement.requestPictureInPicture().then(() => {
+      pipButton.textContent = "Hide Popup"; // Update button text
+    }).catch(error => {
       console.error("Error enabling Picture-in-Picture:", error);
     });
   }
 });
+
+// Update the button text when exiting PiP
+videoElement.addEventListener('leavepictureinpicture', () => {
+  pipButton.textContent = "Show Popup"; // Reset button text
+});
+
+// Function to draw the timer on the canvas
+function drawTimer(timeLeft, timeLimit) {
+  const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
+  const radius = 30; // Adjust the radius to fit the canvas size
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the background circle
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fill();
+
+  // Draw the remaining time arc
+  const timeFraction = timeLeft / timeLimit;
+  const endAngle = -Math.PI / 2 + 2 * Math.PI * timeFraction;
+
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle);
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = '#4caf50'; // Green color
+  ctx.stroke();
+
+  // Draw the time label
+  ctx.font = '20px Arial'; // Adjust font size to fit the canvas
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  ctx.fillText(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`, centerX, centerY);
+}
+
+// Synchronize the PiP timer with the task timer
+function updatePiPTimer() {
+  drawTimer(timeLeft, TIME_LIMIT); // Use the global `timeLeft` and `TIME_LIMIT` values
+}
+
+// Update the timer on the canvas every second
+setInterval(updatePiPTimer, 1000);

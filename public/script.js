@@ -981,10 +981,6 @@ const canvas = document.getElementById('timerCanvas');
 const displayWidth = 150; // Set the display width of the canvas
 const displayHeight = 150; // Set the display height of the canvas
 
-// Set the canvas width and height for high resolution
-canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio
-canvas.height = displayHeight * window.devicePixelRatio; // Scale by device pixel ratio
-
 // Scale the canvas context to match the device pixel ratio
 const ctx = canvas.getContext('2d');
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);

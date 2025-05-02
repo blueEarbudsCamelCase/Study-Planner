@@ -990,8 +990,8 @@ const ctx = canvas.getContext('2d');
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
 // Set the CSS size of the canvas
-canvas.style.width = `${displayWidth}`;
-canvas.style.height = `${displayHeight}`;
+canvas.style.width = `${displayWidth}px`;
+canvas.style.height = `${displayHeight}px`;
 
 // Create a video element for PiP
 const videoElement = document.createElement('video');

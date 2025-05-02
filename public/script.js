@@ -982,8 +982,8 @@ const displayWidth = 200; // Set the display width of the canvas
 const displayHeight = 200; // Set the display height of the canvas
 
 // Set the canvas width and height for high resolution
-canvas.width = fixedWidth * window.devicePixelRatio; // Scale by device pixel ratio
-canvas.height = fixedHeight * window.devicePixelRatio; // Scale by device pixel ratio
+canvas.width = displayWidth * window.devicePixelRatio; // Scale by device pixel ratio
+canvas.height = displayHeight * window.devicePixelRatio; // Scale by device pixel ratio
 
 // Scale the canvas context to match the device pixel ratio
 const ctx = canvas.getContext('2d');

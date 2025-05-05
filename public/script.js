@@ -6,9 +6,7 @@ if (localStorage.getItem("darkMode") === "enabled") {
 document.addEventListener("DOMContentLoaded", () => {
 
     const dashboardSection = document.getElementById("dashboardSection");
-    const scheduleSetupSection = document.getElementById("scheduleSetupSection");
-    const errorMessage = document.getElementById('error-message');
-      
+    const scheduleSetupSection = document.getElementById("scheduleSetupSection");      
 
 //iCal feed section
 
@@ -19,8 +17,6 @@ alert('Information saved!');
 
 function checkIcalFeed() {
   const icalUrl = localStorage.getItem("icalFeedUrl");
-  const dashboardSection = document.getElementById("dashboardSection");
-  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
   if (!icalUrl) {
     // Show the schedule setup section if no iCal feed is saved
@@ -32,9 +28,6 @@ function checkIcalFeed() {
     scheduleSetupSection.classList.add("hidden");
   }
 }
-
-// Call this function on page load
-checkIcalFeed();
 
 // Save the schedule and iCal feed
 document.getElementById("scheduleForm").addEventListener("submit", (e) => {
@@ -49,6 +42,8 @@ document.getElementById("scheduleForm").addEventListener("submit", (e) => {
     // Fetch and parse the iCal feed
     fetchIcalFeed()
       .then(() => {
+        alert("Schedule and iCal feed saved successfully!");
+        checkIcalFeed(); // Recheck the iCal feed and toggle sections
       })
       .catch((error) => {
         console.error("Error fetching iCal feed:", error);
@@ -57,6 +52,10 @@ document.getElementById("scheduleForm").addEventListener("submit", (e) => {
   } else {
     alert("Please provide a valid iCal feed URL.");
   }
+});
+
+// Check for iCal feed on page load
+checkIcalFeed();
 });
 
 // Check for iCal feed on page load

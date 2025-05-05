@@ -199,25 +199,6 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   background-color: #2f855a; /* Darker green on hover */
 }
 
-#logoutBtn {
-  background-color: #e53e3e; /* Red background */
-  color: #ffffff; /* White text */
-  padding: 0.75rem 1.5rem; /* Add padding */
-  font-size: 1rem; /* Standard font size */
-  font-weight: 600; /* Semi-bold text */
-  border: none; /* Remove default border */
-  border-radius: 8px; /* Rounded corners */
-  cursor: pointer; /* Pointer cursor on hover */
-  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-  position: absolute;
-  bottom: 16px; /* Distance from the bottom */
-  right: 16px; /* Distance from the right */
-  margin: 0; /* Reset any margin applied by Tailwind */
-}
-#logoutBtn:hover {
-  background-color: #c53030; /* Darker red on hover */
-}
-
 #studyTasks {
   display: none; /* Hide the tasks list initially */
   max-height: 400px; /* Set the maximum height for the tasks list */
@@ -575,36 +556,7 @@ body.dark-mode #studyPlannerSection h3 {
 color: #f7fafc; /* Light text for the title in dark mode */
 }
 
-#scheduleSaveButton {
-display: inline-block; /* Ensure buttons are inline-block */
-padding: 0.75rem 1.5rem; /* Add padding for buttons */
-font-size: 1rem; /* Standard font size for buttons */
-font-weight: 600; /* Semi-bold for buttons */
-color: #ffffff; /* White text color */
-width: 100%;
-background-color: #3182ce; /* Blue background color */
-border: none; /* Remove default border */
-border-radius: 8px; /* Rounded corners for buttons */
-cursor: pointer; /* Pointer cursor on hover */
-transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-}
-
-#scheduleSaveButton:hover {
-background-color: #2b6cb0; /* Darker blue on hover */
-}
-
-#authSection h1 {
-font-size: 2rem; /* Larger font size for the main heading */
-font-weight: bold; /* Make the heading bold */
-color: #2d3748; /* Dark gray color for the heading */
-text-align: center; /* Center-align the heading */
-margin-bottom: 1.5rem; /* Add spacing below the heading */
-}
-
-body.dark-mode #authSection h1 {
-color: #f7fafc; /* Light text for the title in dark mode */
-}
-#authBtn {
+#urlSaveButton {
 display: inline-block; /* Ensure buttons are inline-block */
 padding: 0.75rem 1.5rem; /* Add padding for buttons */
 font-size: 1rem; /* Standard font size for buttons */
@@ -617,21 +569,6 @@ cursor: pointer; /* Pointer cursor on hover */
 transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
-#authBtn:hover {
+#urlSaveButton:hover {
 background-color: #2b6cb0; /* Darker blue on hover */
-}
-
-#authSection input {
-width: 100%; /* Full width for inputs */
-padding: 0.75rem; /* Add padding inside inputs */
-font-size: 1rem; /* Standard font size */
-border: 1px solid #e2e8f0; /* Light border for inputs */
-border-radius: 8px; /* Rounded corners for inputs */
-margin-bottom: 1rem; /* Add spacing below inputs */
-}
-
-#authSection input:focus {
-outline: none; /* Remove default focus outline */
-border-color: #3182ce; /* Blue border on focus */
-box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2); /* Add a subtle blue shadow */
 }

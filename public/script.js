@@ -2,128 +2,10 @@
 if (localStorage.getItem("darkMode") === "enabled") {
   document.body.classList.add("dark-mode");
 }
-  let mode = 'login';
-
-    const progressText = document.getElementById("progressText");
-    const authSection = document.getElementById("authSection");
     const dashboardSection = document.getElementById("dashboardSection");
     const scheduleSetupSection = document.getElementById("scheduleSetupSection");
-    const loginTab = document.getElementById('loginTab');
-    const signupTab = document.getElementById('signupTab');
     const errorMessage = document.getElementById('error-message');
-   
-    // Handling the Login/Signup Toggle
-    loginTab.addEventListener('click', () => {
-      mode = 'login';
-      updateAuthSection();
-      loginTab.classList.add('text-blue-600', 'border-blue-600', 'border-b-2');
-      signupTab.classList.remove('text-blue-600', 'border-b-2');
-    });
-
-    signupTab.addEventListener('click', () => {
-      mode = 'signup';
-      updateAuthSection();
-      signupTab.classList.add('text-blue-600', 'border-blue-600', 'border-b-2');
-      loginTab.classList.remove('text-blue-600', 'border-b-2');
-    });
-
-    function updateAuthSection() {
-      if (mode === 'login') {
-        document.getElementById("authBtn").textContent = "Log In";
-      } else {
-        document.getElementById("authBtn").textContent = "Sign Up";
-      }
-    }
-
-    // Handle form submission (Login/Sign Up)
-  document.getElementById('authForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-document.getElementById('scheduleForm').addEventListener('submit', (e) => {
-e.preventDefault();
-const periodTimes = {
-  period4: { start: "08:21", end: "9:21" },
-  period5: { start: "10:01", end: "11:01" },
-  period6: { start: "11:04", end: "12:04" },
-  period7: { start: "12:07", end: "01:07" },
-  period8: { start: "01:37", end: "02:37" }
-};
-const schedule = {
-  period4: {
-      Monday: { activity: e.target.period4Monday.value, ...periodTimes.period4 },
-      Tuesday: { activity: e.target.period4Tuesday.value, ...periodTimes.period4 },
-      Wednesday: { activity: e.target.period4Wednesday.value, ...periodTimes.period4 },
-      Thursday: { activity: e.target.period4Thursday.value, ...periodTimes.period4 },
-      Friday: { activity: e.target.period4Friday.value, ...periodTimes.period4 }
-    },
-    period5: {
-      Monday: { activity: e.target.period5Monday.value, ...periodTimes.period5 },
-      Tuesday: { activity: e.target.period5Tuesday.value, ...periodTimes.period5 },
-      Wednesday: { activity: e.target.period5Wednesday.value, ...periodTimes.period5 },
-      Thursday: { activity: e.target.period5Thursday.value, ...periodTimes.period5 },
-      Friday: { activity: e.target.period5Friday.value, ...periodTimes.period5 }
-    },
-    period6: {
-      Monday: { activity: e.target.period6Monday.value, ...periodTimes.period6 },
-      Tuesday: { activity: e.target.period6Tuesday.value, ...periodTimes.period6 },
-      Wednesday: { activity: e.target.period6Wednesday.value, ...periodTimes.period6 },
-      Thursday: { activity: e.target.period6Thursday.value, ...periodTimes.period6 },
-      Friday: { activity: e.target.period6Friday.value, ...periodTimes.period6 }
-    },
-    period7: {
-      Monday: { activity: e.target.period7Monday.value, ...periodTimes.period7 },
-      Tuesday: { activity: e.target.period7Tuesday.value, ...periodTimes.period7 },
-      Wednesday: { activity: e.target.period7Wednesday.value, ...periodTimes.period7 },
-      Thursday: { activity: e.target.period7Thursday.value, ...periodTimes.period7 },
-      Friday: { activity: e.target.period7Friday.value, ...periodTimes.period7 }
-    },
-    period8: {
-      Monday: { activity: e.target.period8Monday.value, ...periodTimes.period8 },
-      Tuesday: { activity: e.target.period8Tuesday.value, ...periodTimes.period8 },
-      Wednesday: { activity: e.target.period8Wednesday.value, ...periodTimes.period8 },
-      Thursday: { activity: e.target.period8Thursday.value, ...periodTimes.period8 },
-      Friday: { activity: e.target.period8Friday.value, ...periodTimes.period8 }
-    }
-  };
- 
-  function scheduleStudyAlerts() {
-  const schedule = JSON.parse(localStorage.getItem('schedule') || '{}');
-  const now = new Date();
-  const notificationSound = document.getElementById('studyNotificationSound');
-
-  Object.keys(schedule).forEach(period => {
-    Object.keys(schedule[period]).forEach(day => {
-      const session = schedule[period][day];
-
-      // Only proceed if the activity is "study"
-      if (session.activity === "study") {
-        const sessionStart = new Date();
-        const [hours, minutes] = session.start.split(':');
-        sessionStart.setHours(hours, minutes, 0, 0);
-
-        // Check if the session is today and in the future
-        if (day === now.toLocaleString('en-US', { weekday: 'long' }) && sessionStart > now) {
-          const timeDifference = sessionStart - now - 3 * 60 * 1000; // 3 minutes before
-
-          if (timeDifference > 0) {
-            setTimeout(() => {
-              notificationSound.play().catch(error => console.error("Error playing sound:", error));
-            }, timeDifference);
-          }
-        }
-      }
-    });
-  });
-}
-
-
-const scheduleForm = document.getElementById('scheduleForm').value;
-    localStorage.setItem('schedule', JSON.stringify(schedule));
-    console.log("Schedule Saved", scheduleForm);
-  scheduleStudyAlerts(); 
+      
 
 //iCal feed section
 
@@ -132,7 +14,45 @@ localStorage.setItem('icalFeedUrl', icalUrl);
 console.log("iCal URL saved:", icalUrl);
 alert('Information saved!');
 
+// Check if an iCal feed exists and update the message
+function checkIcalFeed() {
+  const icalUrl = localStorage.getItem("icalFeedUrl");
+  const icalMessage = document.getElementById("icalMessage");
 
+  if (!icalUrl) {
+    icalMessage.classList.remove("hidden");
+    icalMessage.textContent = "No iCal feed saved. Please provide a valid URL.";
+  } else {
+    icalMessage.classList.add("hidden");
+  }
+}
+
+// Save the schedule and iCal feed
+document.getElementById("scheduleForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  
+  // Save the iCal feed URL
+  const icalUrl = document.getElementById("icalUrl").value.trim();
+  if (icalUrl) {
+    localStorage.setItem("icalFeedUrl", icalUrl);
+    console.log("iCal URL saved:", icalUrl);
+
+    // Fetch and parse the iCal feed
+    fetchIcalFeed()
+      .then(() => {
+        alert("Schedule and iCal feed saved successfully!");
+      })
+      .catch((error) => {
+        console.error("Error fetching iCal feed:", error);
+        alert("Failed to fetch iCal feed. Please check the URL.");
+      });
+  } else {
+    alert("Please provide a valid iCal feed URL.");
+  }
+});
+
+// Check for iCal feed on page load
+checkIcalFeed();
 
 fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
   .then(response => response.text())
@@ -145,7 +65,7 @@ fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(ic
     parseIcalFeed(data);
   })
   .catch(error => console.error('Error fetching iCal feed:', error));
-});
+
 
 window.fetchIcalFeed = function fetchIcalFeed() {
   const icalUrl = localStorage.getItem('icalFeedUrl');
@@ -253,51 +173,22 @@ window.parseIcalFeed = function parseIcalFeed(data) {
   // Ensure completedTasks is preserved
   localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
 };
-      
-// Handle login
-      if (mode === 'login') {
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const user = users.find(u => u.username === username && u.password === password);
-        if (user) {
-          authSection.classList.add('hidden');
-          dashboardSection.classList.remove('hidden');
- 
-          const dashboardContainer = document.getElementById("dashboardContainer"); // Target the container
-          const loadingIndicator = document.createElement('p');
-          loadingIndicator.textContent = "Loading your tasks...";
-          loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
-          dashboardContainer.appendChild(loadingIndicator); // Append to the container
 
-          // Fetch the iCal feed after login
-          fetchIcalFeed()
-            .then(() => {
-              loadingIndicator.remove(); // Remove the loading indicator
-            })
-            .catch(error => {
-              console.error("Error fetching or parsing iCal feed:", error);
-              loadingIndicator.textContent = "Failed to load tasks.";
-            });
-        } else {
-          errorMessage.classList.remove('hidden');
-        }
-      }
+ // Fetch the iCal feed when the page loads
+const dashboardContainer = document.getElementById("dashboardContainer"); // Target the container
+const loadingIndicator = document.createElement('p');
+loadingIndicator.textContent = "Loading your tasks...";
+loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
+dashboardContainer.appendChild(loadingIndicator); // Append to the container
 
-      // Handle sign up
-      else {
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        if (users.some(u => u.username === username)) {
-          errorMessage.textContent = "Username already taken!";
-          errorMessage.classList.remove('hidden');
-        } else {
-          users.push({ username, password });
-          localStorage.setItem('users', JSON.stringify(users));
-          authSection.classList.add("hidden");
-          scheduleSetupSection.classList.remove("hidden");
-        }
-      }
-    });
-
-
+fetchIcalFeed()
+  .then(() => {
+    loadingIndicator.remove(); // Remove the loading indicator
+  })
+  .catch(error => {
+    console.error("Error fetching or parsing iCal feed:", error);
+    loadingIndicator.textContent = "Failed to load tasks.";
+  });
     
     // Toggle study planning screen
 // Get references to the settings button, popup, and dark mode toggle

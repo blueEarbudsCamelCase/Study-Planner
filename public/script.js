@@ -58,9 +58,6 @@ document.getElementById("scheduleForm").addEventListener("submit", (e) => {
 checkIcalFeed();
 });
 
-// Check for iCal feed on page load
-checkIcalFeed();
-
 fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
   .then(response => response.text())
   .then(data => {

@@ -977,5 +977,3 @@ function updatePiPTimer() {
 
 // Update the timer on the canvas every second
 setInterval(updatePiPTimer, 1000);
-
-});

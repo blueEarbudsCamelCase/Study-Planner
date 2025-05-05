@@ -49,7 +49,6 @@ document.getElementById("scheduleForm").addEventListener("submit", (e) => {
     // Fetch and parse the iCal feed
     fetchIcalFeed()
       .then(() => {
-        alert("Schedule and iCal feed saved successfully!");
       })
       .catch((error) => {
         console.error("Error fetching iCal feed:", error);

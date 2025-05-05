@@ -4,12 +4,12 @@
   }
     let mode = 'login';
   
-      const dashboardSection = document.getElementById("dashboardSection");
-      const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
 
   document.getElementById('scheduleForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  
+
   const icalUrl = document.getElementById('icalUrl').value;
   localStorage.setItem('icalFeedUrl', icalUrl);
   console.log("iCal URL saved:", icalUrl); 
@@ -53,7 +53,43 @@
   }; 
 });
 
+function checkIcalFeed() {
+  const icalUrl = localStorage.getItem("icalFeedUrl");
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
+  if (!icalUrl) {
+    // Show the schedule setup section if no iCal feed is saved
+    dashboardSection.classList.add("hidden");
+    scheduleSetupSection.classList.remove("hidden");
+  } else {
+    // Show the dashboard if an iCal feed is saved
+    dashboardSection.classList.remove("hidden");
+    scheduleSetupSection.classList.add("hidden");
+  }
+}
+
+// Fetch the iCal feed when the page loads
+const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
+if (dashboardContainer) {
+  const loadingIndicator = document.createElement('p');
+  loadingIndicator.textContent = "Loading your tasks...";
+  loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
+  dashboardContainer.appendChild(loadingIndicator); // Append to the container
+
+checkIcalFeed();
+
+  fetchIcalFeed()
+    .then(() => {
+      loadingIndicator.remove(); // Remove the loading indicator
+    })
+    .catch(error => {
+      console.error("Error fetching or parsing iCal feed:", error);
+      loadingIndicator.textContent = "Failed to load tasks.";
+    });
+} else {
+  console.error("dashboardContainer not found.");
+}
 //everything from here on is functional
 
   // Helper function to parse iCal dates

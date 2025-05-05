@@ -2,6 +2,9 @@
 if (localStorage.getItem("darkMode") === "enabled") {
   document.body.classList.add("dark-mode");
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+
     const dashboardSection = document.getElementById("dashboardSection");
     const scheduleSetupSection = document.getElementById("scheduleSetupSection");
     const errorMessage = document.getElementById('error-message');
@@ -14,23 +17,29 @@ localStorage.setItem('icalFeedUrl', icalUrl);
 console.log("iCal URL saved:", icalUrl);
 alert('Information saved!');
 
-// Check if an iCal feed exists and update the message
 function checkIcalFeed() {
   const icalUrl = localStorage.getItem("icalFeedUrl");
-  const icalMessage = document.getElementById("icalMessage");
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
   if (!icalUrl) {
-    icalMessage.classList.remove("hidden");
-    icalMessage.textContent = "No iCal feed saved. Please provide a valid URL.";
+    // Show the schedule setup section if no iCal feed is saved
+    dashboardSection.classList.add("hidden");
+    scheduleSetupSection.classList.remove("hidden");
   } else {
-    icalMessage.classList.add("hidden");
+    // Show the dashboard if an iCal feed is saved
+    dashboardSection.classList.remove("hidden");
+    scheduleSetupSection.classList.add("hidden");
   }
 }
+
+// Call this function on page load
+checkIcalFeed();
 
 // Save the schedule and iCal feed
 document.getElementById("scheduleForm").addEventListener("submit", (e) => {
   e.preventDefault();
-  
+
   // Save the iCal feed URL
   const icalUrl = document.getElementById("icalUrl").value.trim();
   if (icalUrl) {
@@ -181,14 +190,23 @@ loadingIndicator.textContent = "Loading your tasks...";
 loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
 dashboardContainer.appendChild(loadingIndicator); // Append to the container
 
-fetchIcalFeed()
-  .then(() => {
-    loadingIndicator.remove(); // Remove the loading indicator
-  })
-  .catch(error => {
-    console.error("Error fetching or parsing iCal feed:", error);
-    loadingIndicator.textContent = "Failed to load tasks.";
-  });
+if (dashboardContainer) {
+  const loadingIndicator = document.createElement('p');
+  loadingIndicator.textContent = "Loading your tasks...";
+  loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
+  dashboardContainer.appendChild(loadingIndicator); // Append to the container
+
+  fetchIcalFeed()
+    .then(() => {
+      loadingIndicator.remove(); // Remove the loading indicator
+    })
+    .catch(error => {
+      console.error("Error fetching or parsing iCal feed:", error);
+      loadingIndicator.textContent = "Failed to load tasks.";
+    });
+} else {
+  console.error("dashboardContainer not found.");
+}
     
     // Toggle study planning screen
 // Get references to the settings button, popup, and dark mode toggle
@@ -961,3 +979,5 @@ function updatePiPTimer() {
 
 // Update the timer on the canvas every second
 setInterval(updatePiPTimer, 1000);
+
+});

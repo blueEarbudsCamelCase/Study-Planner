@@ -205,6 +205,7 @@ if (dashboardContainer) {
   const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
   const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
   const tutorialBtn = document.getElementById('tutorialBtn');
+  const mapButton = document.getElementById('mapButton');
   const tutorialPopup = document.getElementById('tutorialPopup');
   const cancelTutorial = document.getElementById('cancelTutorial');
   const saveTutorial = document.getElementById('saveTutorial');
@@ -297,7 +298,10 @@ if (dashboardContainer) {
     console.log(`Tutorial added: Start Time - ${startTime.toLocaleTimeString()}, End Time - ${endTime.toLocaleTimeString()}`);
   });
   
-  backToDashboardBtn.addEventListener("click", () => {
+  mapButton.addEventListener("click", () => {
+}
+
+backToDashboardBtn.addEventListener("click", () => {
     studyScreen.classList.add("hidden"); // Hide the study planner section
     dashboardSection.classList.remove("hidden"); // Show the dashboard section
   });

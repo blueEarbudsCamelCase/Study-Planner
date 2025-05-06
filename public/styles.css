@@ -540,6 +540,22 @@ transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 background-color: #2b6cb0; /* Darker blue on hover */
 }  
 
+#mapButton {
+  background-color: #3182ce; /* Blue background */
+  color: #ffffff; /* White text */
+  padding: 0.75rem 1.5rem; /* Add padding */
+  font-size: 1rem; /* Standard font size */
+  font-weight: 600; /* Semi-bold text */
+  border: none; /* Remove default border */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  }
+  
+  #mapButton:hover {
+  background-color: #2b6cb0; /* Darker blue on hover */
+  }  
+
 #scheduleSetupSection h2 {
 font-size: 2rem; /* Larger font size for the main heading */
 font-weight: bold; /* Make the heading bold */

@@ -7,51 +7,30 @@
   const dashboardSection = document.getElementById("dashboardSection");
   const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
 
-  document.getElementById('scheduleForm').addEventListener('submit', (e) => {
-  e.preventDefault();
+  // Define fetchIcalFeed globally
+function fetchIcalFeed() {
+  const icalUrl = localStorage.getItem('icalFeedUrl');
+  if (!icalUrl) {
+    console.error("No iCal URL found in localStorage.");
+    return Promise.reject("No iCal URL found in localStorage.");
+  }
 
-  const icalUrl = document.getElementById('icalUrl').value;
-  localStorage.setItem('icalFeedUrl', icalUrl);
-  console.log("iCal URL saved:", icalUrl); 
-  
-  fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
+  return fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
     .then(response => response.text())
     .then(data => {
-      console.log("Raw iCal Data:", data); // Log the raw iCal data
+      console.log("Raw iCal Data: ", data); // Log the raw iCal data
       if (!data) {
         console.error("No data received from the iCal feed.");
-        return;
+        throw new Error("No data received from the iCal feed.");
       }
       parseIcalFeed(data);
+      return data; // Return the raw iCal data
     })
-    .catch(error => console.error('Error fetching iCal feed:', error));
-  
-  window.fetchIcalFeed = function fetchIcalFeed() {
-    const icalUrl = localStorage.getItem('icalFeedUrl');
-    if (!icalUrl) {
-      console.error("No iCal URL found in localStorage.");
-      return Promise.reject("No iCal URL found in localStorage.");
-    }
-  
-  
-    return fetch(`https://study-planner-ucmw.onrender.com/proxy?url=${encodeURIComponent(icalUrl)}`)
-      .then(response => response.text())
-      .then(data => {
-        console.log("Raw iCal Data: ", data); // Log the raw iCal data
-        if (!data) {
-          console.error("No data received from the iCal feed.");
-          throw new Error("No data received from the iCal feed.");
-        }
-          parseIcalFeed(data);
-       
-        return data; // Return the raw iCal data
-      })
-      .catch(error => {
-        console.error('Error fetching iCal feed:', error);
-        throw error;
-      });
-  }; 
-});
+    .catch(error => {
+      console.error('Error fetching iCal feed:', error);
+      throw error;
+    });
+}
 
 function checkIcalFeed() {
   const icalUrl = localStorage.getItem("icalFeedUrl");
@@ -69,6 +48,15 @@ function checkIcalFeed() {
   }
 }
 
+  document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const icalUrl = document.getElementById('icalUrl').value;
+  localStorage.setItem('icalFeedUrl', icalUrl);
+  console.log("iCal URL saved:", icalUrl); 
+  });  
+
+
 // Fetch the iCal feed when the page loads
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
 if (dashboardContainer) {
@@ -77,7 +65,7 @@ if (dashboardContainer) {
   loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
   dashboardContainer.appendChild(loadingIndicator); // Append to the container
 
-checkIcalFeed();
+  checkIcalFeed();
 
   fetchIcalFeed()
     .then(() => {

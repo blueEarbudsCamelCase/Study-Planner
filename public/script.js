@@ -299,7 +299,46 @@ if (dashboardContainer) {
   });
   
   mapButton.addEventListener("click", () => {
-}
+    const taskTime = document.getElementById("taskTime"); // Get the task time input element
+    const taskZone = document.getElementById("taskZone"); // Get the task zone select element
+  
+    const estimatedTime = parseInt(taskTime.value, 10); // Ensure it's a number
+    const selectedZone = taskZone.value;
+  
+    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+      alert("Please enter a valid estimated time.");
+      return;
+    }
+
+  // Calculate the total time if this task is added
+  const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+    const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+    return sum + taskTime;
+  }, 0);
+
+  if (currentTotalMinutes + estimatedTime > 60) {
+    // Display an error message if the total time exceeds 60 minutes
+    alert("This task would go past the end of the Study.");
+    return;
+  }
+  
+  // Create a new task object
+  const task = {
+    summary: "MAP Practice",
+    startDate: new Date().toISOString(), // Use the current time as the start date
+    estimatedTime: estimatedTime,
+    zone: selectedZone,
+  };
+
+    console.log(`MAP Practice, Time: ${estimatedTime}, Zone: ${selectedZone}`);
+
+    addToAgenda(task, estimatedTime, selectedZone);
+
+    task.estimatedTime = estimatedTime;
+    task.zone = selectedZone;
+
+    taskPopup.classList.add("hidden");
+  });
 
 backToDashboardBtn.addEventListener("click", () => {
     studyScreen.classList.add("hidden"); // Hide the study planner section

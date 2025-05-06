@@ -130,6 +130,28 @@
   </div>
 </div>
   
+<!----MAP Practice Popup -->
+
+<div id="mapPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+    <h2 class="text-lg font-bold text-center mb-4">Task Details</h2>
+    <label class="block mb-2">Estimated Time (minutes):</label>
+    <input type="number" id="mapTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
+
+    <label class="block mb-2">Zone:</label>
+    <select id="mapZone" class="w-full border border-gray-300 rounded p-2 mb-4">
+      <option value="Independent">Focus</option>
+      <option value="Semi-Collaborative">Semi-Collaborative</option>
+      <option value="Collaborative">Collaborative</option>
+    </select>
+
+    <div class="flex justify-end gap-2">
+      <button id="cancelMapButton" class="text-gray-600 hover:underline">Cancel</button>
+      <button id="saveMapButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Task Popup -->
 
 <div id="taskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

@@ -298,6 +298,7 @@ if (dashboardContainer) {
     console.log(`Tutorial added: Start Time - ${startTime.toLocaleTimeString()}, End Time - ${endTime.toLocaleTimeString()}`);
   });
   mapButton.addEventListener("click", () => {
+
   const taskPopup = document.getElementById("taskPopup"); // Reference the task popup
   const taskTime = document.getElementById("taskTime"); // Get the task time input element
   const taskZone = document.getElementById("taskZone"); // Get the task zone select element
@@ -452,6 +453,52 @@ backToDashboardBtn.addEventListener("click", () => {
     };
   }
   
+  function openMapPopup() {
+    const mapPopup = document.getElementById("taskPopup");
+    const mapTime = document.getElementById("taskTime");
+    const mapZone = document.getElementById("taskZone");
+  
+    // Reset the popup fields
+    mapTime.value = "";
+    mapZone.value = "independent";
+  
+    // Show the popup
+    mapPopup.classList.remove("hidden");
+  
+    // Handle cancel button
+    document.getElementById("cancelMapButton").addEventListener("click", () => {
+      mapPopup.classList.add("hidden");
+    });
+  
+    // Handle save button
+    const saveMapButton = document.getElementById("saveTask");
+    saveMapButton.onclick = () => {
+      const estimatedTime = parseInt(mapTime.value, 10); // Ensure it's a number
+      const selectedZone = mapZone.value;
+  
+      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+        alert("Please enter a valid estimated time.");
+        return;
+      }
+  
+    // Calculate the total time if this task is added
+    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+      return sum + taskTime;
+    }, 0);
+  
+    if (currentTotalMinutes + estimatedTime > 60) {
+      // Display an error message if the total time exceeds 60 minutes
+      alert("This task would go past the end of the Study.");
+      return;
+    }
+      console.log(`MAP Practice, Time: ${estimatedTime}, Zone: ${selectedZone}`);
+  
+      addToAgenda("MAP Practice", estimatedTime, selectedZone);
+  
+      mapPopup.classList.add("hidden");
+    };
+  }
   const runButton = document.getElementById("runButton");
   
   function runButtonColorCheck() {

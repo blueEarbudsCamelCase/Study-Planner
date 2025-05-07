@@ -307,6 +307,8 @@ if (dashboardContainer) {
 
   cancelMapButton.addEventListener("click", () => {
     mapPopup.classList.add("hidden");
+    document.getElementById("mapTime").value = "";
+    document.getElementById("mapZone").value = ""; // Reset to default value
   });
 
   saveMapButton.onclick = () => {
@@ -340,10 +342,14 @@ if (dashboardContainer) {
     addToAgenda(mapTask, estimatedTime, selectedZone);
 
     mapPopup.classList.add("hidden");
+    document.getElementById("mapTime").value = "";
+    document.getElementById("mapZone").value = "";
   };
 backToDashboardBtn.addEventListener("click", () => {
     studyScreen.classList.add("hidden"); // Hide the study planner section
     dashboardSection.classList.remove("hidden"); // Show the dashboard section
+    studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+    runScreenTasks.innerHTML = '';
   });
   
   backToPlanScreenBtn.addEventListener("click", () => {
@@ -807,11 +813,11 @@ backToDashboardBtn.addEventListener("click", () => {
         <h2 class="font-bold text-lg mb-2">Current Task</h2>
         ${
           currentTask
-            ? `<div class="p-4 bg-gray-100 rounded shadow-md mb-4">
+          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getZoneColor(currentTask.dataset.zone)};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
                 <label for="currentTaskCheckbox">${currentTask.textContent}</label>
               </div>`
-            : `<p class="text-gray-500 italic">No current task.</p>`
+            : `<p class="text-gray-500 italic">No current tasks.</p>`
         }
       </div>
       <div class="upcoming-tasks">
@@ -821,7 +827,7 @@ backToDashboardBtn.addEventListener("click", () => {
             ? upcomingTasks
                 .map(
                   (task, index) => `
-                  <div class="p-4 bg-gray-100 rounded shadow-md mb-2">
+                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getZoneColor(task.dataset.zone)};">
                     <input type="checkbox" id="upcomingTaskCheckbox${index}" class="mr-2">
                     <label for="upcomingTaskCheckbox${index}">${task.textContent}</label>
                   </div>
@@ -853,7 +859,7 @@ backToDashboardBtn.addEventListener("click", () => {
             console.log("Last task completed. Stopping timer.");
             clearInterval(timerInterval); // Stop the timer
             document.getElementById("base-timer-label").textContent = "00:00"; // Reset timer display
-            alert('You finished your study period! Great job! Click exit to go back to the planning screen.');
+            alert('You finished your study period! Click exit to go back to the planning screen.');
           } else {
   
             updateRunScreenDisplay(0);
@@ -883,6 +889,20 @@ backToDashboardBtn.addEventListener("click", () => {
       }
     });
   }
+
+  // Helper function to get the color based on the zone
+function getZoneColor(zone) {
+  switch (zone) {
+    case "Independent":
+      return "#3182ce"; // Blue
+    case "Semi-Collaborative":
+      return "#38a169"; // Green
+    case "Collaborative":
+      return "#e53e3e"; // Red
+    default:
+      return "#718096"; // Gray (fallback)
+  }
+}
   
   // Adjust the canvas size to fit the timer
   const canvas = document.getElementById('timerCanvas');

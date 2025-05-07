@@ -305,6 +305,10 @@ if (dashboardContainer) {
     mapPopup.classList.remove("hidden");
   });
 
+  cancelMapButton.addEventListener("click", () => {
+    mapPopup.classList.add("hidden");
+  });
+
   saveMapButton.onclick = () => {
     const estimatedTime = parseInt(mapTime.value, 10); // Ensure it's a number
     const selectedZone = mapZone.value;
@@ -326,8 +330,14 @@ if (dashboardContainer) {
     return;
   }
     console.log(`MAP Practice, Time: ${estimatedTime}, Zone: ${selectedZone}`);
+ 
+    // Create a task object with the name "MAP Practice"
+  const mapTask = {
+    summary: "MAP Practice",
+    startDate: new Date().toISOString(), // Use the current time as the start date
+  };
 
-    addToAgenda("MAP Practice", estimatedTime, selectedZone);
+    addToAgenda(mapTask, estimatedTime, selectedZone);
 
     mapPopup.classList.add("hidden");
   };

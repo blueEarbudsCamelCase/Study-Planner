@@ -388,6 +388,8 @@ backToDashboardBtn.addEventListener("click", () => {
     const taskPopup = document.getElementById("taskPopup");
     const taskTime = document.getElementById("taskTime");
     const taskZone = document.getElementById("taskZone");
+    const cancelTaskButton = document.getElementById("cancelTask");
+
   
     // Reset the popup fields
     taskTime.value = "";
@@ -395,7 +397,12 @@ backToDashboardBtn.addEventListener("click", () => {
   
     // Show the popup
     taskPopup.classList.remove("hidden");
-    
+
+      // Handle cancel button
+  cancelTaskButton.addEventListener("click", () => {
+    taskPopup.classList.add("hidden");
+  });
+      
     // Handle save button
     const saveTaskButton = document.getElementById("saveTask");
     saveTaskButton.onclick = () => {

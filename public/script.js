@@ -806,18 +806,17 @@ backToDashboardBtn.addEventListener("click", () => {
     console.log("Current task:", currentTask ? currentTask.textContent : "None");
     console.log("Upcoming tasks:", upcomingTasks.map(task => task.textContent));
   
-  
     // Clear the runScreen content
     runScreenTasks.innerHTML = `
       <div class="current-task">
         <h2 class="font-bold text-lg mb-2">Current Task</h2>
         ${
           currentTask
-          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getZoneColor(currentTask.dataset.zone)};">
+            ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getZoneColor(currentTask.dataset.zone)};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
                 <label for="currentTaskCheckbox">${currentTask.textContent}</label>
               </div>`
-            : `<p class="text-gray-500 italic">No current tasks.</p>`
+            : `<p class="text-gray-500 italic">No current task.</p>`
         }
       </div>
       <div class="upcoming-tasks">
@@ -827,7 +826,7 @@ backToDashboardBtn.addEventListener("click", () => {
             ? upcomingTasks
                 .map(
                   (task, index) => `
-                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getZoneColor(task.dataset.zone)};">
+                  <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getZoneColor(task.dataset.zone)};">
                     <input type="checkbox" id="upcomingTaskCheckbox${index}" class="mr-2">
                     <label for="upcomingTaskCheckbox${index}">${task.textContent}</label>
                   </div>
@@ -845,7 +844,7 @@ backToDashboardBtn.addEventListener("click", () => {
       currentTaskCheckbox.addEventListener("change", () => {
         if (currentTaskCheckbox.checked) {
           console.log("Current task completed:", currentTask.textContent);
-   
+  
           // Extract the full task object from the dataset
           const task = {
             startDate: currentTask.dataset.startDate, // Retrieve the startDate from the dataset
@@ -853,18 +852,17 @@ backToDashboardBtn.addEventListener("click", () => {
           };
   
           moveToCompleted(task, currentTask);
-    
+  
           // Stop the timer if this is the last task
           if (taskIndex === taskElements.length - 1) {
             console.log("Last task completed. Stopping timer.");
             clearInterval(timerInterval); // Stop the timer
             document.getElementById("base-timer-label").textContent = "00:00"; // Reset timer display
-            alert('You finished your study period! Click exit to go back to the planning screen.');
+            alert('You finished your study period! Great job! Click exit to go back to the planning screen.');
           } else {
-  
-            updateRunScreenDisplay(0);
-            startTaskTimer(0); // Start the next task
-          } 
+            updateRunScreenDisplay(taskIndex + 1);
+            startTaskTimer(taskIndex + 1); // Start the next task
+          }
         }
       });
     }
@@ -889,20 +887,20 @@ backToDashboardBtn.addEventListener("click", () => {
       }
     });
   }
-
+  
   // Helper function to get the color based on the zone
-function getZoneColor(zone) {
-  switch (zone) {
-    case "Independent":
-      return "#3182ce"; // Blue
-    case "Semi-Collaborative":
-      return "#38a169"; // Green
-    case "Collaborative":
-      return "#e53e3e"; // Red
-    default:
-      return "#718096"; // Gray (fallback)
+  function getZoneColor(zone) {
+    switch (zone) {
+      case "Independent":
+        return "#3182ce"; // Blue
+      case "Semi-Collaborative":
+        return "#38a169"; // Green
+      case "Collaborative":
+        return "#e53e3e"; // Red
+      default:
+        return "#718096"; // Gray (fallback)
+    }
   }
-}
   
   // Adjust the canvas size to fit the timer
   const canvas = document.getElementById('timerCanvas');

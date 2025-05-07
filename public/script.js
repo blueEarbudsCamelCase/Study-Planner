@@ -812,7 +812,7 @@ backToDashboardBtn.addEventListener("click", () => {
         <h2 class="font-bold text-lg mb-2">Current Task</h2>
         ${
           currentTask
-            ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getZoneColor(currentTask.dataset.zone)};">
+            ? `<div class="p-4 bg-gray-100 rounded shadow-md mb-4">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
                 <label for="currentTaskCheckbox">${currentTask.textContent}</label>
               </div>`
@@ -826,7 +826,7 @@ backToDashboardBtn.addEventListener("click", () => {
             ? upcomingTasks
                 .map(
                   (task, index) => `
-                  <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getZoneColor(task.dataset.zone)};">
+                  <div class="p-4 bg-gray-100 rounded shadow-md mb-2">
                     <input type="checkbox" id="upcomingTaskCheckbox${index}" class="mr-2">
                     <label for="upcomingTaskCheckbox${index}">${task.textContent}</label>
                   </div>
@@ -887,20 +887,7 @@ backToDashboardBtn.addEventListener("click", () => {
       }
     });
   }
-  
-  // Helper function to get the color based on the zone
-  function getZoneColor(zone) {
-    switch (zone) {
-      case "Independent":
-        return "#3182ce"; // Blue
-      case "Semi-Collaborative":
-        return "#38a169"; // Green
-      case "Collaborative":
-        return "#e53e3e"; // Red
-      default:
-        return "#718096"; // Gray (fallback)
-    }
-  }
+ 
   
   // Adjust the canvas size to fit the timer
   const canvas = document.getElementById('timerCanvas');

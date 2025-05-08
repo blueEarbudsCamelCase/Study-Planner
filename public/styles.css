@@ -212,7 +212,7 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 
 #studyPlannerSection {
-  max-width: 1000px; /* Set a maximum width for the section */
+  max-width: 800px; /* Set a maximum width for the section */
   margin: 2rem auto; /* Center the section horizontally and add vertical spacing */
   padding: 2rem; /* Add padding around the section */
   background-color: #ffffff; /* White background for the section */

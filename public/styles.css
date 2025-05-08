@@ -212,12 +212,10 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 
 #studyPlannerSection {
-  height: calc(100vh - 4rem); /* Adjust height to fit within the viewport */
-  overflow: hidden; /* Prevent scrolling */
+  max-width: 1000px; /* Set a maximum width for the section */
+  margin: 2rem auto; /* Center the section horizontally and add vertical spacing */
   display: flex;
   flex-direction: column;
-  box-sizing: border-box; /* Include padding in height calculation */
-  margin: 2rem auto; /* Center the section horizontally and add vertical spacing */
   padding: 2rem; /* Add padding around the section */
   background-color: #ffffff; /* White background for the section */
   border-radius: 12px; /* Slightly larger rounded corners */
@@ -574,8 +572,7 @@ background-color: #2b6cb0; /* Darker blue on hover */
   #enablePiPButton:hover {
     background-color: #2b6cb0; /* Darker blue on hover */
   }
-
-
+  
 #scheduleSetupSection h2 {
 font-size: 2rem; /* Larger font size for the main heading */
 font-weight: bold; /* Make the heading bold */

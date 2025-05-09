@@ -39,8 +39,7 @@ border-color: #4a5568; /* Darker border */
 
 body.dark-mode #studyPlanDisplay div,
 body.dark-mode #runScreenTasks div {
-background-color: #4a5568; /* Darker background for task items */
-color: #f7fafc; /* Light text */
+  color: #f7fafc; /* Light text */
 }
 
 body.dark-mode #studyPlanDisplay,

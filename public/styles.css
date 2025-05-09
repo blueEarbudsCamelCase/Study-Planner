@@ -37,11 +37,6 @@ color: #f7fafc; /* Light text */
 border-color: #4a5568; /* Darker border */
 }
 
-body.dark-mode #studyPlanDisplay div,
-body.dark-mode #runScreenTasks div {
-  color: #f7fafc; /* Light text */
-}
-
 body.dark-mode #studyPlanDisplay,
 body.dark-mode #studyTasks {
 background-color: #2d3748; /* Darker background for task lists */
@@ -318,6 +313,10 @@ background-color: #ffffff; /* White background */
 border-radius: 12px; /* Rounded corners */
 box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for depth */
 border: 1px solid #e2e8f0; /* Light border for a clean look */
+}
+
+#runScreenTasks div {
+  color: #f7fafc; /* Light text */
 }
 
 /* Sets the containers height and width */

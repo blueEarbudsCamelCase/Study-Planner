@@ -822,21 +822,20 @@ backToDashboardBtn.addEventListener("click", () => {
       <div class="upcoming-tasks">
         <h2 class="font-bold text-lg mb-2">Upcoming Tasks</h2>
         ${
-          upcomingTasks.length > 0
-            ? upcomingTasks
-                .map(
-                  (task, index) => `
-                  <div class="p-4 bg-gray-100 rounded shadow-md mb-2">
-                    <input type="checkbox" id="upcomingTaskCheckbox${index}" class="mr-2">
-                    <label for="upcomingTaskCheckbox${index}">${task.textContent}</label>
-                  </div>
-                `
-                )
-                .join("")
-            : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
-        }
-      </div>
-    `;
+        upcomingTasks.length > 0
+          ? upcomingTasks
+              .map(
+                (task) => `
+                <div class="p-4 bg-gray-100 rounded shadow-md mb-2">
+                  <label>${task.textContent}</label>
+                </div>
+              `
+              )
+              .join("")
+          : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
+      }
+    </div>
+  `;
   
     // Handle marking the current task as completed
     const currentTaskCheckbox = document.getElementById("currentTaskCheckbox");
@@ -858,7 +857,7 @@ backToDashboardBtn.addEventListener("click", () => {
             console.log("Last task completed. Stopping timer.");
             clearInterval(timerInterval); // Stop the timer
             document.getElementById("base-timer-label").textContent = "00:00"; // Reset timer display
-            alert('You finished your study period! Great job! Click exit to go back to the planning screen.');
+            alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
             updateRunScreenDisplay(taskIndex + 1);
             startTaskTimer(taskIndex + 1); // Start the next task
@@ -866,26 +865,7 @@ backToDashboardBtn.addEventListener("click", () => {
         }
       });
     }
-  
-    // Handle marking upcoming tasks as completed
-    upcomingTasks.forEach((task, index) => {
-      const checkbox = document.getElementById(`upcomingTaskCheckbox${index}`);
-      if (checkbox) {
-        checkbox.addEventListener("change", () => {
-          if (checkbox.checked) {
-            console.log("Upcoming task completed:", task.textContent);
-  
-            // Extract the full task object from the dataset
-            const taskObj = {
-              summary: task.textContent.split(" - ")[0], // Extract the summary
-              startDate: task.dataset.startDate, // Retrieve the startDate from the dataset
-            };
-  
-            moveToCompleted(taskObj, task);
-          }
-        });
-      }
-    });
+
   }
  
   

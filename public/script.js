@@ -465,6 +465,7 @@ backToDashboardBtn.addEventListener("click", () => {
   }
   
   function addToAgenda(task, estimatedTime, zone) {
+      console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
     const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
   
     // Remove the placeholder text if it exists
@@ -497,7 +498,8 @@ backToDashboardBtn.addEventListener("click", () => {
     agendaItem.dataset.startDate = task.startDate; // Store the startDate in the dataset
     agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
     agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
-  
+    agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
+
     // Calculate the proportional height based on the estimated time
     const percentage = (estimatedTime / totalMinutes) * 100;
     agendaItem.style.flex = `0 0 ${percentage}%`; // Set height as a percentage of the total time
@@ -846,7 +848,7 @@ backToDashboardBtn.addEventListener("click", () => {
       });
     }
   }
-  
+
  // Helper function to get the color based on the zone
 function getTaskZoneColor(zone) {
   switch (zone) {

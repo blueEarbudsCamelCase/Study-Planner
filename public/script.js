@@ -631,7 +631,6 @@ backToDashboardBtn.addEventListener("click", () => {
   
   function moveToCompleted(task, taskElement) {
     const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
-    const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
     
     // Add the task to completedTasks
     completedTasks.push(task);
@@ -643,16 +642,7 @@ backToDashboardBtn.addEventListener("click", () => {
     } else {
       console.warn("Task element is already removed or not found:", taskElement);
     }
-  
-    // Remove the task from icalTasks in localStorage
-    const updatedIcalTasks = icalTasks.filter(
-      t => t.summary !== task.summary || t.startDate !== task.startDate
-    );
-    localStorage.setItem("icalTasks", JSON.stringify(updatedIcalTasks));
-  
-    console.log("Task moved to completed:", task);
   }
-  
   // Timer Constants
   let TIME_LIMIT = 3600; // Set the timer duration in seconds
   let timePassed = 0;
@@ -859,8 +849,8 @@ backToDashboardBtn.addEventListener("click", () => {
             document.getElementById("base-timer-label").textContent = "00:00"; // Reset timer display
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
-            updateRunScreenDisplay(taskIndex + 1);
-            startTaskTimer(taskIndex + 1); // Start the next task
+            updateRunScreenDisplay(0);
+            startTaskTimer(0); // Start the next task
           }
         }
       });

@@ -464,11 +464,6 @@ backToDashboardBtn.addEventListener("click", () => {
     }
   }
   
-  runButton.onclick = () => {
-    studyScreen.classList.add("hidden"); // Show the study setup screen
-    runScreen.classList.remove("hidden");
-  }
-  
   function addToAgenda(task, estimatedTime, zone) {
     const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
   
@@ -553,7 +548,6 @@ backToDashboardBtn.addEventListener("click", () => {
     tasksList.style.display = "block"; // Show the tasks list after loading
   
     const today = new Date();
-    let scrolledToToday = false;
   
     // Group tasks by date
     const tasksByDate = icalTasks.reduce((acc, task) => {
@@ -630,12 +624,7 @@ backToDashboardBtn.addEventListener("click", () => {
     }
   
   function moveToCompleted(task, taskElement) {
-    const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
-    
-    // Add the task to completedTasks
-    completedTasks.push(task);
-    localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
-  
+
     // Remove task from the current list (Your Tasks)
     if (taskElement && taskElement.parentElement) {
       taskElement.parentElement.removeChild(taskElement);
@@ -643,6 +632,7 @@ backToDashboardBtn.addEventListener("click", () => {
       console.warn("Task element is already removed or not found:", taskElement);
     }
   }
+
   // Timer Constants
   let TIME_LIMIT = 3600; // Set the timer duration in seconds
   let timePassed = 0;
@@ -802,7 +792,7 @@ backToDashboardBtn.addEventListener("click", () => {
         <h2 class="font-bold text-lg mb-2">Current Task</h2>
         ${
           currentTask
-            ? `<div class="p-4 bg-gray-100 rounded shadow-md mb-4">
+          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(currentTask.dataset.zone)};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
                 <label for="currentTaskCheckbox">${currentTask.textContent}</label>
               </div>`
@@ -816,7 +806,7 @@ backToDashboardBtn.addEventListener("click", () => {
           ? upcomingTasks
               .map(
                 (task) => `
-                <div class="p-4 bg-gray-100 rounded shadow-md mb-2">
+                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(task.dataset.zone)};">
                   <label>${task.textContent}</label>
                 </div>
               `
@@ -855,9 +845,21 @@ backToDashboardBtn.addEventListener("click", () => {
         }
       });
     }
-
   }
- 
+  
+ // Helper function to get the color based on the zone
+function getTaskZoneColor(zone) {
+  switch (zone) {
+    case "Independent":
+      return "#3182ce"; // Blue
+    case "Semi-Collaborative":
+      return "#38a169"; // Green
+    case "Collaborative":
+      return "#e53e3e"; // Red
+    default:
+      return "#718096"; // Gray (fallback)
+  }
+}
   
   // Adjust the canvas size to fit the timer
   const canvas = document.getElementById('timerCanvas');

@@ -322,6 +322,10 @@ border: 1px solid #e2e8f0; /* Light border for a clean look */
 #runScreenTasks div {
   color: #f7fafc; /* Light text */
 }
+
+#runScreenTasks h2 {
+ color: #000000; /* Light text */
+}
 /* Sets the containers height and width */
 /* Center the timer */
 .base-timer {

@@ -608,3 +608,53 @@ transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 #urlSaveButton:hover {
 background-color: #2b6cb0; /* Darker blue on hover */
 }
+
+/* Add this CSS for the fade-out animation */
+.fade-out {
+  animation: fade-out 0.5s forwards;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Add this CSS for the animation */
+.checkmark {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #38a169;
+  border-radius: 50%;
+  position: relative;
+  animation: pop-in 0.3s ease-out;
+}
+
+.checkmark::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 12px;
+  border: solid #38a169;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  top: 2px;
+  left: 6px;
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

@@ -637,6 +637,16 @@ backToDashboardBtn.addEventListener("click", () => {
 
   console.log("Task moved to completed:", task);
 
+  //animation for ryland :) this animation adds a checkmark to the commpleted task. 
+const checkmark = document.createElement('div');
+checkmark.className = 'checkmark';
+taskElement.appendChild(checkmark);
+//this part of the animation is a fade on exit for hte completed task. 
+taskElement.classList.add('fade-out');
+setTimeout(() => {
+  taskElement.parentElement.removeChild(taskElement);
+}, 500); // Wait for the animation to complete
+
     // Remove task from the current list (Your Tasks)
     if (taskElement && taskElement.parentElement) {
       taskElement.parentElement.removeChild(taskElement);

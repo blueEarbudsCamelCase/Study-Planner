@@ -153,6 +153,12 @@ body.dark-mode #runScreenTasks div {
   color: #f7fafc; /* Light text for task content in dark mode */
 }
 
+/* Transparent Background for Popups */
+body.dark-mode #tutorialPopup,
+body.dark-mode #taskPopup {
+background-color: rgba(0, 0, 0, 0.5) !important; /* Semi-transparent black background */
+}
+
 #settingsBtn {
 width: 40px; /* Set a fixed width */
 height: 40px; /* Set a fixed height */

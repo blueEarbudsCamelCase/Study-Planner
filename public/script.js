@@ -626,6 +626,16 @@ backToDashboardBtn.addEventListener("click", () => {
     }
   
   function moveToCompleted(task, taskElement) {
+  // Retrieve the current completedTasks array from localStorage
+  const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
+
+  // Add the completed task to the array
+  completedTasks.push(task);
+
+  // Save the updated array back to localStorage
+  localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+
+  console.log("Task moved to completed:", task);
 
     // Remove task from the current list (Your Tasks)
     if (taskElement && taskElement.parentElement) {

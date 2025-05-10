@@ -641,19 +641,14 @@ backToDashboardBtn.addEventListener("click", () => {
 const checkmark = document.createElement('div');
 checkmark.className = 'checkmark';
 taskElement.appendChild(checkmark);
-//this part of the animation is a fade on exit for hte completed task. 
-taskElement.classList.add('fade-out');
-setTimeout(() => {
-  taskElement.parentElement.removeChild(taskElement);
-}, 500); // Wait for the animation to complete
 
-    // Remove task from the current list (Your Tasks)
-    if (taskElement && taskElement.parentElement) {
-      taskElement.parentElement.removeChild(taskElement);
-    } else {
-      console.warn("Task element is already removed or not found:", taskElement);
-    }
-  }
+//this part of the animation is a fade on exit for the completed task. 
+taskElement.classList.add('fade-out');
+  setTimeout(() => {
+    taskElement.parentElement.removeChild(taskElement);
+  }, 500); // Wait for the animation to complete
+  console.log("Task Element:", taskElement);
+}
 
   // Timer Constants
   let TIME_LIMIT = 3600; // Set the timer duration in seconds

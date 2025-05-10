@@ -137,10 +137,20 @@ body.dark-mode #studyPlanDisplay button:hover {
 background-color: #2d3748 !important; /* Slightly darker on hover */
 }
 
-/* Transparent Background for Popups */
-body.dark-mode #tutorialPopup,
-body.dark-mode #taskPopup {
-background-color: rgba(0, 0, 0, 0.5) !important; /* Semi-transparent black background */
+body.dark-mode #studyTasks .text-gray-500 {
+  color: #f7fafc; /* Light text for better visibility in dark mode */
+}
+
+body.dark-mode #runScreenTasks h2 {
+  color: #f7fafc; /* Light text for headings in dark mode */
+}
+
+body.dark-mode #runScreenTasks p {
+  color: #f7fafc; /* Light text for placeholder text in dark mode */
+}
+
+body.dark-mode #runScreenTasks div {
+  color: #f7fafc; /* Light text for task content in dark mode */
 }
 
 #settingsBtn {

@@ -877,12 +877,12 @@ function getTaskZoneColor(zone) {
   // Add an event listener to the PiP button
   const pipButton = document.getElementById('enablePiPButton');
   
-  pipButton.addEventListener('click', async () => {
+  pipButton.addEventListener('click', () => {
   if (documentPictureInPicture.window) {
     documentPictureInPicture.window.close();
   } else {
       // Request PiP mode
-      let pipWindow = documentPictureInPicture.requestWindow().then(() => {
+      documentPictureInPicture.requestWindow().then(pipWindow => {
         pipButton.textContent = "Hide Popup"; // Update button text
         for(let styleSheet of document.querySelectorAll("link[rel=stylesheet]")) {
           let newStyleSheet = document.createElement("link");

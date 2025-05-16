@@ -26,7 +26,7 @@ app.get("/proxy", async (req, res) => {
     }
 
     const data = await response.blob();
-    res.type(blob.type);
+    res.type(data.type);
     res.send(Buffer.from(await data.arrayBuffer()));
   } catch (error) {
     console.error("Error fetching iCal feed: ", error);

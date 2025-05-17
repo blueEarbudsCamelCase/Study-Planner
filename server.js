@@ -22,14 +22,15 @@ app.get("/proxy", async (req, res) => {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`Failed to fetch iCal feed: ${response.statusText}`);
+      throw new Error(`HTTP Error ${response.statusText}`);
     }
 
-    const data = await response.text();
-    res.send(data);
+    const data = await response.blob();
+    res.type(data.type);
+    res.send(Buffer.from(await data.arrayBuffer()));
   } catch (error) {
-    console.error("Error fetching iCal feed:", error);
-    res.status(500).send("Failed to fetch iCal feed.");
+    console.error("Error fetching iCal feed: ", error);
+    res.status(500).send("Failed to fetch iCal feed: " + error);
   }
 });
 

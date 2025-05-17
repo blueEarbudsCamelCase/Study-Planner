@@ -64,6 +64,12 @@
       </label>
     </div>
 
+    <!-- Clear User Data Button -->
+    <div class="mb-4">
+      <button onclick="localStorage.clear();location.reload();" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+        Clear User Data
+      </button>
+    </div>
     <!-- Contact Information -->
     <div class="mb-4">
       <h3 class="font-bold text-md mb-2">Bugs or Issues?</h3>
@@ -175,7 +181,6 @@
 
 <div id="runScreen" class="hidden p-6">
   <div id="runScreenBox" class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-300">
-    <h1 class="text-2xl font-bold mb-4 text-center"></h1>
     <div class="flex flex-col items-center">
       <!-- timer -->
   <div class="base-timer">
@@ -196,16 +201,12 @@
       </g>
     </svg>
     <span id="base-timer-label" class="base-timer__label">
-      <script>
-        "${formatTime(timeLeft)}"
-      </script>
     </span>
   </div>
       <!-- Tasks -->
       <div id="runScreenTasks" class="w-full"></div>
       <!-- Popup Button -->
       <button id="enablePiPButton" class="bg-blue-500 text-white px-4 py-2 rounded">Show Popup</button>
-      <canvas id="timerCanvas" width="300" height="300" style="display: none;"></canvas>
       <!-- Exit Button -->
       <button id="backToPlanScreenBtn" class="bg-red-500 text-white px-4 py-2 rounded shadow-md mt-4">
         Exit

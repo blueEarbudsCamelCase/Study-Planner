@@ -622,6 +622,17 @@ backToDashboardBtn.addEventListener("click", () => {
       });
     }
   
+  function playBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  oscillator.type = 'sine';
+  oscillator.frequency.value = 880; // Hz
+  oscillator.connect(ctx.destination);
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.2); // 0.2 seconds beep
+  oscillator.onended = () => ctx.close();
+}
+
   function moveToCompleted(task, taskElement) {
   // Retrieve the current completedTasks array from localStorage
   const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
@@ -765,6 +776,7 @@ taskElement.classList.add('fade-out');
         setCircleDasharray();
       } else {
         clearInterval(timerInterval); // Stop the timer
+        playBeep(); // Play a beep sound
         console.log("Timer ended. Keeping the circle empty.");
         baseTimer
           .querySelector("#base-timer-path-remaining")
@@ -836,6 +848,7 @@ taskElement.classList.add('fade-out');
     if (currentTaskCheckbox) {
       currentTaskCheckbox.addEventListener("change", () => {
         if (currentTaskCheckbox.checked) {
+          playBeep();
           console.log("Current task completed:", currentTask.textContent);
   
           // Extract the full task object from the dataset
@@ -853,8 +866,8 @@ taskElement.classList.add('fade-out');
             baseTimer.querySelector("#base-timer-label").textContent = "00:00"; // Reset timer display
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
-            updateRunScreenDisplay(0);
-            startTaskTimer(0); // Start the next task
+            updateRunScreenDisplay(taskIndex + 1); // Update the display for the next task
+            startTaskTimer(taskIndex + 1); // Start the next task
           }
         }
       });

@@ -866,8 +866,8 @@ taskElement.classList.add('fade-out');
             baseTimer.querySelector("#base-timer-label").textContent = "00:00"; // Reset timer display
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
-            updateRunScreenDisplay(taskIndex); // Update the display for the next task
-            startTaskTimer(taskIndex); // Start the next task
+            updateRunScreenDisplay(0); // Update the display for the next task
+            startTaskTimer(0); // Start the next task
           }
         }
       });

@@ -871,19 +871,23 @@ backToDashboardBtn.addEventListener("click", () => {
           playBeep();
           currentTask.completed = true;
           moveToCompleted(currentTask, null);  
-          // Stop the timer if this is the last task
-          if (taskIndex === taskElements.length - 1) {
-            clearInterval(timerInterval); // Stop the timer
-            baseTimer.querySelector("#base-timer-label").textContent = "00:00"; // Reset timer display
+ 
+        // Wait for fade-out animation (500ms), then update display and timer
+        setTimeout(() => {
+          const stillIncomplete = runSessionTasks.filter(task => !task.completed);
+          if (stillIncomplete.length === 0) {
+            clearInterval(timerInterval);
+            baseTimer.querySelector("#base-timer-label").textContent = "00:00";
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
-            updateRunScreenDisplay(taskIndex); // Update the display for the next task
-            startTaskTimer(taskIndex); // Start the next task
+            updateRunScreenDisplay(taskIndex); // Always use the same index
+            startTaskTimer(taskIndex);
           }
-        }
-      });
-    }
+        }, 500);
+      }
+    });
   }
+}
 
  // Helper function to get the color based on the zone
 function getTaskZoneColor(zone) {

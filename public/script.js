@@ -645,17 +645,37 @@ backToDashboardBtn.addEventListener("click", () => {
 
   console.log("Task moved to completed:", task);
 
-  //animation for ryland :) this animation adds a checkmark to the commpleted task. 
-const checkmark = document.createElement('div');
-checkmark.className = 'checkmark';
-taskElement.appendChild(checkmark);
+  // If taskElement is provided, animate as before
+  if (taskElement) {
+    // animation for ryland :) this animation adds a checkmark to the commpleted task. 
+    const checkmark = document.createElement('div');
+    checkmark.className = 'checkmark';
+    taskElement.appendChild(checkmark);
 
-//this part of the animation is a fade on exit for the completed task. 
-taskElement.classList.add('fade-out');
-  setTimeout(() => {
-    taskElement.parentElement.removeChild(taskElement);
-  }, 500); // Wait for the animation to complete
-  console.log("Task Element:", taskElement);
+    // this part of the animation is a fade on exit for the completed task. 
+    taskElement.classList.add('fade-out');
+    setTimeout(() => {
+      taskElement.parentElement.removeChild(taskElement);
+    }, 500); // Wait for the animation to complete
+    console.log("Task Element:", taskElement);
+  } else {
+    // For runScreen: animate the current task card
+    const currentTaskDiv = document.querySelector('#runScreenTasks .current-task > div');
+    if (currentTaskDiv) {
+      // Add checkmark
+      const checkmark = document.createElement('div');
+      checkmark.className = 'checkmark';
+      currentTaskDiv.appendChild(checkmark);
+
+      // Fade out
+      currentTaskDiv.classList.add('fade-out');
+      setTimeout(() => {
+        if (currentTaskDiv.parentElement) {
+          currentTaskDiv.parentElement.removeChild(currentTaskDiv);
+        }
+      }, 500);
+    }
+  }
 }
 
   // Timer Constants

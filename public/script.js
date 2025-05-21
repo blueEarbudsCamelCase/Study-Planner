@@ -784,56 +784,56 @@ taskElement.classList.add('fade-out');
       }
     }, 1000);
   }
-  
+
+  let runSessionTasks = [];
+
+
   // Initialize the timer when the runScreen is shown
-  runButton.onclick = () => {
-    studyScreen.classList.add("hidden"); // Hide the study setup screen
-    runScreen.classList.remove("hidden"); // Show the run screen
-    
-    //run the function to add a task to the runScreen
-    updateRunScreenDisplay(0)
-    // Start the timer for the first task
-    startTaskTimer(0);
-  };
+ runButton.onclick = () => {
+  studyScreen.classList.add("hidden");
+  runScreen.classList.remove("hidden");
+  // Build the runSessionTasks array from the DOM
+  runSessionTasks = Array.from(studyPlanDisplay.children).map(child => ({
+    summary: child.textContent.split(" - ")[0],
+    startDate: child.dataset.startDate,
+    estimatedTime: parseInt(child.dataset.estimatedTime, 10),
+    zone: child.dataset.zone,
+    completed: false
+  }));
+  updateRunScreenDisplay(0);
+  startTaskTimer(0);
+};
+
   
   const runScreenTasks = document.getElementById("runScreenTasks")
   
-  // Update the runScreen display
   function updateRunScreenDisplay(taskIndex) {
-    console.log("Updating runScreen display for taskIndex:", taskIndex);
-  
-    const taskElements = Array.from(studyPlanDisplay.children);
-    console.log("Task elements:", taskElements);
-  
-    // Get the current task and upcoming tasks
-    const currentTask = taskElements[taskIndex];
-    const upcomingTasks = taskElements.slice(taskIndex + 1);
-  
-    console.log("Current task:", currentTask ? currentTask.textContent : "None");
-    console.log("Upcoming tasks:", upcomingTasks.map(task => task.textContent));
-  
-    // Clear the runScreen content
-    runScreenTasks.innerHTML = `
-      <div class="current-task">
-        <h2 class="font-bold text-lg mb-2">Current Task</h2>
-        ${
-          currentTask
-          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(currentTask.dataset.zone)};">
+  // Only show tasks that are not completed
+  const incompleteTasks = runSessionTasks.filter(task => !task.completed);
+  const currentTask = incompleteTasks[taskIndex];
+  const upcomingTasks = incompleteTasks.slice(taskIndex + 1);
+
+  runScreenTasks.innerHTML = `
+    <div class="current-task">
+      <h2 class="font-bold text-lg mb-2">Current Task</h2>
+      ${
+        currentTask
+          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(currentTask.zone)};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
-                <label for="currentTaskCheckbox">${currentTask.textContent}</label>
+                <label for="currentTaskCheckbox">${currentTask.summary} - ${currentTask.estimatedTime} min.</label>
               </div>`
-            : `<p class="text-gray-500 italic">No current task.</p>`
-        }
-      </div>
-      <div class="upcoming-tasks">
-        <h2 class="font-bold text-lg mb-2">Upcoming Tasks</h2>
-        ${
+          : `<p class="text-gray-500 italic">No current task.</p>`
+      }
+    </div>
+    <div class="upcoming-tasks">
+      <h2 class="font-bold text-lg mb-2">Upcoming Tasks</h2>
+      ${
         upcomingTasks.length > 0
           ? upcomingTasks
               .map(
                 (task) => `
-                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(task.dataset.zone)};">
-                  <label>${task.textContent}</label>
+                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(task.zone)};">
+                  <label>${task.summary} - ${task.estimatedTime} min.</label>
                 </div>
               `
               )
@@ -842,32 +842,23 @@ taskElement.classList.add('fade-out');
       }
     </div>
   `;
-  
+
     // Handle marking the current task as completed
     const currentTaskCheckbox = document.getElementById("currentTaskCheckbox");
     if (currentTaskCheckbox) {
       currentTaskCheckbox.addEventListener("change", () => {
         if (currentTaskCheckbox.checked) {
           playBeep();
-          console.log("Current task completed:", currentTask.textContent);
-  
-          // Extract the full task object from the dataset
-          const task = {
-            startDate: currentTask.dataset.startDate, // Retrieve the startDate from the dataset
-            summary: currentTask.textContent.split(" - ")[0], // Extract the summary
-          };
-  
-          moveToCompleted(task, currentTask);
-  
+          currentTask.completed = true;
+          moveToCompleted(currentTask, null);  
           // Stop the timer if this is the last task
           if (taskIndex === taskElements.length - 1) {
-            console.log("Last task completed. Stopping timer.");
             clearInterval(timerInterval); // Stop the timer
             baseTimer.querySelector("#base-timer-label").textContent = "00:00"; // Reset timer display
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
-            updateRunScreenDisplay(0); // Update the display for the next task
-            startTaskTimer(0); // Start the next task
+            updateRunScreenDisplay(taskIndex); // Update the display for the next task
+            startTaskTimer(taskIndex); // Start the next task
           }
         }
       });

@@ -8,8 +8,14 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
-// Serve static files from the "public" folder
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static files with cache headers
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js') || path.endsWith('.css') || path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    }
+  }
+}));
 
 // Proxy route for fetching iCal feed
 app.get("/proxy", async (req, res) => {

@@ -882,7 +882,7 @@ backToDashboardBtn.addEventListener("click", () => {
           } else {
             const nextTaskIndex = runSessionTasks.findIndex(task => !task.completed);
             updateRunScreenDisplay(taskIndex); // Always use the same index
-            startTaskTimer(nextTaskIndex);
+            startTaskTimer(taskIndex);
           }
         }, 500);
       }

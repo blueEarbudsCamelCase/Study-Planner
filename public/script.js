@@ -880,8 +880,9 @@ backToDashboardBtn.addEventListener("click", () => {
             baseTimer.querySelector("#base-timer-label").textContent = "00:00";
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
-            updateRunScreenDisplay(taskIndex); // Always use the same index
-            startTaskTimer(taskIndex);
+            const nextTaskIndex = runSessionTasks.findIndex(task => !task.completed);
+            updateRunScreenDisplay(nextTaskIndex); // Always use the same index
+            startTaskTimer(nextTaskIndex);
           }
         }, 500);
       }

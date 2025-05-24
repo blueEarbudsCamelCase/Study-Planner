@@ -881,8 +881,8 @@ backToDashboardBtn.addEventListener("click", () => {
             alert('You finished your study! Click exit to go back to the planning screen.');
           } else {
             const nextTaskIndex = runSessionTasks.findIndex(task => !task.completed);
-            updateRunScreenDisplay(taskIndex); // Always use the same index
-            startTaskTimer(nextTaskIndex);
+            updateRunScreenDisplay(0); // Always use the same index
+            startTaskTimer(0);
           }
         }, 500);
       }

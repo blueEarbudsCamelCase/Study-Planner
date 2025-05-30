@@ -10,6 +10,18 @@ border-radius: 12px; /* Rounded corners */
 box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
 border: 1px solid #e2e8f0; /* Light border for a clean look */
 }
+
+.button {
+display: inline-block; /* Ensure buttons are inline-block */
+padding: 0.75rem 1.5rem; /* Add padding for buttons */
+font-size: 1rem; /* Standard font size for buttons */
+font-weight: 600; /* Semi-bold for buttons */
+color: #ffffff; /* White text color */
+background-color: #3182ce; /* Blue background color */
+border: none; /* Remove default border */
+border-radius: 8px; /* Rounded corners for buttons */
+cursor: pointer; /* Pointer cursor on hover */
+transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 /* Dark Mode Styles */
 body.dark-mode {
 background-color: #1a202c; /* Dark background */

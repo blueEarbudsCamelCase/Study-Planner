@@ -17,6 +17,16 @@ app.use(express.static('public', {
   }
 }));
 
+// Middleware to block forbidden query parameters
+app.use((req, res, next) => {
+  const forbiddenParams = ['proxy', '=proxy?', 'url', 'fetch'];
+  const queryKeys = Object.keys(req.query);
+  if (queryKeys.some(key => forbiddenParams.includes(key.toLowerCase()))) {
+    return res.status(403).send('Forbidden');
+  }
+  next();
+});
+
 // Proxy route for fetching iCal feed
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;

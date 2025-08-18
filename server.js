@@ -31,6 +31,17 @@ app.use((req, res, next) => {
 app.get("/proxy", async (req, res) => {
   const url = req.query.url;
 
+  // Only allow URLs from canvas.na.oneschoolglobal.com
+  const allowedDomain = "canvas.na.oneschoolglobal.com";
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.hostname !== allowedDomain) {
+      return res.status(403).send("Forbidden: Domain not allowed.");
+    }
+  } catch (e) {
+    return res.status(400).send("Invalid URL.");
+  }
+
   if (!url) {
     return res.status(400).send("Missing 'url' query parameter.");
   }

@@ -22,6 +22,7 @@ border: none; /* Remove default border */
 border-radius: 8px; /* Rounded corners for buttons */
 cursor: pointer; /* Pointer cursor on hover */
 transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
 /* Dark Mode Styles */
 body.dark-mode {
 background-color: #1a202c; /* Dark background */

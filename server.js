@@ -22,7 +22,7 @@ app.get("/proxy", async (req, res) => {
   const url = req.query.url;
 
   // Only allow URLs from canvas.na.oneschoolglobal.com
-  const allowedDomain = "canvas.na.oneschoolglobal.com";
+  const allowedDomain = "canvas.oneschoolglobal.com";
   try {
     const parsedUrl = new URL(url);
     if (parsedUrl.hostname !== allowedDomain) {

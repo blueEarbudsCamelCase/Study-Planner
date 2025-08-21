@@ -347,6 +347,8 @@ backToDashboardBtn.addEventListener("click", () => {
     dashboardSection.classList.remove("hidden"); // Show the dashboard section
     studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
     runScreenTasks.innerHTML = '';
+
+    updateMinutesLeftDisplay();
   });
   
   backToPlanScreenBtn.addEventListener("click", () => {
@@ -355,6 +357,7 @@ backToDashboardBtn.addEventListener("click", () => {
     studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
     runScreenTasks.innerHTML = '';
     runButtonColorCheck();
+    updateMinutesLeftDisplay();
    
     // Exit PiP mode if active
     if (document.pictureInPictureElement) {

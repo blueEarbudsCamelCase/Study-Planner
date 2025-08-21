@@ -942,17 +942,3 @@ function updateMinutesLeftDisplay() {
   minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
 }
 
-// Call updateMinutesLeftDisplay after every change to the study plan
-// For example, at the end of addToAgenda:
-function addToAgenda(task, estimatedTime, zone) {
-  // ...existing code...
-  studyPlanDisplay.appendChild(agendaItem);
-  runButtonColorCheck();
-  updateMinutesLeftDisplay(); // <-- Add this line
-}
-
-// Also call it when clearing the plan (e.g., in backToDashboardBtn event)
-backToDashboardBtn.addEventListener("click", () => {
-  // ...existing code...
-  updateMinutesLeftDisplay();
-});

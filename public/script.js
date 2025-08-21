@@ -1,4 +1,4 @@
-    let mode = 'login';
+let mode = 'login';
   
   const dashboardSection = document.getElementById("dashboardSection");
   const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
@@ -529,6 +529,7 @@ backToDashboardBtn.addEventListener("click", () => {
     studyPlanDisplay.appendChild(agendaItem);
   
     runButtonColorCheck(); 
+    updateMinutesLeftDisplay(); // <-- Add this line
   }
   
   function loadStudyTasks() {
@@ -930,3 +931,28 @@ function getTaskZoneColor(zone) {
       });
     }
   });
+function updateMinutesLeftDisplay() {
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");
+  const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+    const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+    return sum + estimatedTime;
+  }, 0);
+  const minutesLeft = Math.max(60 - totalMinutes, 0);
+  minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
+}
+
+// Call updateMinutesLeftDisplay after every change to the study plan
+// For example, at the end of addToAgenda:
+function addToAgenda(task, estimatedTime, zone) {
+  // ...existing code...
+  studyPlanDisplay.appendChild(agendaItem);
+  runButtonColorCheck();
+  updateMinutesLeftDisplay(); // <-- Add this line
+}
+
+// Also call it when clearing the plan (e.g., in backToDashboardBtn event)
+backToDashboardBtn.addEventListener("click", () => {
+  // ...existing code...
+  updateMinutesLeftDisplay();
+});

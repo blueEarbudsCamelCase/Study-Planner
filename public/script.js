@@ -945,3 +945,87 @@ function updateMinutesLeftDisplay() {
   minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
 }
 
+// Theme popup logic
+const themesBtn = document.getElementById("themesBtn");
+const themesPopup = document.getElementById("themesPopup");
+const closeThemesBtn = document.getElementById("closeThemesBtn");
+const themeSwitcher = document.getElementById("themeSwitcher");
+
+// Open themes popup
+themesBtn.addEventListener("click", () => {
+  themesPopup.classList.remove("hidden");
+  themesPopup.style.visibility = "visible";
+});
+
+// Close themes popup
+closeThemesBtn.addEventListener("click", () => {
+  themesPopup.classList.add("hidden");
+  themesPopup.style.visibility = "hidden";
+});
+
+// Theme definitions
+const themeStyles = {
+  "default": () => {
+    document.body.className = "bg-gray-100 font-sans";
+    document.documentElement.style = "";
+  },
+  "focus-mode": () => {
+    document.body.className = "bg-gray-900 font-sans";
+    document.documentElement.style.background = "#222";
+  },
+  "sunset-gradient": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)";
+  },
+  "deep-ocean": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #2b5876 0%, #4e4376 100%)";
+  },
+  "forest-retreat": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)";
+  },
+  "highlighter-pop": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #f9d423 0%, #ff4e50 100%)";
+  },
+  "classic-professional": () => {
+    document.body.className = "bg-white font-serif";
+    document.documentElement.style.background = "#f7fafc";
+  },
+  "lavender-haze": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #b993d6 0%, #8ca6db 100%)";
+  },
+  "coffee-shop": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #b79891 0%, #94716b 100%)";
+  },
+  "vibrant-bold": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #fc00ff 0%, #00dbde 100%)";
+  },
+  "greyscale": () => {
+    document.body.className = "font-sans";
+    document.documentElement.style.background = "linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)";
+  }
+};
+
+// Apply theme
+function applyTheme(theme) {
+  if (themeStyles[theme]) {
+    themeStyles[theme]();
+    localStorage.setItem("selectedTheme", theme);
+  }
+}
+
+// Theme switcher change event
+themeSwitcher.addEventListener("change", (e) => {
+  applyTheme(e.target.value);
+});
+
+// Load theme on page load
+const savedTheme = localStorage.getItem("selectedTheme") || "default";
+themeSwitcher.value = savedTheme;
+applyTheme(savedTheme);
+

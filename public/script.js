@@ -1,9 +1,7 @@
-let mode = 'login';
-  
-  const dashboardSection = document.getElementById("dashboardSection");
-  const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
+const dashboardSection = document.getElementById("dashboardSection");
+const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
-  // Define fetchIcalFeed globally
+// Define fetchIcalFeed globally
 function fetchIcalFeed() {
   const icalUrl = localStorage.getItem('icalFeedUrl');
   if (!icalUrl) {
@@ -195,7 +193,6 @@ if (dashboardContainer) {
   
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');
-  const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
   const startStudyBtn = document.getElementById("startStudyBtn");
   const backToDashboardBtn = document.getElementById("backToDashboardBtn");
   const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
@@ -399,7 +396,7 @@ backToDashboardBtn.addEventListener("click", () => {
   
     // Reset the popup fields
     taskTime.value = "";
-    taskZone.value = "independent";
+    taskZone.value = "";
   
     // Show the popup
     taskPopup.classList.remove("hidden");
@@ -711,63 +708,20 @@ backToDashboardBtn.addEventListener("click", () => {
       .setAttribute("stroke-dasharray", circleDasharray);
   }
   
-  function getFirstTaskDuration() {
-    const firstTask = studyPlanDisplay.children[0];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  function getSecondTaskDuration() {
-    const firstTask = studyPlanDisplay.children[1];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  function getThirdTaskDuration() {
-    const firstTask = studyPlanDisplay.children[2];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  function getFourthTaskDuration() {
-    const firstTask = studyPlanDisplay.children[3];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  function getFifthTaskDuration() {
-    const firstTask = studyPlanDisplay.children[4];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  function getSixthTaskDuration() {
-    const firstTask = studyPlanDisplay.children[5];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  
+  // Helper function to get task duration by index
+function getTaskDuration(index) {
+  const task = studyPlanDisplay.children[index];
+  return task ? parseInt(task.dataset.estimatedTime, 10) || 0 : 0;
+}
+
   function startTaskTimer(taskIndex) {
     const taskDurations = [
-      getFirstTaskDuration(),
-      getSecondTaskDuration(),
-      getThirdTaskDuration(),
-      getFourthTaskDuration(),
-      getFifthTaskDuration(),
-      getSixthTaskDuration(),
+      getTaskDuration(0),
+      getTaskDuration(1),
+      getTaskDuration(2),
+      getTaskDuration(3),
+      getTaskDuration(4),
+      getTaskDuration(5),
     ];
   
     // Check if the task exists

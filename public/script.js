@@ -900,60 +900,81 @@ closeThemesBtn.addEventListener("click", () => {
   themesPopup.style.visibility = "hidden";
 });
 
-// Theme definitions
-const themeStyles = {
-  "default": () => {
-    document.body.className = "bg-gray-100 font-sans";
-    document.documentElement.style = "";
+const themeVars = {
+  "focus-mode": {
+    "--bg-color": "#F9FAFB",
+    "--card-bg": "#fff",
+    "--card-text": "#1F2937",
+    "--accent-color": "#3B82F6"
   },
-  "focus-mode": () => {
-    document.body.className = "bg-gray-900 font-sans";
-    document.documentElement.style.background = "#222";
+  "sunset-gradient": {
+    "--bg-color": "linear-gradient(to bottom, #F9EBC8, #F9D1B0)",
+    "--card-bg": "#FFF8E1",
+    "--card-text": "#5D4037",
+    "--accent-color": "#FF7043"
   },
-  "sunset-gradient": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #ff9966 0%, #ff5e62 100%)";
+  "deep-ocean": {
+    "--bg-color": "#001A23",
+    "--card-bg": "#0B2D3B",
+    "--card-text": "#E0FBFC",
+    "--accent-color": "#48A9A6"
   },
-  "deep-ocean": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #2b5876 0%, #4e4376 100%)";
+  "forest-retreat": {
+    "--bg-color": "#E9F5E3",
+    "--card-bg": "#F3F8F1",
+    "--card-text": "#2F4858",
+    "--accent-color": "#6D9773"
   },
-  "forest-retreat": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)";
+  "highlighter-pop": {
+    "--bg-color": "#F4F6F9",
+    "--card-bg": "#fff",
+    "--card-text": "#333333",
+    "--accent-color": "#D8FF5F"
   },
-  "highlighter-pop": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #f9d423 0%, #ff4e50 100%)";
+  "classic-professional": {
+    "--bg-color": "#FDFDF5",
+    "--card-bg": "#fff",
+    "--card-text": "#3D3635",
+    "--accent-color": "#00509D"
   },
-  "classic-professional": () => {
-    document.body.className = "bg-white font-serif";
-    document.documentElement.style.background = "#f7fafc";
+  "lavender-haze": {
+    "--bg-color": "#F8F4FF",
+    "--card-bg": "#DCD7E8",
+    "--card-text": "#4A435E",
+    "--accent-color": "#8C7DDA"
   },
-  "lavender-haze": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #b993d6 0%, #8ca6db 100%)";
+  "coffee-shop": {
+    "--bg-color": "#E6DBCF",
+    "--card-bg": "#F2EFE8",
+    "--card-text": "#4A3628",
+    "--accent-color": "#8C593C"
   },
-  "coffee-shop": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #b79891 0%, #94716b 100%)";
+  "vibrant-bold": {
+    "--bg-color": "#222831",
+    "--card-bg": "#94B0DA",
+    "--card-text": "#EEEEEE",
+    "--accent-color": "#FF847C"
   },
-  "vibrant-bold": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #fc00ff 0%, #00dbde 100%)";
+  "greyscale": {
+    "--bg-color": "#FFFFFF",
+    "--card-bg": "#DDDDDD",
+    "--card-text": "#111111",
+    "--accent-color": "#555555"
   },
-  "greyscale": () => {
-    document.body.className = "font-sans";
-    document.documentElement.style.background = "linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)";
+  "default": {
+    "--bg-color": "#f9fafb",
+    "--card-bg": "#fff",
+    "--card-text": "#1f2937",
+    "--accent-color": "#3b82f6"
   }
 };
 
-// Apply theme
 function applyTheme(theme) {
-  if (themeStyles[theme]) {
-    themeStyles[theme]();
-    localStorage.setItem("selectedTheme", theme);
-  }
+  const vars = themeVars[theme] || themeVars["default"];
+  Object.entries(vars).forEach(([key, value]) => {
+    document.documentElement.style.setProperty(key, value);
+  });
+  localStorage.setItem("selectedTheme", theme);
 }
 
 // Theme switcher change event

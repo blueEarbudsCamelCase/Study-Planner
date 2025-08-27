@@ -1,3 +1,33 @@
+:root {
+  --bg-color: #f9fafb;
+  --card-bg: #fff;
+  --card-text: #1f2937;
+  --accent-color: #3b82f6;
+  --zone-independent: #3182ce;
+  --zone-semi-collaborative: #38a169;
+  --zone-collaborative: #e53e3e;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--card-text);
+}
+
+.card, .agendaItem, .current-task > div, .upcoming-tasks > div {
+  background: var(--card-bg) !important;
+  color: var(--card-text) !important;
+}
+
+.agendaItem[data-zone="Independent"], .current-task > div[data-zone="Independent"], .upcoming-tasks > div[data-zone="Independent"] {
+  background: var(--zone-independent) !important;
+}
+.agendaItem[data-zone="Semi-Collaborative"], .current-task > div[data-zone="Semi-Collaborative"], .upcoming-tasks > div[data-zone="Semi-Collaborative"] {
+  background: var(--zone-semi-collaborative) !important;
+}
+.agendaItem[data-zone="Collaborative"], .current-task > div[data-zone="Collaborative"], .upcoming-tasks > div[data-zone="Collaborative"] {
+  background: var(--zone-collaborative) !important;
+}
+
 #dashboardSection {
   position: relative; /* Ensure the section is the positioning context */
 }

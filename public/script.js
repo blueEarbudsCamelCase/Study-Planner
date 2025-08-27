@@ -983,3 +983,11 @@ const savedTheme = localStorage.getItem("selectedTheme") || "default";
 themeSwitcher.value = savedTheme;
 applyTheme(savedTheme);
 
+// Edit iCal Feed button logic
+const editInputsBtn = document.getElementById("editInputsBtn");
+editInputsBtn.addEventListener("click", () => {
+  settingsPopup.classList.add("hidden");
+  scheduleSetupSection.classList.remove("hidden");
+  dashboardSection.classList.add("hidden");
+});
+

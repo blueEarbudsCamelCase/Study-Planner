@@ -7,7 +7,7 @@ function fetchIcalFeed() {
   if (!icalUrl) {
     console.error("No iCal URL found in localStorage.");
     return Promise.reject("No iCal URL found in localStorage.");
-  }
+  } 
 
   return fetch(`/proxy?url=${encodeURIComponent(icalUrl)}`)
     .then(response => response.text())
@@ -764,7 +764,6 @@ function getTaskDuration(index) {
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
-
   
   const runScreenTasks = document.getElementById("runScreenTasks")
   
@@ -971,10 +970,20 @@ const themeVars = {
 
 function applyTheme(theme) {
   const vars = themeVars[theme] || themeVars["default"];
+  console.log("Applying theme:", theme, vars); // <-- Add this log
   Object.entries(vars).forEach(([key, value]) => {
     document.documentElement.style.setProperty(key, value);
+    console.log(`Set CSS variable ${key} to ${value}`); // <-- Add this log
   });
   localStorage.setItem("selectedTheme", theme);
+
+  // Special handling for gradient backgrounds
+  if (vars["--bg-color"] && vars["--bg-color"].startsWith("linear-gradient")) {
+    document.body.style.background = vars["--bg-color"];
+    console.log("Set body background to gradient:", vars["--bg-color"]);
+  } else {
+    document.body.style.background = "";
+  }
 }
 
 // Theme switcher change event

@@ -174,16 +174,6 @@ if (dashboardContainer) {
     settingsPopup.style.visibility = "hidden"; // Ensure it's hidden
   });
   
-  // Toggle dark mode
-  darkModeToggle.addEventListener("change", () => {
-    if (darkModeToggle.checked) {
-      document.body.classList.add("dark-mode");
-      localStorage.setItem("darkMode", "enabled");
-    } else {
-      document.body.classList.remove("dark-mode");
-      localStorage.setItem("darkMode", "disabled");
-    }
-  });
   
   // Load dark mode preference on page load
   if (localStorage.getItem("darkMode") === "enabled") {

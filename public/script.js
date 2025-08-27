@@ -174,13 +174,6 @@ if (dashboardContainer) {
     settingsPopup.style.visibility = "hidden"; // Ensure it's hidden
   });
   
-  
-  // Load dark mode preference on page load
-  if (localStorage.getItem("darkMode") === "enabled") {
-    document.body.classList.add("dark-mode");
-    darkModeToggle.checked = true;
-  }
-  
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');
   const startStudyBtn = document.getElementById("startStudyBtn");

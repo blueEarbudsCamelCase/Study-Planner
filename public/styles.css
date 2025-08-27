@@ -1,3 +1,4 @@
+/* Theme variables */
 :root {
   --bg-color: #f9fafb;
   --card-bg: #fff;
@@ -11,195 +12,104 @@
 body {
   background: var(--bg-color);
   color: var(--card-text);
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-.card, .agendaItem, .current-task > div, .upcoming-tasks > div {
-  background: var(--card-bg) !important;
-  color: var(--card-text) !important;
+.card, .agendaItem, .current-task > div, .upcoming-tasks > div, #studyPlanDisplay > div {
+  background: var(--card-bg);
+  color: var(--card-text);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .agendaItem[data-zone="Independent"], .current-task > div[data-zone="Independent"], .upcoming-tasks > div[data-zone="Independent"] {
-  background: var(--zone-independent) !important;
+  background: var(--zone-independent);
+  color: #fff;
 }
 .agendaItem[data-zone="Semi-Collaborative"], .current-task > div[data-zone="Semi-Collaborative"], .upcoming-tasks > div[data-zone="Semi-Collaborative"] {
-  background: var(--zone-semi-collaborative) !important;
+  background: var(--zone-semi-collaborative);
+  color: #fff;
 }
 .agendaItem[data-zone="Collaborative"], .current-task > div[data-zone="Collaborative"], .upcoming-tasks > div[data-zone="Collaborative"] {
-  background: var(--zone-collaborative) !important;
+  background: var(--zone-collaborative);
+  color: #fff;
 }
 
-#dashboardSection {
-  position: relative; /* Ensure the section is the positioning context */
-}
-#dashboardContainer {
-max-width: 800px; /* Set a maximum width for the container */
-margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
-padding: 2rem; /* Add padding inside the container */
-background-color: #ffffff; /* White background */
-border-radius: 12px; /* Rounded corners */
-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
-border: 1px solid #e2e8f0; /* Light border for a clean look */
+button {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 4px 0;
 }
 
-.button {
-display: inline-block; /* Ensure buttons are inline-block */
-padding: 0.75rem 1.5rem; /* Add padding for buttons */
-font-size: 1rem; /* Standard font size for buttons */
-font-weight: 600; /* Semi-bold for buttons */
-color: #ffffff; /* White text color */
-background-color: #3182ce; /* Blue background color */
-border: none; /* Remove default border */
-border-radius: 8px; /* Rounded corners for buttons */
-cursor: pointer; /* Pointer cursor on hover */
-transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-}
-/* Dark Mode Styles */
-body.dark-mode {
-background-color: #1a202c; /* Dark background */
-color: #f7fafc; /* Light text */
+button:hover {
+  opacity: 0.85;
 }
 
-body.dark-mode .bg-white {
-background-color: #2d3748; /* Darker background for containers */
+#dashboardContainer, #studyPlannerSection, #runScreenBox {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-body.dark-mode .text-gray-600 {
-color: #a0aec0; /* Lighter gray text */
+.hidden {
+  display: none !important;
 }
 
-body.dark-mode .text-blue-500 {
-color: #63b3ed; /* Lighter blue for links */
-}
-/* Dark Mode Styles for Containers */
-body.dark-mode #dashboardContainer,
-body.dark-mode #studyPlannerSection,
-body.dark-mode #runScreenBox,
-body.dark-mode #settingsPopup .bg-white {
-background-color: #2d3748; /* Darker background for containers */
-color: #f7fafc; /* Light text */
-border-color: #4a5568; /* Darker border */
+/* Popup overlay */
+#settingsPopup, #themesPopup, #tutorialPopup, #mapPopup, #taskPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
 }
 
-body.dark-mode #studyPlanDisplay div {
-  color: #f7fafc; /* Light text */
+#settingsPopup .bg-white, #themesPopup .bg-white, #tutorialPopup .bg-white, #mapPopup .bg-white, #taskPopup .bg-white {
+  background: var(--card-bg);
+  color: var(--card-text);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  max-width: 400px;
+  width: 100%;
 }
 
-body.dark-mode #studyPlanDisplay,
-body.dark-mode #studyTasks {
-background-color: #2d3748; /* Darker background for task lists */
-color: #f7fafc; /* Light text */
-border-color: #4a5568; /* Darker border */
-}
+/* Utility */
+.flex { display: flex; }
+.space-x-4 > * + * { margin-left: 1rem; }
+.text-center { text-align: center; }
+.font-bold { font-weight: bold; }
+.mb-4 { margin-bottom: 1rem; }
+.mt-4 { margin-top: 1rem; }
+.p-6 { padding: 1.5rem; }
+.rounded-xl { border-radius: 1rem; }
+.shadow-lg { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+.max-w-sm { max-width: 24rem; }
+.w-full { width: 100%; }
+.text-sm { font-size: 0.875rem; }
+.text-gray-500 { color: #6b7280; }
+.border-t { border-top: 1px solid #e5e7eb; }
+.pt-4 { padding-top: 1rem; }
 
-body.dark-mode #tutorialPopup,
-body.dark-mode #taskPopup {
-background-color: #2d3748; /* Darker background for popups */
-color: #f7fafc; /* Light text */
-}
-
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-background-color: #4a5568; /* Darker background for inputs */
-color: #f7fafc; /* Light text */
-border-color: #4a5568; /* Match border to background */
-}
-
-body.dark-mode input::placeholder,
-body.dark-mode select::placeholder,
-body.dark-mode textarea::placeholder {
-color: #a0aec0; /* Lighter gray for placeholder text */
-}
-
-/* Ensure all input elements are styled in dark mode */
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-background-color: #4a5568; /* Dark background */
-color: #f7fafc; /* Light text */
-border: 1px solid #4a5568; /* Dark border */
-border-radius: 8px; /* Rounded corners */
-padding: 0.75rem; /* Add padding */
-}
-
-body.dark-mode input:focus,
-body.dark-mode select:focus,
-body.dark-mode textarea:focus {
-outline: none; /* Remove default focus outline */
-border-color: #63b3ed; /* Blue border on focus */
-box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5); /* Subtle blue shadow */
-}
-/* Dark Mode Styles for Headings and Titles */
-body.dark-mode h1,
-body.dark-mode h2,
-body.dark-mode h3,
-body.dark-mode h4,
-body.dark-mode h5,
-body.dark-mode h6, 
-body.dark-mode p,
-body.dark-mode li {
-color: #f7fafc; /* Light text for headings */
-}
-
-body.dark-mode .text-gray-500 {
-color: #a0aec0; /* Lighter gray for subtitles or secondary text */
-}
-
-body.dark-mode .text-gray-600 {
-color: #cbd5e0; /* Slightly lighter gray for task feed titles */
-}
-
-body.dark-mode .text-blue-500 {
-color: #63b3ed; /* Lighter blue for links */
-}
-/* Dark Mode Styles for Task Buttons */
-body.dark-mode #studyPlanDisplay button {
-background-color: #4a5568; /* Dark background */
-color: #f7fafc; /* Light text */
-border: 1px solid #4a5568; /* Match border to background */
-}
-
-body.dark-mode #studyPlanDisplay button:hover {
-background-color: #2d3748; /* Slightly darker on hover */
-}
 
 /* Transparent Background for Popups */
 #tutorialPopup,
 #taskPopup {
 background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
-}
-
-/* Task Buttons in studyPlanDisplay */
-body.dark-mode #studyPlanDisplay button {
-background-color: #4a5568 !important; /* Dark background */
-color: #f7fafc !important; /* Light text */
-border: 1px solid #4a5568 !important; /* Match border to background */
-}
-
-body.dark-mode #studyPlanDisplay button:hover {
-background-color: #2d3748 !important; /* Slightly darker on hover */
-}
-
-body.dark-mode #studyTasks .text-gray-500 {
-  color: #f7fafc; /* Light text for better visibility in dark mode */
-}
-
-body.dark-mode #runScreenTasks h2 {
-  color: #f7fafc; /* Light text for headings in dark mode */
-}
-
-body.dark-mode #runScreenTasks p {
-  color: #f7fafc; /* Light text for placeholder text in dark mode */
-}
-
-body.dark-mode #runScreenTasks div {
-  color: #f7fafc; /* Light text for task content in dark mode */
-}
-
-/* Transparent Background for Popups */
-body.dark-mode #tutorialPopup,
-body.dark-mode #taskPopup {
-background-color: rgba(0, 0, 0, 0.5) !important; /* Semi-transparent black background */
 }
 
 #settingsBtn {

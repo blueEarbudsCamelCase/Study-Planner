@@ -1,13 +1,13 @@
-const dashboardSection = document.getElementById("dashboardSection");
-const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+ const dashboardSection = document.getElementById("dashboardSection");
+ const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
 
-// Define fetchIcalFeed globally
+  // Define fetchIcalFeed globally
 function fetchIcalFeed() {
   const icalUrl = localStorage.getItem('icalFeedUrl');
   if (!icalUrl) {
     console.error("No iCal URL found in localStorage.");
     return Promise.reject("No iCal URL found in localStorage.");
-  } 
+  }
 
   return fetch(`/proxy?url=${encodeURIComponent(icalUrl)}`)
     .then(response => response.text())
@@ -174,8 +174,26 @@ if (dashboardContainer) {
     settingsPopup.style.visibility = "hidden"; // Ensure it's hidden
   });
   
+  // Toggle dark mode
+  darkModeToggle.addEventListener("change", () => {
+    if (darkModeToggle.checked) {
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("darkMode", "enabled");
+    } else {
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("darkMode", "disabled");
+    }
+  });
+  
+  // Load dark mode preference on page load
+  if (localStorage.getItem("darkMode") === "enabled") {
+    document.body.classList.add("dark-mode");
+    darkModeToggle.checked = true;
+  }
+  
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');
+  const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
   const startStudyBtn = document.getElementById("startStudyBtn");
   const backToDashboardBtn = document.getElementById("backToDashboardBtn");
   const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
@@ -379,7 +397,7 @@ backToDashboardBtn.addEventListener("click", () => {
   
     // Reset the popup fields
     taskTime.value = "";
-    taskZone.value = "";
+    taskZone.value = "independent";
   
     // Show the popup
     taskPopup.classList.remove("hidden");
@@ -691,20 +709,63 @@ backToDashboardBtn.addEventListener("click", () => {
       .setAttribute("stroke-dasharray", circleDasharray);
   }
   
-  // Helper function to get task duration by index
-function getTaskDuration(index) {
-  const task = studyPlanDisplay.children[index];
-  return task ? parseInt(task.dataset.estimatedTime, 10) || 0 : 0;
-}
-
+  function getFirstTaskDuration() {
+    const firstTask = studyPlanDisplay.children[0];
+      if(firstTask) {
+        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+      }
+      return 0;
+  }
+  
+  function getSecondTaskDuration() {
+    const firstTask = studyPlanDisplay.children[1];
+      if(firstTask) {
+        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+      }
+      return 0;
+  }
+  
+  function getThirdTaskDuration() {
+    const firstTask = studyPlanDisplay.children[2];
+      if(firstTask) {
+        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+      }
+      return 0;
+  }
+  
+  function getFourthTaskDuration() {
+    const firstTask = studyPlanDisplay.children[3];
+      if(firstTask) {
+        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+      }
+      return 0;
+  }
+  
+  function getFifthTaskDuration() {
+    const firstTask = studyPlanDisplay.children[4];
+      if(firstTask) {
+        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+      }
+      return 0;
+  }
+  
+  function getSixthTaskDuration() {
+    const firstTask = studyPlanDisplay.children[5];
+      if(firstTask) {
+        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+      }
+      return 0;
+  }
+  
+  
   function startTaskTimer(taskIndex) {
     const taskDurations = [
-      getTaskDuration(0),
-      getTaskDuration(1),
-      getTaskDuration(2),
-      getTaskDuration(3),
-      getTaskDuration(4),
-      getTaskDuration(5),
+      getFirstTaskDuration(),
+      getSecondTaskDuration(),
+      getThirdTaskDuration(),
+      getFourthTaskDuration(),
+      getFifthTaskDuration(),
+      getSixthTaskDuration(),
     ];
   
     // Check if the task exists
@@ -764,6 +825,7 @@ function getTaskDuration(index) {
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
+
   
   const runScreenTasks = document.getElementById("runScreenTasks")
   
@@ -880,127 +942,3 @@ function updateMinutesLeftDisplay() {
   const minutesLeft = Math.max(60 - totalMinutes, 0);
   minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
 }
-
-// Theme popup logic
-const themesBtn = document.getElementById("themesBtn");
-const themesPopup = document.getElementById("themesPopup");
-const closeThemesBtn = document.getElementById("closeThemesBtn");
-const themeSwitcher = document.getElementById("themeSwitcher");
-
-// Open themes popup
-themesBtn.addEventListener("click", () => {
-  themesPopup.classList.remove("hidden");
-  themesPopup.style.visibility = "visible";
-});
-
-// Close themes popup
-closeThemesBtn.addEventListener("click", () => {
-  themesPopup.classList.add("hidden");
-  themesPopup.style.visibility = "hidden";
-});
-
-const themeVars = {
-  "focus-mode": {
-    "--bg-color": "#F9FAFB",
-    "--card-bg": "#fff",
-    "--card-text": "#1F2937",
-    "--accent-color": "#3B82F6"
-  },
-  "sunset-gradient": {
-    "--bg-color": "linear-gradient(to bottom, #F9EBC8, #F9D1B0)",
-    "--card-bg": "#FFF8E1",
-    "--card-text": "#5D4037",
-    "--accent-color": "#FF7043"
-  },
-  "deep-ocean": {
-    "--bg-color": "#001A23",
-    "--card-bg": "#0B2D3B",
-    "--card-text": "#E0FBFC",
-    "--accent-color": "#48A9A6"
-  },
-  "forest-retreat": {
-    "--bg-color": "#E9F5E3",
-    "--card-bg": "#F3F8F1",
-    "--card-text": "#2F4858",
-    "--accent-color": "#6D9773"
-  },
-  "highlighter-pop": {
-    "--bg-color": "#F4F6F9",
-    "--card-bg": "#fff",
-    "--card-text": "#333333",
-    "--accent-color": "#D8FF5F"
-  },
-  "classic-professional": {
-    "--bg-color": "#FDFDF5",
-    "--card-bg": "#fff",
-    "--card-text": "#3D3635",
-    "--accent-color": "#00509D"
-  },
-  "lavender-haze": {
-    "--bg-color": "#F8F4FF",
-    "--card-bg": "#DCD7E8",
-    "--card-text": "#4A435E",
-    "--accent-color": "#8C7DDA"
-  },
-  "coffee-shop": {
-    "--bg-color": "#E6DBCF",
-    "--card-bg": "#F2EFE8",
-    "--card-text": "#4A3628",
-    "--accent-color": "#8C593C"
-  },
-  "vibrant-bold": {
-    "--bg-color": "#222831",
-    "--card-bg": "#94B0DA",
-    "--card-text": "#EEEEEE",
-    "--accent-color": "#FF847C"
-  },
-  "greyscale": {
-    "--bg-color": "#FFFFFF",
-    "--card-bg": "#DDDDDD",
-    "--card-text": "#111111",
-    "--accent-color": "#555555"
-  },
-  "default": {
-    "--bg-color": "#f9fafb",
-    "--card-bg": "#fff",
-    "--card-text": "#1f2937",
-    "--accent-color": "#3b82f6"
-  }
-};
-
-function applyTheme(theme) {
-  const vars = themeVars[theme] || themeVars["default"];
-  console.log("Applying theme:", theme, vars); // <-- Add this log
-  Object.entries(vars).forEach(([key, value]) => {
-    document.documentElement.style.setProperty(key, value);
-    console.log(`Set CSS variable ${key} to ${value}`); // <-- Add this log
-  });
-  localStorage.setItem("selectedTheme", theme);
-
-  // Special handling for gradient backgrounds
-  if (vars["--bg-color"] && vars["--bg-color"].startsWith("linear-gradient")) {
-    document.body.style.background = vars["--bg-color"];
-    console.log("Set body background to gradient:", vars["--bg-color"]);
-  } else {
-    document.body.style.background = "";
-  }
-}
-
-// Theme switcher change event
-themeSwitcher.addEventListener("change", (e) => {
-  applyTheme(e.target.value);
-});
-
-// Load theme on page load
-const savedTheme = localStorage.getItem("selectedTheme") || "default";
-themeSwitcher.value = savedTheme;
-applyTheme(savedTheme);
-
-// Edit iCal Feed button logic
-const editInputsBtn = document.getElementById("editInputsBtn");
-editInputsBtn.addEventListener("click", () => {
-  settingsPopup.classList.add("hidden");
-  scheduleSetupSection.classList.remove("hidden");
-  dashboardSection.classList.add("hidden");
-});
-

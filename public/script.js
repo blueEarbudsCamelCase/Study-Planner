@@ -1,4 +1,4 @@
- const dashboardSection = document.getElementById("dashboardSection");
+const dashboardSection = document.getElementById("dashboardSection");
  const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
 
   // Define fetchIcalFeed globally
@@ -94,7 +94,6 @@ if (dashboardContainer) {
   }
   
   window.parseIcalFeed = function parseIcalFeed(data) {
-    console.log("parseIcalFeed called with data:", data);
     if (!data) {
       console.error("No data provided to parseIcalFeed.");
       return;
@@ -205,9 +204,11 @@ if (dashboardContainer) {
   let baseTimer = document.querySelector('.base-timer')
   
   startStudyBtn.addEventListener("click", () => {
-    dashboardSection.classList.add("hidden"); // Hide the dashboard section
-    studyScreen.classList.remove("hidden"); // Show the study setup screen
+    dashboardSection.classList.add("hidden");
+    studyScreen.classList.remove("hidden");
     loadStudyTasks();
+    // Add this line for debugging:
+    document.getElementById('studyPlannerSection').innerHTML += '<div style="color:red;">Study Planner Section is visible</div>';
   });
   
   tutorialBtn.addEventListener('click', () => {
@@ -821,7 +822,6 @@ backToDashboardBtn.addEventListener("click", () => {
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
-
   
   const runScreenTasks = document.getElementById("runScreenTasks")
   

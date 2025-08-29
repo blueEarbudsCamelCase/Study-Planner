@@ -81,18 +81,10 @@
 <div id="themesPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full flex flex-col">
     <h2 class="text-lg font-bold text-center mb-4">Choose a Theme</h2>
+    <!--no js to back this up yet, will come later. remind me -->
     <select id="themeSwitcher" class="w-full p-2 rounded border mb-4">
       <option value="default">Default</option>
-      <option value="focus-mode">Focus Mode</option>
-      <option value="sunset-gradient">Sunset Gradient</option>
-      <option value="deep-ocean">Deep Ocean</option>
-      <option value="forest-retreat">Forest Retreat</option>
-      <option value="highlighter-pop">Highlighter Pop</option>
-      <option value="classic-professional">Classic & Professional</option>
-      <option value="lavender-haze">Lavender Haze</option>
-      <option value="coffee-shop">Coffee Shop</option>
-      <option value="vibrant-bold">Vibrant & Bold</option>
-      <option value="greyscale">Greyscale</option>
+
     </select>
     <div class="flex justify-end mt-4">
       <button id="closeThemesBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
@@ -174,7 +166,14 @@
   <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
     <h2 class="text-lg font-bold text-center mb-4">Task Details</h2>
     <label class="block mb-2">Estimated Time (minutes):</label>
+    <!--i'd like to add some buttons here that have common times, 5, 10, 15, 20. put them on the same line as the text input. they should be small and square.-->
     <input type="number" id="taskTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
+    <div class="flex space-x-2 mb-4">
+  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=5;">5</button>
+  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=10;">10</button>
+  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=15;">15</button>
+  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=20;">20</button>
+</div>
 
     <label class="block mb-2">Zone:</label>
     <select id="taskZone" class="w-full border border-gray-300 rounded p-2 mb-4">

@@ -397,12 +397,15 @@ backToDashboardBtn.addEventListener("click", () => {
   timeSelected = false;
   zoneSelected = false;
 
-  // Fix: Add event listeners to time buttons to trigger tryAutoSave
+  // Add event listeners to time buttons to trigger auto-save if zone is already selected
   document.querySelectorAll('.bg-gray-200').forEach(btn => {
     btn.onclick = () => {
       taskTime.value = btn.textContent;
       timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-      tryAutoSave();
+      // If zone is already selected, trigger auto-save
+      if (zoneSelected) {
+        tryAutoSave();
+      }
     };
   });
 

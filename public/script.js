@@ -400,10 +400,12 @@ backToDashboardBtn.addEventListener("click", () => {
   // Add event listeners to time buttons to trigger auto-save if zone is already selected
   document.querySelectorAll('.bg-gray-200').forEach(btn => {
     btn.onclick = () => {
+      console.log('[Time Button Clicked]', btn.textContent);
       taskTime.value = btn.textContent;
       timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-      // If zone is already selected, trigger auto-save
+      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
       if (zoneSelected) {
+        console.log('[Time Button] Triggering tryAutoSave');
         tryAutoSave();
       }
     };
@@ -413,12 +415,14 @@ backToDashboardBtn.addEventListener("click", () => {
   document.querySelectorAll('.zone-btn').forEach(btn => {
     btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
     btn.onclick = () => {
+      console.log('[Zone Button Clicked]', btn.dataset.zone);
       selectedZone = btn.dataset.zone;
       zoneSelected = true;
       document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
       if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
       if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
       if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
       tryAutoSave();
     };
   });
@@ -431,8 +435,10 @@ backToDashboardBtn.addEventListener("click", () => {
 
   // Try to auto-save when both are selected
   function tryAutoSave() {
+    console.log('[tryAutoSave] timeSelected:', timeSelected, 'zoneSelected:', zoneSelected);
     if (timeSelected && zoneSelected) {
       const estimatedTime = parseInt(taskTime.value, 10);
+      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
       if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
         alert("Please enter a valid estimated time.");
         return;
@@ -447,6 +453,7 @@ backToDashboardBtn.addEventListener("click", () => {
         alert("This task would go past the end of the Study.");
         return;
       }
+      console.log('[tryAutoSave] Saving task:', task, estimatedTime, selectedZone);
       addToAgenda(task, estimatedTime, selectedZone);
       task.estimatedTime = estimatedTime;
       task.zone = selectedZone;

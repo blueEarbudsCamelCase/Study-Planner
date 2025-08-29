@@ -445,13 +445,13 @@ backToDashboardBtn.addEventListener("click", () => {
   // Show the popup
   taskPopup.classList.remove("hidden");
 
-  // Close popup when clicking outside
+  // Close popup when clicking outside the inner box
   setTimeout(() => {
     document.addEventListener("mousedown", outsideClickListener);
   }, 0);
 
   function outsideClickListener(e) {
-    if (!taskPopup.contains(e.target)) {
+    if (!taskPopup.querySelector('.bg-white').contains(e.target)) {
       closePopup();
     }
   }

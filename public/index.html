@@ -174,11 +174,11 @@
     </div>
 
     <label class="block mb-2">Zone:</label>
-    <select id="taskZone" class="w-full border border-gray-300 rounded p-2 mb-4">
-      <option value="Independent">Focus</option>
-      <option value="Semi-Collaborative">Semi-Collaborative</option>
-      <option value="Collaborative">Collaborative</option>
-    </select>
+    <div id="zoneButtonGroup" class="flex space-x-2 mb-4">
+  <button type="button" class="zone-btn bg-blue-600 text-white rounded w-32 h-10 font-bold" data-zone="Independent">Focus</button>
+  <button type="button" class="zone-btn bg-green-600 text-white rounded w-32 h-10 font-bold" data-zone="Semi-Collaborative">Semi-Collaborative</button>
+  <button type="button" class="zone-btn bg-red-600 text-white rounded w-32 h-10 font-bold" data-zone="Collaborative">Collaborative</button>
+</div>
 
     <div class="flex justify-end gap-2">
       <button id="cancelTask" class="text-gray-600 hover:underline">Cancel</button>

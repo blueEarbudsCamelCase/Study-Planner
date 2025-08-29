@@ -162,7 +162,7 @@
 <!-- Task Popup -->
 
 <div id="taskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full relative">
     <h2 class="text-lg font-bold text-center mb-4">Task Details</h2>
     <label class="block mb-2">Estimated Time (minutes):</label>
     <input type="number" id="taskTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
@@ -179,14 +179,9 @@
 
     <label class="block mb-2">Zone:</label>
     <div id="zoneButtonGroup" class="flex space-x-2 mb-4">
-  <button type="button" class="zone-btn bg-blue-600 text-white rounded w-32 h-10 font-bold" data-zone="Independent">Focus</button>
-  <button type="button" class="zone-btn bg-green-600 text-white rounded w-32 h-10 font-bold" data-zone="Semi-Collaborative">Semi-Collaborative</button>
-  <button type="button" class="zone-btn bg-red-600 text-white rounded w-32 h-10 font-bold" data-zone="Collaborative">Collaborative</button>
-</div>
-
-    <div class="flex justify-end gap-2">
-      <button id="cancelTask" class="text-gray-600 hover:underline">Cancel</button>
-      <button id="saveTask" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+      <button type="button" class="zone-btn bg-blue-600 text-white rounded w-32 h-10 text-xs font-bold" data-zone="Independent">Focus</button>
+      <button type="button" class="zone-btn bg-green-600 text-white rounded w-32 h-10 text-xs font-bold" data-zone="Semi-Collaborative">Semi-Collaborative</button>
+      <button type="button" class="zone-btn bg-red-600 text-white rounded w-32 h-10 text-xs font-bold" data-zone="Collaborative">Collaborative</button>
     </div>
   </div>
 </div>

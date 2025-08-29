@@ -102,7 +102,6 @@ if (dashboardContainer) {
   
     const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
     const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
-    console.log("Completed Task Keys:", completedTaskKeys);
   
     const events = [];
     const lines = data.split('\n');
@@ -139,7 +138,6 @@ if (dashboardContainer) {
   
         if (!completedTaskKeys.includes(taskKey) && eventStartDate >= sevenDaysAgo) {
           events.push(event);
-          console.log("Event added:", event);
         } else {
           console.log("Event skipped (either completed or too old):", event);
         }
@@ -147,7 +145,6 @@ if (dashboardContainer) {
       }
     });
   
-    console.log("Filtered Events:", events);
     localStorage.setItem("icalTasks", JSON.stringify(events));
   
     // Ensure completedTasks is preserved

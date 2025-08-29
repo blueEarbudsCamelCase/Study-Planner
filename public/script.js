@@ -397,6 +397,15 @@ backToDashboardBtn.addEventListener("click", () => {
   timeSelected = false;
   zoneSelected = false;
 
+  // Fix: Add event listeners to time buttons to trigger tryAutoSave
+  document.querySelectorAll('.bg-gray-200').forEach(btn => {
+    btn.onclick = () => {
+      taskTime.value = btn.textContent;
+      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+      tryAutoSave();
+    };
+  });
+
   // Highlight default button (none selected)
   document.querySelectorAll('.zone-btn').forEach(btn => {
     btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');

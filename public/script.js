@@ -12,7 +12,6 @@ function fetchIcalFeed() {
   return fetch(`/proxy?url=${encodeURIComponent(icalUrl)}`)
     .then(response => response.text())
     .then(data => {
-      console.log("Raw iCal Data: ", data); // Log the raw iCal data
       if (!data) {
         console.error("No data received from the iCal feed.");
         throw new Error("No data received from the iCal feed.");
@@ -160,7 +159,7 @@ if (dashboardContainer) {
   const settingsBtn = document.getElementById("settingsBtn");
   const settingsPopup = document.getElementById("settingsPopup");
   const closeSettingsBtn = document.getElementById("closeSettingsBtn");
-  const darkModeToggle = document.getElementById("darkModeToggle");
+  //const darkModeToggle = document.getElementById("darkModeToggle");
   
   // Open the settings popup
   settingsBtn.addEventListener("click", () => {
@@ -174,7 +173,7 @@ if (dashboardContainer) {
     settingsPopup.style.visibility = "hidden"; // Ensure it's hidden
   });
   
-  // Toggle dark mode
+  /* Toggle dark mode
   darkModeToggle.addEventListener("change", () => {
     if (darkModeToggle.checked) {
       document.body.classList.add("dark-mode");
@@ -189,7 +188,7 @@ if (dashboardContainer) {
   if (localStorage.getItem("darkMode") === "enabled") {
     document.body.classList.add("dark-mode");
     darkModeToggle.checked = true;
-  }
+  }*/
   
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');

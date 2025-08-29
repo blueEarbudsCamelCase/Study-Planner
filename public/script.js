@@ -1,7 +1,7 @@
 const dashboardSection = document.getElementById("dashboardSection");
- const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
+const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
 
-  // Define fetchIcalFeed globally
+// Define fetchIcalFeed globally
 function fetchIcalFeed() {
   const icalUrl = localStorage.getItem('icalFeedUrl');
   if (!icalUrl) {
@@ -137,6 +137,7 @@ if (dashboardContainer) {
   
         if (!completedTaskKeys.includes(taskKey) && eventStartDate >= sevenDaysAgo) {
           events.push(event);
+          console.log("Event added:", event);
         } else {
           console.log("Event skipped (either completed or too old):", event);
         }
@@ -155,7 +156,7 @@ if (dashboardContainer) {
   const settingsBtn = document.getElementById("settingsBtn");
   const settingsPopup = document.getElementById("settingsPopup");
   const closeSettingsBtn = document.getElementById("closeSettingsBtn");
-  //const darkModeToggle = document.getElementById("darkModeToggle");
+  const darkModeToggle = document.getElementById("darkModeToggle");
   
   // Open the settings popup
   settingsBtn.addEventListener("click", () => {
@@ -169,7 +170,7 @@ if (dashboardContainer) {
     settingsPopup.style.visibility = "hidden"; // Ensure it's hidden
   });
   
-  /* Toggle dark mode
+  // Toggle dark mode
   darkModeToggle.addEventListener("change", () => {
     if (darkModeToggle.checked) {
       document.body.classList.add("dark-mode");
@@ -184,7 +185,7 @@ if (dashboardContainer) {
   if (localStorage.getItem("darkMode") === "enabled") {
     document.body.classList.add("dark-mode");
     darkModeToggle.checked = true;
-  }*/
+  }
   
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');
@@ -204,11 +205,9 @@ if (dashboardContainer) {
   let baseTimer = document.querySelector('.base-timer')
   
   startStudyBtn.addEventListener("click", () => {
-    dashboardSection.classList.add("hidden");
-    studyScreen.classList.remove("hidden");
+    dashboardSection.classList.add("hidden"); // Hide the dashboard section
+    studyScreen.classList.remove("hidden"); // Show the study setup screen
     loadStudyTasks();
-    // Add this line for debugging:
-    document.getElementById('studyPlannerSection').innerHTML += '<div style="color:red;">Study Planner Section is visible</div>';
   });
   
   tutorialBtn.addEventListener('click', () => {
@@ -532,7 +531,6 @@ backToDashboardBtn.addEventListener("click", () => {
   
   function loadStudyTasks() {
     const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
-    console.log("Tasks from localStorage:", icalTasks); // Log tasks from localStorage
     const tasksList = document.getElementById("studyTasks");
     tasksList.innerHTML = ""; // Clear the list
   
@@ -656,7 +654,6 @@ backToDashboardBtn.addEventListener("click", () => {
     setTimeout(() => {
       taskElement.parentElement.removeChild(taskElement);
     }, 500); // Wait for the animation to complete
-    console.log("Task Element:", taskElement);
   } else {
     // For runScreen: animate the current task card
     const currentTaskDiv = document.querySelector('#runScreenTasks .current-task > div');
@@ -822,6 +819,7 @@ backToDashboardBtn.addEventListener("click", () => {
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
+
   
   const runScreenTasks = document.getElementById("runScreenTasks")
   

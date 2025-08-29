@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="styles.css"> 
 </head>
 <body class="bg-gray-100 font-sans">
-<!-- Schedule Setup Section --> 
+<!-- Schedule Setup Section -->
 <div id="scheduleSetupSection" class="hidden min-h-screen flex flex-col items-center justify-center p-8">
   <form id="scheduleForm" class="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl">
     <h2 class="text-2xl font-bold mb-6">Input your iCal Feed:</h2>
@@ -53,46 +53,40 @@
 
 <!-- Settings Popup -->
 <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full flex flex-col">
+  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
     <h2 class="text-lg font-bold text-center mb-4">Settings</h2>
+    
+    <!-- Dark Mode Toggle -->
+    <div class="mb-4">
+      <label class="flex items-center">
+        <input type="checkbox" id="darkModeToggle" class="mr-2">
+        <span>Enable Dark Mode</span>
+      </label>
+    </div>
 
-    <!-- Themes Button -->
-    <button id="themesBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4 w-full">
-      Themes
-    </button>
-    <button id="editInputsBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 w-full">
-      Edit iCal Feed
-    </button>
-
+    <!-- Clear User Data Button -->
+    <div class="mb-4">
+      <button onclick="localStorage.clear();location.reload();" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+        Edit User Data
+      </button>
+    </div>
     <!-- Contact Information -->
-    <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
-      <div>Contact: <a href="mailto:meridith.snair28@na.oneschoolglobal.com" class="text-blue-500 hover:underline">support@studyplanner.com</a></div>
+    <div class="mb-4">
+      <h3 class="font-bold text-md mb-2">Bugs or Issues?</h3>
+      <p class="text-sm text-gray-600">For bugs or suggestions, email Meridith Snair.</p>
     </div>
 
     <!-- Close Button -->
-    <div class="flex justify-end mt-4">
+    <div class="flex justify-end">
       <button id="closeSettingsBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
         Close
       </button>
     </div>
   </div>
 </div>
-<!-- Themes Popup -->
-<div id="themesPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full flex flex-col">
-    <h2 class="text-lg font-bold text-center mb-4">Choose a Theme</h2>
-    <!--no js to back this up yet, will come later. remind me -->
-    <select id="themeSwitcher" class="w-full p-2 rounded border mb-4">
-      <option value="default">Default</option>
-
-    </select>
-    <div class="flex justify-end mt-4">
-      <button id="closeThemesBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-        Close
-      </button>
     </div>
   </div>
-</div> 
+    </div>
 
  <!-- === Study Planner Section === -->
 <section id="studyPlannerSection" class="hidden p-6">
@@ -100,11 +94,16 @@
   <div class="flex space-x-4">
     <!-- Tasks List -->
     <div class="w-1/2">
-      <ul id="studyTasks"></ul>
+      <h3 class="font-bold text-lg mb-2">Tasks</h3>
+      <ul id="studyTasks" class="list-disc list-inside text-base space-y-1"></ul>
     </div>
+
     <!-- Study Plan Display -->
     <div class="w-1/2">
-      <div id="studyPlanDisplay"></div>
+      <h3 class="font-bold text-lg mb-2">Your Study Plan:</h3>
+      <div id="studyPlanDisplay" class="p-4 bg-gray-100 rounded shadow-md">
+        <p class="text-gray-500 italic">No tasks scheduled yet.</p>
+      </div>
     </div>
   </div>
 
@@ -166,14 +165,13 @@
   <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
     <h2 class="text-lg font-bold text-center mb-4">Task Details</h2>
     <label class="block mb-2">Estimated Time (minutes):</label>
-    <!--i'd like to add some buttons here that have common times, 5, 10, 15, 20. put them on the same line as the text input. they should be small and square.-->
     <input type="number" id="taskTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
     <div class="flex space-x-2 mb-4">
-  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=5;">5</button>
-  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=10;">10</button>
-  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=15;">15</button>
-  <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=20;">20</button>
-</div>
+      <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=5;">5</button>
+      <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=10;">10</button>
+      <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=15;">15</button>
+      <button type="button" class="bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300" onclick="document.getElementById('taskTime').value=20;">20</button>
+    </div>
 
     <label class="block mb-2">Zone:</label>
     <select id="taskZone" class="w-full border border-gray-300 rounded p-2 mb-4">

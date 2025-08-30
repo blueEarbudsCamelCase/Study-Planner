@@ -205,7 +205,6 @@ if (dashboardContainer) {
   let baseTimer = document.querySelector('.base-timer')
   
   startStudyBtn.addEventListener("click", () => {
-    console.log("Start Study button clicked");
     dashboardSection.classList.add("hidden"); // Hide the dashboard section
     studyScreen.classList.remove("hidden"); // Show the study setup screen
     loadStudyTasks();

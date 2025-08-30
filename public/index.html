@@ -55,13 +55,12 @@
   <!-- Dashboard Content -->
   <div class="flex-grow container mx-auto px-4 py-8">
     <div class="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8 h-full items-stretch">
-      <iframe
+      <div class="bg-white shadow-2xl rounded-2xl w-full lg:w-1/2 p-8 flex flex-col">
+        <iframe
           src='https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled'
           class="w-full flex-grow rounded-xl"
           scrolling='yes'>
         </iframe>
-      <div class="bg-white shadow-2xl rounded-2xl w-full lg:w-1/2 p-8 flex flex-col">
-        <!-- You can add your iframe here if needed -->
       </div>
 
       <!-- Tasks Section -->
@@ -71,10 +70,6 @@
           <!-- Keep your existing tasks and buttons here -->
           <button id="startStudyBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 transition duration-300 mb-4">
             Plan Your Study
-          </button>
-          <!-- Settings Button and Popup -->
-          <button id="settingsBtn" class="absolute top-4 right-4 bg-gray-500 text-white p-2 rounded-full hover:bg-gray-600 transition">
-            <i class="fas fa-cog"></i>
           </button>
 
           <!-- Settings Popup -->
@@ -114,6 +109,11 @@
       </div>
     </div>
   </div>
+  <!-- Place startStudyBtn here, outside the card -->
+  <button id="startStudyBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 transition duration-300 mb-4">
+    Plan Your Study
+  </button>
+</div>
 </div>
 
  <!-- === Study Planner Section === -->

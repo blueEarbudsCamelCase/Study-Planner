@@ -133,13 +133,13 @@ body.dark-mode #studyPlanDisplay button:hover {
 background-color: #2d3748; /* Slightly darker on hover */
 }
 
-body.dark-mode #time-button {
+body.dark-mode time-btn {
 background-color: #4a5568; /* Dark background */
 color: #f7fafc; /* Light text */
 border: 1px solid #4a5568; /* Match border to background */
 }
 
-body.dark-mode #time-button:hover {
+body.dark-mode time-btn:hover {
 background-color: #2d3748; /* Slightly darker on hover */
 }
 

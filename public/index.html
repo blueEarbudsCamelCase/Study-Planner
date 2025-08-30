@@ -56,11 +56,11 @@
   <div id="dashboardContainer" class="flex-grow container mx-auto px-4 py-8 flex flex-col justify-between h-[calc(100vh-96px)]">
     <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4">
       <!-- Iframe Section -->
-      <div class="bg-white shadow-2xl rounded-2xl p-8" style="width:400px; height:600px;">
+      <div class="bg-white shadow-2xl rounded-2xl p-8 w-full h-full" style="width:400px; height:600px;">
         <h3 class="text-xl font-bold mb-4">Bookings</h3>
         <iframe
           src='https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled'
-          class="w-full h-full rounded-xl"
+          class="w-full rounded-xl"
           scrolling='yes'>
         </iframe>
       </div>
@@ -69,6 +69,7 @@
       <div class="bg-white shadow-2xl rounded-2xl p-8 flex flex-col" style="width:400px; height:600px;">
         <h3 class="text-xl font-bold mb-4">Today</h3>
         <!-- Place your tasks content here -->
+      </div>
         <!-- Settings Popup (leave as is) -->
         <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
@@ -104,7 +105,7 @@
         </div>
       </div>
     </div>
-  </div>
+  
     <!-- Start Study Button -->
     <button id="startStudyBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 transition duration-300 mt-0">
       Plan Your Study

@@ -2,10 +2,8 @@
   position: relative; /* Ensure the section is the positioning context */
 }
 #dashboardContainer {
-margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
-padding: 2rem; /* Add padding inside the container */
+margin: 0.5rem auto; /* Center the container horizontally and add vertical spacing */
 }
-
 .button {
 display: inline-block; /* Ensure buttons are inline-block */
 padding: 0.75rem 1.5rem; /* Add padding for buttons */
@@ -223,10 +221,9 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   background-color: #38a169; /* Green background */
   color: #ffffff; /* White text */
   padding: 0.75rem 1.5rem; /* Add padding */
-  font-size: 1rem; /* Standard font size */
+  font-size: 1.25rem; /* Standard font size */
   font-weight: 600; /* Semi-bold text */
   border: none; /* Remove default border */
-  border-radius: 8px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
  }

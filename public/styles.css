@@ -2,14 +2,12 @@
   position: relative; /* Ensure the section is the positioning context */
 }
 #dashboardContainer {
-max-width: 800px; /* Set a maximum width for the container */
-margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
-padding: 2rem; /* Add padding inside the container */
-background-color: #ffffff; /* White background */
-border-radius: 12px; /* Rounded corners */
-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
-border: 1px solid #e2e8f0; /* Light border for a clean look */
-}
+  margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
+  display: flex;           /* Enable flexbox */
+  justify-content: center; /* Center cards horizontally */
+  align-items: center;     /* Center cards vertically */
+  flex-wrap: wrap;         /* Allow cards to wrap if needed */
+  min-height: 60vh;        /* Optional: vertically center within viewport */
 
 .button {
 display: inline-block; /* Ensure buttons are inline-block */

@@ -40,16 +40,42 @@
 </div>
 
   <!-- Dashboard Section -->
-  <div id="dashboardSection" class="min-h-screen p-8 relative">
-    <div id="dashboardContainer" class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-300">
-      <h1 class="text-2xl font-bold mb-4 text-center">Welcome to Your Dashboard</h1>
-      <div class="flex flex-col items-center space-y-4">
-    <button id="startStudyBtn" class="bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition mb-4">
-  Plan Your Study</button>
-  <!-- Settings Button -->
-<button id="settingsBtn" class="absolute top-4 right-4 bg-gray-500 text-white p-2 rounded-full hover:bg-gray-600 transition">
-  <i class="fas fa-cog"></i> <!-- Font Awesome Gear Icon -->
-</button>
+    <div id="dashboardSection" style="padding-top:2rem;">
+      <div style="position:relative;">
+        <button id="settingsBtn" style="position:absolute; top:0; right:0; z-index:10;" aria-label="Settings">
+          <span class="material-icons">settings</span>
+        </button>
+        <h1 style="text-align:center; font-size:2rem; font-weight:bold; margin-bottom:2rem;">Welcome to your Dashboard!</h1>
+        <div style="display:flex; justify-content:center; gap:2rem;">
+          <!-- Left Box: Microsoft Form Placeholder -->
+          <div id="dashboardLeftBox" style="background:#fff; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,0.15); border:1px solid #e2e8f0; padding:2rem; min-width:350px; max-width:450px; min-height:400px; display:flex; align-items:center; justify-content:center;">
+            <div class="bg-white shadow-2xl rounded-2xl w-full p-0 flex flex-col" style="height:100%; width:100%;">
+              <iframe
+                src="https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled"
+                class="w-full flex-grow rounded-xl"
+                style="min-height:350px; border:none;"
+                scrolling="yes">
+              </iframe>
+            </div>
+          </div>
+          <!-- Right Box: Today Task List -->
+          <div id="dashboardRightBox" style="background:#fff; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,0.15); border:1px solid #e2e8f0; padding:2rem; min-width:350px; max-width:450px; min-height:400px; position:relative;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+              <h2 style="font-size:1.25rem; font-weight:600; margin:0;">Today</h2>
+              <div>
+                <button id="refreshTasksBtn" title="Refresh" style="background:none; border:none; cursor:pointer; font-size:1.5rem; margin-right:0.5rem;">
+                  <span class="material-icons">refresh</span>
+                </button>
+                <button id="addTaskBtn" title="Add Task" style="background:#38a169; color:#fff; border:none; border-radius:50%; width:32px; height:32px; font-size:1.5rem; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;">
+                  <span class="material-icons">add</span>
+                </button>
+              </div>
+            </div>
+            <ul id="studyTasks" style="list-style:none; padding:0; margin:0; max-height:320px; overflow-y:auto;"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
 <!-- Settings Popup -->
 <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

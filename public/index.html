@@ -54,19 +54,19 @@
 
   <!-- Dashboard Content -->
   <div id="dashboardContainer" class="flex-grow container mx-auto px-4 py-8 flex flex-col justify-between h-[calc(100vh-96px)]">
-    <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4">
+    <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4 min-h-0">
       <!-- Iframe Section -->
-      <div class="bg-white shadow-2xl rounded-2xl p-8 w-full h-full" style="width:800px; height:800px;">
+      <div class="bookings-iframe-container bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
         <h3 class="text-xl font-bold mb-4">Bookings</h3>
         <iframe
           src='https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled'
-          class="w-full h-full rounded-xl"
+          class="w-full h-full rounded-xl flex-1"
           scrolling='yes'>
         </iframe>
       </div>
 
       <!-- Tasks Section -->
-      <div class="bg-white shadow-2xl rounded-2xl p-8 flex flex-col" style="width:400px; height:600px;">
+      <div class="bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
         <!-- Place your tasks content here -->
       </div>
         <!-- Settings Popup (leave as is) -->

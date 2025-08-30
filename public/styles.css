@@ -1,16 +1,16 @@
 #dashboardSection {
   position: relative; /* Ensure the section is the positioning context */
 }
-
-/* the missing end bracket here is intentional. for some reason this makes the startStudyBtn bigger and makes the settings button not oblong. can you fix this?*/
 #dashboardContainer {
-  margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
-  display: flex;           /* Enable flexbox */
-  justify-content: center; /* Center cards horizontally */
-  align-items: center;     /* Center cards vertically */
-  flex-wrap: wrap;         /* Allow cards to wrap if needed */
-  min-height: 60vh;        /* Optional: vertically center within viewport */
+max-width: 800px; /* Set a maximum width for the container */
+margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
+padding: 2rem; /* Add padding inside the container */
+background-color: #ffffff; /* White background */
+border-radius: 12px; /* Rounded corners */
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+border: 1px solid #e2e8f0; /* Light border for a clean look */
 }
+
 .button {
 display: inline-block; /* Ensure buttons are inline-block */
 padding: 0.75rem 1.5rem; /* Add padding for buttons */
@@ -228,9 +228,10 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   background-color: #38a169; /* Green background */
   color: #ffffff; /* White text */
   padding: 0.75rem 1.5rem; /* Add padding */
-  font-size: 1.25rem; /* Standard font size */
+  font-size: 1rem; /* Standard font size */
   font-weight: 600; /* Semi-bold text */
   border: none; /* Remove default border */
+  border-radius: 8px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
  }

@@ -54,9 +54,10 @@
 
   <!-- Dashboard Content -->
   <div class="flex-grow container mx-auto px-4 py-8 flex flex-col">
-    <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow">
+    <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4">
       <!-- Iframe Section -->
       <div class="bg-white shadow-2xl rounded-2xl p-8" style="width:400px; height:600px;">
+        <h3 class="text-xl font-bold mb-4">Bookings</h3>
         <iframe
           src='https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled'
           class="w-full h-full rounded-xl"
@@ -65,42 +66,41 @@
       </div>
 
       <!-- Tasks Section -->
-      <div id="dashboardContainer" class="bg-white shadow-2xl rounded-2xl p-8 flex flex-col min-h-[500px] h-full">
-        <div class="bg-white shadow-2xl rounded-2xl p-8" style="width:400px; height:600px;">
+      <div id="dashboardContainer" class="bg-white shadow-2xl rounded-2xl p-8 flex flex-col" style="width:400px; height:600px;">
+        <h3 class="text-xl font-bold mb-4">Today</h3>
+        <!-- Place your tasks content here -->
+        <!-- Settings Popup (leave as is) -->
+        <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+            <h2 class="text-lg font-bold text-center mb-4">Settings</h2>
+            
+            <!-- Dark Mode Toggle -->
+            <div class="mb-4">
+              <label class="flex items-center">
+                <input type="checkbox" id="darkModeToggle" class="mr-2">
+                <span>Enable Dark Mode</span>
+              </label>
+            </div>
 
-          <!-- Settings Popup -->
-<div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-bold text-center mb-4">Settings</h2>
-    
-    <!-- Dark Mode Toggle -->
-    <div class="mb-4">
-      <label class="flex items-center">
-        <input type="checkbox" id="darkModeToggle" class="mr-2">
-        <span>Enable Dark Mode</span>
-      </label>
-    </div>
+            <!-- Clear User Data Button -->
+            <div class="mb-4">
+              <button onclick="localStorage.clear();location.reload();" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Edit User Data
+              </button>
+            </div>
+            <!-- Contact Information -->
+            <div class="mb-4">
+              <h3 class="font-bold text-md mb-2">Bugs or Issues?</h3>
+              <p class="text-sm text-gray-600">For bugs or suggestions, email Meridith Snair.</p>
+            </div>
 
-    <!-- Clear User Data Button -->
-    <div class="mb-4">
-      <button onclick="localStorage.clear();location.reload();" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-        Edit User Data
-      </button>
-    </div>
-    <!-- Contact Information -->
-    <div class="mb-4">
-      <h3 class="font-bold text-md mb-2">Bugs or Issues?</h3>
-      <p class="text-sm text-gray-600">For bugs or suggestions, email Meridith Snair.</p>
-    </div>
-
-    <!-- Close Button -->
-    <div class="flex justify-end">
-      <button id="closeSettingsBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-        Close
-      </button>
-    </div>
-  </div>
-</div>
+            <!-- Close Button -->
+            <div class="flex justify-end">
+              <button id="closeSettingsBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

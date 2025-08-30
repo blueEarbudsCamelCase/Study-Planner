@@ -978,3 +978,44 @@ function updateMinutesLeftDisplay() {
   const minutesLeft = Math.max(60 - totalMinutes, 0);
   minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
 }
+
+const gradeSelect = document.getElementById('gradeSelect');
+const bookingsIframe = document.getElementById('bookingsIframe');
+
+// Save grade selection on form submit
+document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+  const selectedGrade = gradeSelect.value;
+  localStorage.setItem('userGrade', selectedGrade);
+  // ...existing code...
+});
+
+// Set grade selection from localStorage on load
+document.addEventListener('DOMContentLoaded', () => {
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+  }
+  updateIframeSrc(savedGrade || gradeSelect.value);
+});
+
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
+}
+
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}

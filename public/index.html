@@ -22,6 +22,14 @@
         placeholder="https://example.com/calendar.ics"
         class="w-full px-3 py-2 border rounded-md"
       />
+      <div class="mb-4">
+        <label for="gradeSelect" class="block mb-2 font-semibold">Select Your Grade:</label>
+        <select id="gradeSelect" class="w-full px-3 py-2 border rounded-md">
+          <option value="7-8">Grade 7/8</option>
+          <option value="9-10">Grade 9/10</option>
+          <option value="11-12">Grade 11/12</option>
+        </select>
+      </div>
       <p id="icalMessage" class="text-sm text-gray-500 mt-2 hidden">
         No iCal feed saved. Please provide a valid URL.
       </p>
@@ -59,7 +67,8 @@
       <div class="bookings-iframe-container bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
         <h3 class="text-xl font-bold mb-4">Book a Tutorial:</h3>
         <iframe
-          src='https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled'
+          id="bookingsIframe"
+          src="https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled"
           class="w-full h-full rounded-xl flex-1"
           scrolling='yes'>
         </iframe>

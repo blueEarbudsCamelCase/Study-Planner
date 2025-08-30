@@ -1,6 +1,8 @@
 #dashboardSection {
   position: relative; /* Ensure the section is the positioning context */
 }
+
+/* the missing end bracket here is intentional. for some reason this makes the startStudyBtn bigger and makes the settings button not oblong. can you fix this?*/
 #dashboardContainer {
   margin: 2rem auto; /* Center the container horizontally and add vertical spacing */
   display: flex;           /* Enable flexbox */
@@ -8,7 +10,7 @@
   align-items: center;     /* Center cards vertically */
   flex-wrap: wrap;         /* Allow cards to wrap if needed */
   min-height: 60vh;        /* Optional: vertically center within viewport */
-
+}
 .button {
 display: inline-block; /* Ensure buttons are inline-block */
 padding: 0.75rem 1.5rem; /* Add padding for buttons */
@@ -226,10 +228,9 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   background-color: #38a169; /* Green background */
   color: #ffffff; /* White text */
   padding: 0.75rem 1.5rem; /* Add padding */
-  font-size: 1rem; /* Standard font size */
+  font-size: 1.25rem; /* Standard font size */
   font-weight: 600; /* Semi-bold text */
   border: none; /* Remove default border */
-  border-radius: 8px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
  }

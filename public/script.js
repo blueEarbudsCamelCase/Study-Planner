@@ -194,11 +194,7 @@ if (dashboardContainer) {
   const backToDashboardBtn = document.getElementById("backToDashboardBtn");
   const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
   const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
-  const tutorialBtn = document.getElementById('tutorialBtn');
   const mapButton = document.getElementById('mapButton');
-  const tutorialPopup = document.getElementById('tutorialPopup');
-  const cancelTutorial = document.getElementById('cancelTutorial');
-  const saveTutorial = document.getElementById('saveTutorial');
   const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
   const cancelMapButton = document.getElementById('cancelMapButton');
   const saveMapButton = document.getElementById('saveMapButton');
@@ -208,88 +204,6 @@ if (dashboardContainer) {
     dashboardSection.classList.add("hidden"); // Hide the dashboard section
     studyScreen.classList.remove("hidden"); // Show the study setup screen
     loadStudyTasks();
-  });
-  
-  tutorialBtn.addEventListener('click', () => {
-    tutorialPopup.classList.remove('hidden');
-  });
-  
-  cancelTutorial.addEventListener('click', () => {
-    tutorialPopup.classList.add('hidden');
-  });
-  
-  saveTutorial.addEventListener('click', () => {
-    const startTimeInput = document.getElementById('tutorialStart').value; // Get the start time
-    const durationInput = parseInt(document.getElementById('tutorialDuration').value, 10); // Get the duration in minutes
-  
-    if (!startTimeInput || isNaN(durationInput) || durationInput <= 0) {
-      alert("Please enter a valid start time and duration.");
-      return;
-    }
-  
-    // Parse the start time into a Date object
-    const [hours, minutes] = startTimeInput.split(':').map(Number);
-    const startTime = new Date();
-    startTime.setHours(hours, minutes, 0, 0); // Set the start time
-  
-    // Calculate the end time
-    const endTime = new Date(startTime);
-    endTime.setMinutes(endTime.getMinutes() + durationInput);
-  
-    // Check if there are existing tasks
-    const studyPlanDisplayTasks = Array.from(studyPlanDisplay.children);
-    let studyStartTime;
-  
-    if (studyPlanDisplayTasks.length === 0) {
-      // If this is the first task, start 1 minute from now
-      studyStartTime = new Date();
-      studyStartTime.setMinutes(studyStartTime.getMinutes() + 1);
-    } else {
-      // If there are previous tasks, start after the last task's end time
-      const lastTask = studyPlanDisplayTasks[studyPlanDisplayTasks.length - 1];
-      const lastTaskEndTime = new Date(lastTask.dataset.endTime); // Retrieve the end time from the dataset
-      studyStartTime = new Date(lastTaskEndTime);
-    }
-  
-    // Ensure the tutorial task's start time is within the study session
-    const studyEndTime = new Date(studyStartTime);
-    studyEndTime.setMinutes(studyStartTime.getMinutes() + 60);
-  
-    if (startTime < studyStartTime || startTime >= studyEndTime) {
-      alert("The start time of this task is outside the current study session.");
-      return;
-    }
-  
-    if (endTime > studyEndTime) {
-      alert("This task would overlap the study session and cannot be added.");
-      return;
-    }
-  
-    // Calculate the total time if this task is added
-    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-      return sum + taskTime;
-    }, 0);
-  
-    if (currentTotalMinutes + durationInput > 60) {
-      alert("This task would exceed the 60-minute limit for the study plan.");
-      return;
-    }
-  
-    // Create a new tutorial task object
-    const tutorialTask = {
-      summary: "Tutorial",
-      startDate: startTime.toISOString(),
-      estimatedTime: durationInput,
-    };
-  
-    // Add the tutorial task to the studyPlanDisplay
-    addToAgenda(tutorialTask, durationInput, "Independent");
-  
-    // Close the tutorial popup
-    tutorialPopup.classList.add('hidden');
-  
-    console.log(`Tutorial added: Start Time - ${startTime.toLocaleTimeString()}, End Time - ${endTime.toLocaleTimeString()}`);
   });
 
   mapButton.addEventListener("click", () => {

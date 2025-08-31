@@ -123,6 +123,7 @@ body.dark-mode #dashboardContainer,
 body.dark-mode .bookings-iframe-container {
   background-color: #1a202c !important;
   color: #f7fafc !important;
+  border-color: #4a5568;
   border: 1px solid #e2e8f0;
 }
 

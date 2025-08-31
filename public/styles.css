@@ -718,19 +718,36 @@ background-color: #2b6cb0; /* Darker blue on hover */
   overflow: hidden;
   border-radius: 16px;
   box-sizing: border-box;
+  border: 1px solid #e2e8f0; /* Light border for cards and iframe */
 }
 
 .bookings-iframe-container iframe {
   width: 100%;
   height: 100%;
-  border: none;
+  border: 1px solid #e2e8f0; /* Light border for iframe itself */
   display: block;
   border-radius: 16px;
 }
 
-.bookings-iframe-container,
 .bg-white.shadow-2xl.rounded-2xl.p-8.flex-1 {
   min-height: 0; /* Allow flex children to shrink/grow */
   display: flex;
   flex-direction: column;
+  border: 1px solid #e2e8f0; /* Light border for dashboard cards */
+}
+
+body.dark-mode .bg-white.shadow-2xl.rounded-2xl.p-8.flex-1 {
+  background-color: #2d3748 !important;
+  color: #f7fafc !important;
+  border: 1px solid #4a5568 !important; /* Light border in dark mode */
+}
+
+body.dark-mode .bookings-iframe-container {
+  background-color: #1a202c !important;
+  color: #f7fafc !important;
+  border: 1px solid #4a5568 !important; /* Light border in dark mode */
+}
+
+body.dark-mode .bookings-iframe-container iframe {
+  border: 1px solid #4a5568 !important; /* Light border for iframe in dark mode */
 }

@@ -123,13 +123,13 @@ body.dark-mode #dashboardContainer,
 body.dark-mode .bookings-iframe-container {
   background-color: #1a202c !important;
   color: #f7fafc !important;
-  border-color: #4a5568 !important;
+  border: 1px #4a5568 !important;
 }
 
 body.dark-mode .bg-white.shadow-2xl.rounded-2xl.p-8.flex-1 {
   background-color: #2d3748 !important;
   color: #f7fafc !important;
-  border-color: #4a5568 !important;
+  border: #4a5568 !important;
 }
 
 body.dark-mode #dashboardSection h2,
@@ -260,7 +260,7 @@ width: 100%;
 background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 #startStudyBtn {
-  background-color: #38a169; /* Green background */
+  background-color: #38a169 !important; /* Green background */
   color: #ffffff; /* White text */
   padding: 0.75rem 1.5rem; /* Add padding */
   font-size: 1.25rem; /* Standard font size */
@@ -271,7 +271,7 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
  }
 
 #startStudyBtn:hover {
-  background-color: #2f855a; /* Darker green on hover */
+  background-color: #2f855a !important; /* Darker green on hover */
 }
 
 #studyTasks {

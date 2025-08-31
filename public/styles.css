@@ -672,8 +672,6 @@ background-color: #2b6cb0; /* Darker blue on hover */
 /* Ensure the Bookings iframe stays inside its container */
 .bookings-iframe-container {
   position: relative;
-  width: 400px;
-  height: 600px;
   overflow: hidden;
   border-radius: 16px;
   box-sizing: border-box;

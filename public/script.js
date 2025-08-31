@@ -186,7 +186,7 @@ if (dashboardContainer) {
     document.body.classList.add("dark-mode");
     darkModeToggle.checked = true;
   }
-  
+  const runButton = document.getElementById("runButton");
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');
   const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
@@ -391,8 +391,6 @@ backToDashboardBtn.addEventListener("click", () => {
     document.removeEventListener("mousedown", outsideClickListener);
   }
 }
- 
-  const runButton = document.getElementById("runButton");
   
   function runButtonColorCheck() {
   

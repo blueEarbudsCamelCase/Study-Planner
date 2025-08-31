@@ -120,7 +120,12 @@ color: #63b3ed; /* Lighter blue for links */
 /* Dark Mode Styles for Dashboard Section */
 body.dark-mode #dashboardSection,
 body.dark-mode #dashboardContainer,
-body.dark-mode .bookings-iframe-container,
+body.dark-mode .bookings-iframe-container {
+  background-color: #1a202c !important;
+  color: #f7fafc !important;
+  border-color: #4a5568 !important;
+}
+
 body.dark-mode .bg-white.shadow-2xl.rounded-2xl.p-8.flex-1 {
   background-color: #2d3748 !important;
   color: #f7fafc !important;
@@ -147,15 +152,10 @@ body.dark-mode #dashboardSection .shadow-2xl {
 }
 
 body.dark-mode #dashboardSection select,
-body.dark-mode #dashboardSection input,
-body.dark-mode #dashboardSection button {
-  background-color: #4a5568 !important;
-  color: #f7fafc !important;
-  border-color: #4a5568 !important;
-}
-
-body.dark-mode #dashboardSection button:hover {
-  background-color: #2d3748 !important;
+body.dark-mode #dashboardSection input {
+  background-color: #4a5568;
+  color: #f7fafc;
+  border-color: #4a5568;
 }
 /* Dark Mode Styles for Task Buttons */
 body.dark-mode #studyPlanDisplay button {

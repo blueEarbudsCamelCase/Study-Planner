@@ -932,3 +932,48 @@ if (gradeSelect) {
     updateIframeSrc(grade);
   });
 }
+
+// --- Task List Logic ---
+let customTasks = JSON.parse(localStorage.getItem('customTasks') || '[]');
+
+function renderTasks() {
+  const taskList = document.getElementById('studyTasks');
+  taskList.innerHTML = '';
+  if(customTasks.length === 0){
+    taskList.innerHTML = '<li>No tasks yet</li>';
+  }
+  customTasks.forEach((task, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<input type="checkbox" id="task-${index}"> ${task.title} — ${task.date}`;
+    taskList.appendChild(li);
+  });
+  taskList.style.display = 'block';
+}
+
+renderTasks();
+
+
+// --- Tutorial Task Button ---
+const addTutorialBtn = document.getElementById('addTutorialTaskBtn');
+
+addTutorialBtn.addEventListener('click', () => {
+  const date = prompt("Enter tutorial date (YYYY-MM-DD):");
+  if (!date) return;
+  const newTask = { title: 'Tutorial', date, type: 'tutorial' };
+  customTasks.push(newTask);
+  localStorage.setItem('customTasks', JSON.stringify(customTasks));
+  renderTasks();
+});
+// --- Add Custom Task Button ---
+const addTaskBtn = document.getElementById('addTaskBtn');
+
+addTaskBtn.addEventListener('click', () => {
+  const title = prompt("Enter task title:");
+  if (!title) return;
+  const date = prompt("Enter task date (YYYY-MM-DD):");
+  if (!date) return;
+  const newTask = { title, date, type: 'custom' };
+  customTasks.push(newTask);
+  localStorage.setItem('customTasks', JSON.stringify(customTasks));
+  renderTasks();
+});

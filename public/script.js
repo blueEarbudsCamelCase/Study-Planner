@@ -27,15 +27,16 @@ function fetchIcalFeed() {
 
 function checkIcalFeed() {
   const icalUrl = localStorage.getItem("icalFeedUrl");
+  const userGrade = localStorage.getItem("userGrade");
   const dashboardSection = document.getElementById("dashboardSection");
   const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
-  if (!icalUrl) {
-    // Show the schedule setup section if no iCal feed is saved
+  if (!icalUrl || !userGrade) {
+    // Show the schedule setup section if no iCal feed or grade is saved
     dashboardSection.classList.add("hidden");
     scheduleSetupSection.classList.remove("hidden");
   } else {
-    // Show the dashboard if an iCal feed is saved
+    // Show the dashboard if both are saved
     dashboardSection.classList.remove("hidden");
     scheduleSetupSection.classList.add("hidden");
   }

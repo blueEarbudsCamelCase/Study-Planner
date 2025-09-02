@@ -484,24 +484,45 @@ backToDashboardBtn.addEventListener("click", () => {
     updateMinutesLeftDisplay(); // <-- Add this line
   }
   
-  function loadStudyTasks() {
-    const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
-    const tasksList = document.getElementById("studyTasks");
-    tasksList.innerHTML = ""; // Clear the list
-  
-    if (!icalTasks || icalTasks.length === 0) {
-      tasksList.innerHTML = "<li>No events loaded yet.</li>";
-      tasksList.style.display = "block"; // Show the list even if empty
-  
-      return;
-    }
-  
-    tasksList.style.display = "block"; // Show the tasks list after loading
-  
-    const today = new Date();
+  // Utility to get all tasks (ical + custom)
+function getAllTasks() {
+  const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  return [...icalTasks, ...customTasks];
+}
+
+// Render dashboard tasks
+function renderDashboardTasks() {
+  const dashboardTasks = document.getElementById("dashboardTasks");
+  if (!dashboardTasks) return;
+  dashboardTasks.innerHTML = "";
+  const tasks = getAllTasks();
+  if (tasks.length === 0) {
+    dashboardTasks.innerHTML = "<li>No tasks scheduled yet.</li>";
+    return;
+  }
+  tasks.forEach(task => {
+    const li = document.createElement("li");
+    li.textContent = `${task.summary || "Unnamed Task"} (${new Date(task.startDate).toLocaleDateString()})`;
+    dashboardTasks.appendChild(li);
+  });
+}
+
+// Render study planner tasks (override to include custom tasks)
+function loadStudyTasks() {
+  const tasksList = document.getElementById("studyTasks");
+  tasksList.innerHTML = "";
+  const tasks = getAllTasks();
+  if (tasks.length === 0) {
+    tasksList.innerHTML = "<li>No events loaded yet.</li>";
+    tasksList.style.display = "block";
+    return;
+  }
+  tasksList.style.display = "block";
+  const today = new Date();
   
     // Group tasks by date
-    const tasksByDate = icalTasks.reduce((acc, task) => {
+    const tasksByDate = tasks.reduce((acc, task) => {
       const taskDate = new Date(task.startDate).toDateString(); // Group by date string
       if (!acc[taskDate]) {
         acc[taskDate] = [];
@@ -774,7 +795,6 @@ backToDashboardBtn.addEventListener("click", () => {
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
-
   
   const runScreenTasks = document.getElementById("runScreenTasks")
   
@@ -932,3 +952,54 @@ if (gradeSelect) {
     updateIframeSrc(grade);
   });
 }
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  if (!date) return alert("Please select a date.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: "Tutorial",
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("addTaskPlannerBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value;
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) return alert("Please enter a title and date.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Call renderDashboardTasks on page load
+document.addEventListener("DOMContentLoaded", () => {
+  renderDashboardTasks();
+});

@@ -492,7 +492,7 @@ function getAllTasks() {
 }
 
 // Render dashboard tasks
-function renderDashboardTasks() {
+function renderDashboardTasks({ scrollToToday = false } = {}) {
   const dashboardTasks = document.getElementById("dashboardTasks");
   dashboardTasks.innerHTML = "";
   const tasks = getAllTasks();
@@ -553,7 +553,7 @@ function renderDashboardTasks() {
       });
     });
   // Scroll to today's heading
-  if (todayHeading) {
+  if (todayHeading && scrollToToday) {
     setTimeout(() => {
       todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 10);
@@ -1052,7 +1052,10 @@ document.getElementById("saveTaskBtn").onclick = () => {
 
 // Call renderDashboardTasks on page load
 document.addEventListener("DOMContentLoaded", () => {
-  renderDashboardTasks();
+  fetchIcalFeed().then(() => {
+    renderDashboardTasks({ scrollToToday: true });
+    loadStudyTasks();
+  });
 });
 
 document.getElementById("refreshTasksBtn").onclick = () => {
@@ -1108,12 +1111,17 @@ document.getElementById("saveEditTaskBtn").onclick = () => {
     let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
     editedIcalTasks[editingTask.startDate] = newTitle;
     localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
+    // Re-parse iCal feed to apply edits immediately
+    fetchIcalFeed().then(() => {
+      renderDashboardTasks();
+      loadStudyTasks();
+    });
   } else {
     localStorage.setItem("customTasks", JSON.stringify(customTasks));
+    renderDashboardTasks();
+    loadStudyTasks();
   }
 
   document.getElementById("editTaskPopup").classList.add("hidden");
   editingTask = null;
-  renderDashboardTasks();
-  loadStudyTasks();
 };

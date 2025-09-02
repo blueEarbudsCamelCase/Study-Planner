@@ -750,3 +750,17 @@ body.dark-mode .bookings-iframe-container {
 body.dark-mode .bookings-iframe-container iframe {
   border: 1px solid #4a5568 !important; /* Light border for iframe in dark mode */
 }
+
+body.dark-mode #dashboardTasks {
+  background-color: #2d3748 !important;
+  color: #f7fafc !important;
+  border-color: #4a5568 !important;
+}
+body.dark-mode #dashboardTasks button {
+  background-color: #4a5568 !important;
+  color: #f7fafc !important;
+  border: 1px solid #4a5568 !important;
+}
+body.dark-mode #dashboardTasks button:hover {
+  background-color: #2d3748 !important;
+}

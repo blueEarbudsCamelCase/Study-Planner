@@ -98,56 +98,57 @@ if (dashboardContainer) {
       console.error("No data provided to parseIcalFeed.");
       return;
     }
-  
+
     const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
     const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
-  
+
+    // Load previous edits
+    const editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+
     const events = [];
     const lines = data.split('\n');
     let event = {};
-  
-    const now = new Date(); // Current date and time
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
-  
+
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
     lines.forEach(line => {
       if (line.startsWith('SUMMARY:')) {
-         let summary = line.replace('SUMMARY:', '').trim();
+        let summary = line.replace('SUMMARY:', '').trim();
         if (summary.includes('[')) {
           summary = summary.split('[')[0].trim();
         }
         event.summary = summary;
       }
       if (line.startsWith('DTSTART')) {
-        // Handle both standard and VALUE=DATE formats
         const start = line.includes(':') ? line.split(':')[1].trim() : null;
         if (start) {
           event.startDate = parseIcalDate(start);
         }
       }
       if (line.startsWith('DTEND')) {
-        // Handle both standard and VALUE=DATE formats
         const end = line.includes(':') ? line.split(':')[1].trim() : null;
         if (end) {
           event.endDate = parseIcalDate(end);
         }
       }
       if (line.trim() === 'END:VEVENT') {
-        const taskKey = `${event.summary}-${event.startDate}`;
+        const taskKey = `${event.startDate}`;
         const eventStartDate = new Date(event.startDate);
-  
-        if (!completedTaskKeys.includes(taskKey) && eventStartDate >= sevenDaysAgo) {
-          events.push(event);
-          console.log("Event added:", event);
-        } else {
-          console.log("Event skipped (either completed or too old):", event);
+
+        // Apply edits if present
+        if (editedIcalTasks[taskKey]) {
+          event.summary = editedIcalTasks[taskKey];
         }
-        event = {}; // Reset the event object for the next event
+
+        if (!completedTaskKeys.includes(`${event.summary}-${event.startDate}`) && eventStartDate >= sevenDaysAgo) {
+          events.push(event);
+        }
+        event = {};
       }
     });
-  
+
     localStorage.setItem("icalTasks", JSON.stringify(events));
-  
-    // Ensure completedTasks is preserved
     localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
   };
       
@@ -534,11 +535,12 @@ function renderDashboardTasks() {
         checkbox.className = "mr-2";
         checkbox.addEventListener("change", () => {
           moveToCompleted(task, li, true);
-          // Hide after animation
+          li.classList.add('fade-out');
           setTimeout(() => {
             if (li.parentElement) {
               li.parentElement.removeChild(li);
             }
+            renderDashboardTasks();
           }, 500);
         });
         const button = document.createElement("button");
@@ -1032,6 +1034,10 @@ document.getElementById("saveTaskBtn").onclick = () => {
     return;
   }
   const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
   customTasks.push({
     summary: title,
     startDate: new Date(date).toISOString()
@@ -1081,8 +1087,13 @@ document.getElementById("saveEditTaskBtn").onclick = () => {
   const newTitle = document.getElementById("editTaskTitle").value;
   if (!editingTask) return;
 
-  // Try to update in customTasks first
+  // Prevent duplicate custom task names
   let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === newTitle && t.startDate !== editingTask.startDate)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
+
   let updated = false;
   customTasks = customTasks.map(t => {
     if (t.startDate === editingTask.startDate && t.summary === editingTask.summary) {
@@ -1092,16 +1103,11 @@ document.getElementById("saveEditTaskBtn").onclick = () => {
     return t;
   });
 
-  // If not found in customTasks, update in icalTasks
   if (!updated) {
-    let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
-    icalTasks = icalTasks.map(t => {
-      if (t.startDate === editingTask.startDate && t.summary === editingTask.summary) {
-        return { ...t, summary: newTitle };
-      }
-      return t;
-    });
-    localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
+    // Save iCal edits in editedIcalTasks
+    let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+    editedIcalTasks[editingTask.startDate] = newTitle;
+    localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
   } else {
     localStorage.setItem("customTasks", JSON.stringify(customTasks));
   }

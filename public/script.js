@@ -54,11 +54,10 @@ function checkIcalFeed() {
 // Fetch the iCal feed when the page loads
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
 if (dashboardContainer) {
-  /*const loadingIndicator = document.createElement('p');
-  loadingIndicator.textContent = "Loading your tasks...";
+  const loadingIndicator = document.createElement('p');
+  loadingIndicator.textContent = "";
   loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
-  dashboardContainer.appendChild(loadingIndicator); // Append to the container*/
-
+  dashboardContainer.appendChild(loadingIndicator); // Append to the container
   checkIcalFeed();
 
   fetchIcalFeed()
@@ -509,6 +508,7 @@ function renderDashboardTasks() {
   }, {});
   const todayKey = today.toDateString();
   if (!tasksByDate[todayKey]) tasksByDate[todayKey] = [];
+  let todayHeading = null;
   Object.keys(tasksByDate)
     .sort((a, b) => new Date(a) - new Date(b))
     .forEach(date => {
@@ -517,6 +517,9 @@ function renderDashboardTasks() {
       dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
       dateHeading.className = "font-bold text-lg mt-4 mb-2";
       dashboardTasks.appendChild(dateHeading);
+      if (parsedDate.toDateString() === today.toDateString()) {
+        todayHeading = dateHeading;
+      }
       if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
         const placeholder = document.createElement("li");
         placeholder.textContent = "You've completed all of today's tasks. Great job!";
@@ -529,7 +532,15 @@ function renderDashboardTasks() {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "mr-2";
-        checkbox.addEventListener("change", () => moveToCompleted(task, li, true));
+        checkbox.addEventListener("change", () => {
+          moveToCompleted(task, li, true);
+          // Hide after animation
+          setTimeout(() => {
+            if (li.parentElement) {
+              li.parentElement.removeChild(li);
+            }
+          }, 500);
+        });
         const button = document.createElement("button");
         button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
         button.textContent = task.summary || "Unnamed Event";
@@ -539,6 +550,12 @@ function renderDashboardTasks() {
         dashboardTasks.appendChild(li);
       });
     });
+  // Scroll to today's heading
+  if (todayHeading) {
+    setTimeout(() => {
+      todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 10);
+  }
 }
 
 // Render study planner tasks (override to include custom tasks)
@@ -656,11 +673,14 @@ function loadStudyTasks() {
     taskElement.appendChild(checkmark);
     taskElement.classList.add('fade-out');
     setTimeout(() => {
-      taskElement.parentElement.removeChild(taskElement);
+      if (taskElement.parentElement) {
+        taskElement.parentElement.removeChild(taskElement);
+      }
       if (isDashboard) renderDashboardTasks();
+      else loadStudyTasks();
     }, 500);
-  }
-  if (!isDashboard) {
+  } else {
+    // If no element, just refresh lists
     renderDashboardTasks();
     loadStudyTasks();
   }
@@ -1060,13 +1080,32 @@ document.getElementById("cancelEditTaskBtn").onclick = () => {
 document.getElementById("saveEditTaskBtn").onclick = () => {
   const newTitle = document.getElementById("editTaskTitle").value;
   if (!editingTask) return;
-  editingTask.summary = newTitle;
-  // Update in localStorage
+
+  // Try to update in customTasks first
   let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-  customTasks = customTasks.map(t =>
-    t.startDate === editingTask.startDate ? { ...t, summary: newTitle } : t
-  );
-  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  let updated = false;
+  customTasks = customTasks.map(t => {
+    if (t.startDate === editingTask.startDate && t.summary === editingTask.summary) {
+      updated = true;
+      return { ...t, summary: newTitle };
+    }
+    return t;
+  });
+
+  // If not found in customTasks, update in icalTasks
+  if (!updated) {
+    let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
+    icalTasks = icalTasks.map(t => {
+      if (t.startDate === editingTask.startDate && t.summary === editingTask.summary) {
+        return { ...t, summary: newTitle };
+      }
+      return t;
+    });
+    localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
+  } else {
+    localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  }
+
   document.getElementById("editTaskPopup").classList.add("hidden");
   editingTask = null;
   renderDashboardTasks();

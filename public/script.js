@@ -54,10 +54,10 @@ function checkIcalFeed() {
 // Fetch the iCal feed when the page loads
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
 if (dashboardContainer) {
-  const loadingIndicator = document.createElement('p');
+  /*const loadingIndicator = document.createElement('p');
   loadingIndicator.textContent = "Loading your tasks...";
   loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
-  dashboardContainer.appendChild(loadingIndicator); // Append to the container
+  dashboardContainer.appendChild(loadingIndicator); // Append to the container*/
 
   checkIcalFeed();
 
@@ -526,10 +526,15 @@ function renderDashboardTasks() {
       tasksByDate[date].forEach(task => {
         const li = document.createElement("li");
         li.className = "mb-1 flex items-center";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "mr-2";
+        checkbox.addEventListener("change", () => moveToCompleted(task, li, true));
         const button = document.createElement("button");
-        button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
+        button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
         button.textContent = task.summary || "Unnamed Event";
         button.onclick = () => openEditTaskPopup(task);
+        li.appendChild(checkbox);
         li.appendChild(button);
         dashboardTasks.appendChild(li);
       });
@@ -634,47 +639,30 @@ function loadStudyTasks() {
   oscillator.onended = () => ctx.close();
 }
 
-  function moveToCompleted(task, taskElement) {
-  // Retrieve the current completedTasks array from localStorage
+  function moveToCompleted(task, taskElement, isDashboard = false) {
   const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
-
-  // Add the completed task to the array
   completedTasks.push(task);
-
-  // Save the updated array back to localStorage
   localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
 
-  console.log("Task moved to completed:", task);
+  // Remove from customTasks if present
+  let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks = customTasks.filter(t => !(t.startDate === task.startDate && t.summary === task.summary));
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
 
-  // If taskElement is provided, animate as before
   if (taskElement) {
     // animation for ryland :) this animation adds a checkmark to the commpleted task. 
     const checkmark = document.createElement('div');
     checkmark.className = 'checkmark';
     taskElement.appendChild(checkmark);
-
-    // this part of the animation is a fade on exit for the completed task. 
     taskElement.classList.add('fade-out');
     setTimeout(() => {
       taskElement.parentElement.removeChild(taskElement);
-    }, 500); // Wait for the animation to complete
-  } else {
-    // For runScreen: animate the current task card
-    const currentTaskDiv = document.querySelector('#runScreenTasks .current-task > div');
-    if (currentTaskDiv) {
-      // Add checkmark
-      const checkmark = document.createElement('div');
-      checkmark.className = 'checkmark';
-      currentTaskDiv.appendChild(checkmark);
-
-      // Fade out
-      currentTaskDiv.classList.add('fade-out');
-      setTimeout(() => {
-        if (currentTaskDiv.parentElement) {
-          currentTaskDiv.parentElement.removeChild(currentTaskDiv);
-        }
-      }, 500);
-    }
+      if (isDashboard) renderDashboardTasks();
+    }, 500);
+  }
+  if (!isDashboard) {
+    renderDashboardTasks();
+    loadStudyTasks();
   }
 }
 
@@ -990,14 +978,19 @@ document.getElementById("cancelTutorialBtn").onclick = () => {
 };
 document.getElementById("saveTutorialBtn").onclick = () => {
   const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
   if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
   const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
   customTasks.push({
-    summary: "Tutorial",
-    startDate: new Date(date).toISOString()
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
   });
   localStorage.setItem("customTasks", JSON.stringify(customTasks));
   document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
   renderDashboardTasks();
   loadStudyTasks();
 };
@@ -1037,7 +1030,21 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("refreshTasksBtn").onclick = () => {
-  renderDashboardTasks();
+  const btn = document.getElementById("refreshTasksBtn");
+  btn.innerHTML = `<i class="fas fa-sync fa-spin"></i>`;
+  setTimeout(() => {
+    renderDashboardTasks();
+    btn.innerHTML = `<i class="fas fa-sync"></i>`;
+  }, 700); // Show spinner for 0.7s
+};
+
+document.getElementById("refreshStudyTasksBtn").onclick = () => {
+  const btn = document.getElementById("refreshStudyTasksBtn");
+  btn.innerHTML = `<i class="fas fa-sync fa-spin"></i>`;
+  setTimeout(() => {
+    loadStudyTasks();
+    btn.innerHTML = `<i class="fas fa-sync"></i>`;
+  }, 700);
 };
 
 let editingTask = null;

@@ -537,10 +537,7 @@ function renderDashboardTasks({ scrollToToday = false } = {}) {
           moveToCompleted(task, li, true);
           li.classList.add('fade-out');
           setTimeout(() => {
-            if (li.parentElement) {
-              li.parentElement.removeChild(li);
-            }
-            renderDashboardTasks();
+            renderDashboardTasks({ scrollToToday: true }); // Always refresh and scroll to today
           }, 500);
         });
         const button = document.createElement("button");
@@ -1060,19 +1057,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("refreshTasksBtn").onclick = () => {
   const btn = document.getElementById("refreshTasksBtn");
-  btn.innerHTML = `<i class="fas fa-sync fa-spin"></i>`;
+  const icon = btn.querySelector("i");
+  if (icon) icon.classList.add("fa-spin");
+  renderDashboardTasks({ scrollToToday: true });
   setTimeout(() => {
-    renderDashboardTasks();
-    btn.innerHTML = `<i class="fas fa-sync"></i>`;
-  }, 700); // Show spinner for 0.7s
+    if (icon) icon.classList.remove("fa-spin");
+  }, 700);
 };
 
 document.getElementById("refreshStudyTasksBtn").onclick = () => {
   const btn = document.getElementById("refreshStudyTasksBtn");
-  btn.innerHTML = `<i class="fas fa-sync fa-spin"></i>`;
+  const icon = btn.querySelector("i");
+  if (icon) icon.classList.add("fa-spin");
+  loadStudyTasks();
   setTimeout(() => {
-    loadStudyTasks();
-    btn.innerHTML = `<i class="fas fa-sync"></i>`;
+    if (icon) icon.classList.remove("fa-spin");
   }, 700);
 };
 

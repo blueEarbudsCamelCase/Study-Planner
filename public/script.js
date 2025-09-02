@@ -486,9 +486,21 @@ backToDashboardBtn.addEventListener("click", () => {
   
   // Utility to get all tasks (ical + custom)
 function getAllTasks() {
+  const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
+  const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
+
   const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
   const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-  return [...icalTasks, ...customTasks];
+
+  // Filter out completed tasks from both sources
+  const filteredIcalTasks = icalTasks.filter(
+    t => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
+  );
+  const filteredCustomTasks = customTasks.filter(
+    t => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
+  );
+
+  return [...filteredIcalTasks, ...filteredCustomTasks];
 }
 
 // Render dashboard tasks
@@ -656,6 +668,7 @@ function loadStudyTasks() {
 }
 
   function moveToCompleted(task, taskElement, isDashboard = false) {
+  console.log("[moveToCompleted] Called for:", task.summary, task.startDate, "isDashboard:", isDashboard);
   const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
   completedTasks.push(task);
   localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
@@ -664,6 +677,11 @@ function loadStudyTasks() {
   let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
   customTasks = customTasks.filter(t => !(t.startDate === task.startDate && t.summary === task.summary));
   localStorage.setItem("customTasks", JSON.stringify(customTasks));
+
+  // Remove from iCal tasks if present
+  let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
+  icalTasks = icalTasks.filter(t => !(t.startDate === task.startDate && t.summary === task.summary));
+  localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
 
   if (taskElement) {
     // animation for ryland :) this animation adds a checkmark to the commpleted task. 
@@ -674,18 +692,24 @@ function loadStudyTasks() {
     setTimeout(() => {
       if (taskElement.parentElement) {
         taskElement.parentElement.removeChild(taskElement);
+        console.log("[moveToCompleted] Task element removed from DOM");
       }
-      if (isDashboard) renderDashboardTasks();
-      else loadStudyTasks();
+      if (isDashboard) {
+        console.log("[moveToCompleted] Refreshing dashboard tasks");
+        renderDashboardTasks({ scrollToToday: true });
+      } else {
+        console.log("[moveToCompleted] Refreshing study tasks");
+        loadStudyTasks();
+      }
     }, 500);
   } else {
-    // If no element, just refresh lists
-    renderDashboardTasks();
+    console.log("[moveToCompleted] No taskElement, refreshing both lists");
+    renderDashboardTasks({ scrollToToday: true });
     loadStudyTasks();
   }
 }
 
-  // Timer Constants
+// Timer Constants
   let TIME_LIMIT = 3600; // Set the timer duration in seconds
   let timePassed = 0;
   let timeLeft = TIME_LIMIT;
@@ -1058,10 +1082,13 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("refreshTasksBtn").onclick = () => {
   const btn = document.getElementById("refreshTasksBtn");
   const icon = btn.querySelector("i");
+  console.log("[Refresh Dashboard] Button clicked");
   if (icon) icon.classList.add("fa-spin");
+  // Force reload from localStorage
   renderDashboardTasks({ scrollToToday: true });
   setTimeout(() => {
     if (icon) icon.classList.remove("fa-spin");
+    console.log("[Refresh Dashboard] Animation ended");
   }, 700);
 };
 
@@ -1069,9 +1096,11 @@ document.getElementById("refreshStudyTasksBtn").onclick = () => {
   const btn = document.getElementById("refreshStudyTasksBtn");
   const icon = btn.querySelector("i");
   if (icon) icon.classList.add("fa-spin");
+  console.log("[Refresh StudyPlanner] Button clicked");
   loadStudyTasks();
   setTimeout(() => {
     if (icon) icon.classList.remove("fa-spin");
+    console.log("[Refresh StudyPlanner] Animation ended");
   }, 700);
 };
 

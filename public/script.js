@@ -494,18 +494,46 @@ function getAllTasks() {
 // Render dashboard tasks
 function renderDashboardTasks() {
   const dashboardTasks = document.getElementById("dashboardTasks");
-  if (!dashboardTasks) return;
   dashboardTasks.innerHTML = "";
   const tasks = getAllTasks();
   if (tasks.length === 0) {
     dashboardTasks.innerHTML = "<li>No tasks scheduled yet.</li>";
     return;
   }
-  tasks.forEach(task => {
-    const li = document.createElement("li");
-    li.textContent = `${task.summary || "Unnamed Task"} (${new Date(task.startDate).toLocaleDateString()})`;
-    dashboardTasks.appendChild(li);
-  });
+  const today = new Date();
+  const tasksByDate = tasks.reduce((acc, task) => {
+    const taskDate = new Date(task.startDate).toDateString();
+    if (!acc[taskDate]) acc[taskDate] = [];
+    acc[taskDate].push(task);
+    return acc;
+  }, {});
+  const todayKey = today.toDateString();
+  if (!tasksByDate[todayKey]) tasksByDate[todayKey] = [];
+  Object.keys(tasksByDate)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .forEach(date => {
+      const parsedDate = new Date(date);
+      const dateHeading = document.createElement("h3");
+      dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
+      dateHeading.className = "font-bold text-lg mt-4 mb-2";
+      dashboardTasks.appendChild(dateHeading);
+      if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
+        const placeholder = document.createElement("li");
+        placeholder.textContent = "You've completed all of today's tasks. Great job!";
+        placeholder.className = "text-gray-500 italic";
+        dashboardTasks.appendChild(placeholder);
+      }
+      tasksByDate[date].forEach(task => {
+        const li = document.createElement("li");
+        li.className = "mb-1 flex items-center";
+        const button = document.createElement("button");
+        button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
+        button.textContent = task.summary || "Unnamed Event";
+        button.onclick = () => openEditTaskPopup(task);
+        li.appendChild(button);
+        dashboardTasks.appendChild(li);
+      });
+    });
 }
 
 // Render study planner tasks (override to include custom tasks)
@@ -978,16 +1006,18 @@ document.getElementById("saveTutorialBtn").onclick = () => {
 document.getElementById("addTaskBtn").onclick = () => {
   document.getElementById("addTaskPopup").classList.remove("hidden");
 };
-document.getElementById("addTaskPlannerBtn").onclick = () => {
-  document.getElementById("addTaskPopup").classList.remove("hidden");
-};
 document.getElementById("cancelTaskBtn").onclick = () => {
   document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
 };
 document.getElementById("saveTaskBtn").onclick = () => {
-  const title = document.getElementById("customTaskTitle").value;
+  const title = document.getElementById("customTaskTitle").value.trim();
   const date = document.getElementById("customTaskDate").value;
-  if (!title || !date) return alert("Please enter a title and date.");
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
   const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
   customTasks.push({
     summary: title,
@@ -995,6 +1025,8 @@ document.getElementById("saveTaskBtn").onclick = () => {
   });
   localStorage.setItem("customTasks", JSON.stringify(customTasks));
   document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
   renderDashboardTasks();
   loadStudyTasks();
 };
@@ -1003,3 +1035,33 @@ document.getElementById("saveTaskBtn").onclick = () => {
 document.addEventListener("DOMContentLoaded", () => {
   renderDashboardTasks();
 });
+
+document.getElementById("refreshTasksBtn").onclick = () => {
+  renderDashboardTasks();
+};
+
+let editingTask = null;
+function openEditTaskPopup(task) {
+  editingTask = task;
+  document.getElementById("editTaskTitle").value = task.summary || "";
+  document.getElementById("editTaskPopup").classList.remove("hidden");
+}
+document.getElementById("cancelEditTaskBtn").onclick = () => {
+  document.getElementById("editTaskPopup").classList.add("hidden");
+  editingTask = null;
+};
+document.getElementById("saveEditTaskBtn").onclick = () => {
+  const newTitle = document.getElementById("editTaskTitle").value;
+  if (!editingTask) return;
+  editingTask.summary = newTitle;
+  // Update in localStorage
+  let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks = customTasks.map(t =>
+    t.startDate === editingTask.startDate ? { ...t, summary: newTitle } : t
+  );
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("editTaskPopup").classList.add("hidden");
+  editingTask = null;
+  renderDashboardTasks();
+  loadStudyTasks();
+};

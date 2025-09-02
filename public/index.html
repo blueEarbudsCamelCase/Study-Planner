@@ -81,9 +81,14 @@
       <div class="bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
         <h3 class="text-xl font-bold mb-4 flex items-center justify-between">
           Tasks
-          <button id="addTaskBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
+          <div class="flex items-center">
+            <button id="addTaskBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
+            <button id="refreshTasksBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
+              <i class="fas fa-sync"></i>
+            </button>
+          </div>
         </h3>
-        <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1"></ul>
+        <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1" style="max-height:400px; overflow-y:auto; border:1px solid #cdcece; border-radius:8px; padding:10px; background:#fff;"></ul>
       </div>
         <!-- Settings Popup (leave as is) -->
         <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -264,6 +269,18 @@
     <div class="flex justify-end gap-2">
       <button id="cancelTaskBtn" class="text-gray-600 hover:underline">Cancel</button>
       <button id="saveTaskBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+    </div>
+  </div>
+</div>
+<!-- Edit Task Popup -->
+<div id="editTaskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+    <h2 class="text-lg font-bold text-center mb-4">Edit Task</h2>
+    <label class="block mb-2">Task Title:</label>
+    <input type="text" id="editTaskTitle" class="w-full border border-gray-300 rounded p-2 mb-4" />
+    <div class="flex justify-end gap-2">
+      <button id="cancelEditTaskBtn" class="text-gray-600 hover:underline">Cancel</button>
+      <button id="saveEditTaskBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
     </div>
   </div>
 </div>

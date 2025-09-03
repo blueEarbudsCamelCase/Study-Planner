@@ -983,11 +983,64 @@ document.getElementById('scheduleForm').addEventListener('submit', (e) => {
 
 // Set grade selection from localStorage on load
 document.addEventListener('DOMContentLoaded', () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
   const savedGrade = localStorage.getItem('userGrade');
   if (savedGrade && gradeSelect) {
     gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
   }
-  updateIframeSrc(savedGrade || gradeSelect.value);
 });
 
 // Update iframe src based on grade
@@ -1073,83 +1126,858 @@ document.getElementById("saveTaskBtn").onclick = () => {
 
 // Call renderDashboardTasks on page load
 document.addEventListener("DOMContentLoaded", () => {
-  fetchIcalFeed().then(() => {
-    renderDashboardTasks({ scrollToToday: true });
-    loadStudyTasks();
-  });
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
 });
 
-document.getElementById("refreshTasksBtn").onclick = () => {
-  const btn = document.getElementById("refreshTasksBtn");
-  const icon = btn.querySelector("i");
-  console.log("[Refresh Dashboard] Button clicked");
-  if (icon) icon.classList.add("fa-spin");
-  // Force reload from localStorage
-  renderDashboardTasks({ scrollToToday: true });
-  setTimeout(() => {
-    if (icon) icon.classList.remove("fa-spin");
-    console.log("[Refresh Dashboard] Animation ended");
-  }, 700);
-};
-
-document.getElementById("refreshStudyTasksBtn").onclick = () => {
-  const btn = document.getElementById("refreshStudyTasksBtn");
-  const icon = btn.querySelector("i");
-  if (icon) icon.classList.add("fa-spin");
-  console.log("[Refresh StudyPlanner] Button clicked");
-  loadStudyTasks();
-  setTimeout(() => {
-    if (icon) icon.classList.remove("fa-spin");
-    console.log("[Refresh StudyPlanner] Animation ended");
-  }, 700);
-};
-
-let editingTask = null;
-function openEditTaskPopup(task) {
-  editingTask = task;
-  document.getElementById("editTaskTitle").value = task.summary || "";
-  document.getElementById("editTaskPopup").classList.remove("hidden");
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
 }
-document.getElementById("cancelEditTaskBtn").onclick = () => {
-  document.getElementById("editTaskPopup").classList.add("hidden");
-  editingTask = null;
-};
-document.getElementById("saveEditTaskBtn").onclick = () => {
-  const newTitle = document.getElementById("editTaskTitle").value;
-  if (!editingTask) return;
 
-  // Prevent duplicate custom task names
-  let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-  if (customTasks.some(t => t.summary === newTitle && t.startDate !== editingTask.startDate)) {
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
+  if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value.trim();
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
     alert("Custom task titles must be unique.");
     return;
   }
-
-  let updated = false;
-  customTasks = customTasks.map(t => {
-    if (t.startDate === editingTask.startDate && t.summary === editingTask.summary) {
-      updated = true;
-      return { ...t, summary: newTitle };
-    }
-    return t;
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
   });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
 
-  if (!updated) {
-    // Save iCal edits in editedIcalTasks
-    let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
-    editedIcalTasks[editingTask.startDate] = newTitle;
-    localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
-    // Re-parse iCal feed to apply edits immediately
-    fetchIcalFeed().then(() => {
-      renderDashboardTasks();
-      loadStudyTasks();
-    });
-  } else {
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    renderDashboardTasks();
-    loadStudyTasks();
+// Call renderDashboardTasks on page load
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
   }
 
-  document.getElementById("editTaskPopup").classList.add("hidden");
-  editingTask = null;
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
+});
+
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
+}
+
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
+  if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value.trim();
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Call renderDashboardTasks on page load
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
+});
+
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
+}
+
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
+  if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value.trim();
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Call renderDashboardTasks on page load
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
+});
+
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
+}
+
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
+  if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value.trim();
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Call renderDashboardTasks on page load
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
+});
+
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
+}
+
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
+  if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value.trim();
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Call renderDashboardTasks on page load
+document.addEventListener("DOMContentLoaded", () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    const loadingIndicator = document.createElement('p');
+    loadingIndicator.textContent = "";
+    loadingIndicator.className = "text-center text-gray-500 mt-4";
+    dashboardContainer.appendChild(loadingIndicator);
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        loadingIndicator.remove();
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        loadingIndicator.textContent = "Failed to load tasks.";
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
+});
+
+// Update iframe src based on grade
+function updateIframeSrc(grade) {
+  let src = '';
+  if (grade === '7-8') {
+    src = 'https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '9-10') {
+    src = 'https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  } else if (grade === '11-12') {
+    src = 'https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled=true';
+  }
+  if (bookingsIframe) bookingsIframe.src = src;
+}
+
+// Change iframe when grade selection changes
+if (gradeSelect) {
+  gradeSelect.addEventListener('change', (e) => {
+    const grade = e.target.value;
+    localStorage.setItem('userGrade', grade);
+    updateIframeSrc(grade);
+  });
+}
+
+// Add Tutorial Popup logic
+document.getElementById("addTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTutorialBtn").onclick = () => {
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+};
+document.getElementById("saveTutorialBtn").onclick = () => {
+  const date = document.getElementById("tutorialDate").value;
+  const teacher = document.getElementById("tutorialTeacher").value.trim();
+  if (!date) return alert("Please select a date.");
+  if (!teacher) return alert("Please enter the teacher's name.");
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  customTasks.push({
+    summary: `Tutorial (${teacher})`,
+    startDate: new Date(date).toISOString(),
+    teacher
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTutorialPopup").classList.add("hidden");
+  document.getElementById("tutorialDate").value = "";
+  document.getElementById("tutorialTeacher").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
+};
+
+// Add Task Popup logic
+document.getElementById("addTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.remove("hidden");
+};
+document.getElementById("cancelTaskBtn").onclick = () => {
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+};
+document.getElementById("saveTaskBtn").onclick = () => {
+  const title = document.getElementById("customTaskTitle").value.trim();
+  const date = document.getElementById("customTaskDate").value;
+  if (!title || !date) {
+    alert("Please enter a title and date.");
+    return;
+  }
+  const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+  if (customTasks.some(t => t.summary === title)) {
+    alert("Custom task titles must be unique.");
+    return;
+  }
+  customTasks.push({
+    summary: title,
+    startDate: new Date(date).toISOString()
+  });
+  localStorage.setItem("customTasks", JSON.stringify(customTasks));
+  document.getElementById("addTaskPopup").classList.add("hidden");
+  document.getElementById("customTaskTitle").value = "";
+  document.getElementById("customTaskDate").value = "";
+  renderDashboardTasks();
+  loadStudyTasks();
 };

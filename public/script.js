@@ -1110,7 +1110,65 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStudyTasks();
   };
 
+  // Add refresh button logic for dashboard
+  const refreshTasksBtn = document.getElementById("refreshTasksBtn");
+  if (refreshTasksBtn) {
+    refreshTasksBtn.onclick = () => {
+      refreshTasksBtn.classList.add("fa-spin");
+      fetchIcalFeed()
+        .then(() => {
+          renderDashboardTasks({ scrollToToday: true });
+          loadStudyTasks();
+          setTimeout(() => refreshTasksBtn.classList.remove("fa-spin"), 500);
+        })
+        .catch(() => {
+          setTimeout(() => refreshTasksBtn.classList.remove("fa-spin"), 500);
+        });
+    };
+  }
+
+  // Add refresh button logic for study planner
+  const refreshStudyTasksBtn = document.getElementById("refreshStudyTasksBtn");
+  if (refreshStudyTasksBtn) {
+    refreshStudyTasksBtn.onclick = () => {
+      refreshStudyTasksBtn.classList.add("fa-spin");
+      fetchIcalFeed()
+        .then(() => {
+          loadStudyTasks();
+          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+        })
+        .catch(() => {
+          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+        });
+    };
+  }
+
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
 });
+
+function updateIframeSrc(grade) {
+  const bookingsIframe = document.getElementById('bookingsIframe');
+  if (!bookingsIframe) return;
+  let src = "";
+  switch (grade) {
+    case "7-8":
+      src = "https://outlook.office.com/book/Grade78Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      break;
+    case "9-10":
+      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      break;
+    case "11-12":
+      src = "https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      break;
+    default:
+      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+  }
+  bookingsIframe.src = src;
+}
+
+function openEditTaskPopup(task) {
+  // You can implement a real edit popup here
+  alert("Edit Task: " + (task.summary || "Unnamed Event"));
+}

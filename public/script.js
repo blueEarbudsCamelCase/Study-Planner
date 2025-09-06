@@ -55,7 +55,6 @@ function checkIcalFeed() {
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
 if (dashboardContainer) {
   const loadingIndicator = document.createElement('p');
-  loadingIndicator.textContent = "";
   loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
   dashboardContainer.appendChild(loadingIndicator); // Append to the container
   checkIcalFeed();
@@ -281,7 +280,7 @@ backToDashboardBtn.addEventListener("click", () => {
     const loadingIndicator = document.createElement('p');
     loadingIndicator.textContent = "Refreshing tasks...";
     loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
-    dashboardSection.appendChild(loadingIndicator);
+    dashboardContainer.appendChild(loadingIndicator);
   
     // Fetch, parse, and reload tasks
     setTimeout(() => {

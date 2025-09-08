@@ -67,13 +67,15 @@
       <div class="bookings-iframe-container bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl font-bold">Book a Tutorial:</h3>
-          <button id="addTutorialBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
+          <button id="addTutorialBtn" title="Add Tutorial" aria-label="Add Tutorial" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
         </div>
         <iframe
           id="bookingsIframe"
           src="https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled"
           class="w-full h-full rounded-xl flex-1"
-          scrolling='yes'>
+          scrolling='yes'
+          title="Book a Tutorial"
+          aria-label="Book a Tutorial">
         </iframe>
       </div>
 
@@ -82,8 +84,8 @@
         <h3 class="text-xl font-bold mb-4 flex items-center justify-between">
           Tasks
           <div class="flex items-center">
-            <button id="addTaskBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
-            <button id="refreshTasksBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
+            <button id="addTaskBtn" title="Add Task" aria-label="Add Task" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
+            <button id="refreshTasksBtn" title="Refresh Tasks" aria-label="Refresh Tasks" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
               <i class="fas fa-sync" style="font-size:1rem;display:flex;align-items:center;justify-content:center;"></i>
             </button>
           </div>
@@ -136,7 +138,7 @@
 <section id="studyPlannerSection" class="hidden p-6">
   <h1 class="text-2xl font-bold mb-4 flex items-center justify-between">
   Study Session
-  <button id="refreshStudyTasksBtn" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
+  <button id="refreshStudyTasksBtn" title="Refresh Study Tasks" aria-label="Refresh Study Tasks" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
     <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
       <i class="fas fa-sync" style="font-size:0.85rem;"></i>
     </span>
@@ -178,7 +180,7 @@
     <input type="number" id="mapTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
 
     <label class="block mb-2">Zone:</label>
-    <select id="mapZone" class="w-full border border-gray-300 rounded p-2 mb-4">
+    <select id="mapZone" class="w-full border border-gray-300 rounded p-2 mb-4" title="Select your MAP Practice zone" aria-label="Zone">
       <option value="Independent">Focus</option>
       <option value="Semi-Collaborative">Semi-Collaborative</option>
       <option value="Collaborative">Collaborative</option>

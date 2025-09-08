@@ -54,18 +54,16 @@ function checkIcalFeed() {
 // Fetch the iCal feed when the page loads
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
 if (dashboardContainer) {
-  const loadingIndicator = document.createElement('p');
-  loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
-  dashboardContainer.appendChild(loadingIndicator); // Append to the container
   checkIcalFeed();
 
   fetchIcalFeed()
     .then(() => {
-      loadingIndicator.remove(); // Remove the loading indicator
+      renderDashboardTasks({ scrollToToday: true });
+      loadStudyTasks();
     })
     .catch(error => {
       console.error("Error fetching or parsing iCal feed:", error);
-      loadingIndicator.textContent = "Failed to load tasks.";
+      // Optionally show an error message elsewhere if needed
     });
 } else {
   console.error("dashboardContainer not found.");
@@ -276,25 +274,15 @@ backToDashboardBtn.addEventListener("click", () => {
   
     console.log("Study plan and run screen cleared.");
   
-    // Show a loading indicator
-    const loadingIndicator = document.createElement('p');
-    loadingIndicator.textContent = "Refreshing tasks...";
-    loadingIndicator.className = "text-center text-gray-500 mt-4"; // Add some styling
-    dashboardContainer.appendChild(loadingIndicator);
-  
     // Fetch, parse, and reload tasks
-    setTimeout(() => {
-      fetchIcalFeed()
-        .then(() => {
-          parseIcalFeed();
-          loadStudyTasks();
-          loadingIndicator.remove(); // Remove the loading indicator after tasks are loaded
-        })
-        .catch(error => {
-          console.error("Error fetching or parsing tasks:", error);
-          loadingIndicator.textContent = "Failed to refresh tasks.";
-        });
-    }, 2000); // 2000ms = 2 seconds delay
+    fetchIcalFeed()
+      .then(() => {
+        parseIcalFeed();
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing tasks:", error);
+      });
   });
   
   
@@ -997,21 +985,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Only run if dashboardContainer exists
   if (dashboardContainer) {
-    const loadingIndicator = document.createElement('p');
-    loadingIndicator.textContent = "";
-    loadingIndicator.className = "text-center text-gray-500 mt-4";
-    dashboardContainer.appendChild(loadingIndicator);
     checkIcalFeed();
 
     fetchIcalFeed()
       .then(() => {
-        loadingIndicator.remove();
         renderDashboardTasks({ scrollToToday: true });
         loadStudyTasks();
       })
       .catch(error => {
         console.error("Error fetching or parsing iCal feed:", error);
-        loadingIndicator.textContent = "Failed to load tasks.";
+        // Optionally show an error message elsewhere if needed
       });
   }
 

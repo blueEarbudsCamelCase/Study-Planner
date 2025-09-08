@@ -765,7 +765,7 @@ body.dark-mode #dashboardTasks button:hover {
   background-color: #2d3748 !important;
 }
 
-/* Stylize the dark mode toggle as a blue button */
+/* Stylize the dark mode toggle as a blue button matching the Edit User Data button */
 #darkModeToggle {
   /* Hide the default checkbox */
   appearance: none;
@@ -779,14 +779,18 @@ body.dark-mode #dashboardTasks button:hover {
 
 #darkModeToggle + span {
   display: inline-block;
+  width: 100%;
   background-color: #3182ce;
   color: #fff;
-  padding: 0.5rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
   cursor: pointer;
-  transition: background-color 0.3s;
   border: none;
+  transition: background-color 0.3s;
+  box-sizing: border-box;
 }
 
 #darkModeToggle:checked + span {

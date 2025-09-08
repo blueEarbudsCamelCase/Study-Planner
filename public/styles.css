@@ -765,9 +765,8 @@ body.dark-mode #dashboardTasks button:hover {
   background-color: #2d3748 !important;
 }
 
-/* Stylize the dark mode toggle as a blue button matching the Edit User Data button */
+/* Stylize the dark mode toggle as a blue button matching the Edit User Data button 
 #darkModeToggle {
-  /* Hide the default checkbox */
   appearance: none;
   -webkit-appearance: none;
   width: 0;
@@ -797,7 +796,7 @@ body.dark-mode #dashboardTasks button:hover {
   background-color: #2b6cb0;
 }
 
-/* Add focus style for accessibility */
+
 #darkModeToggle:focus + span {
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
-}
+}*/

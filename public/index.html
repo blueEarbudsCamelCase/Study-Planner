@@ -92,33 +92,26 @@
         </h3>
         <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1" style="max-height:400px; overflow-y:auto; border:1px solid #cdcece; border-radius:8px; padding:10px; background:#fff;"></ul>
       </div>
-        <!-- Settings Popup (leave as is) -->
+        <!-- Settings Popup (replace the old one with this) -->
         <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+          <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full flex flex-col">
             <h2 class="text-lg font-bold text-center mb-4">Settings</h2>
-            
-            <!-- Dark Mode Toggle -->
-            <div class="mb-4">
-              <label class="flex items-center">
-                <input type="checkbox" id="darkModeToggle" class="mr-2">
-                <span>Enable Dark Mode</span>
-              </label>
-            </div>
 
-            <!-- Clear User Data Button -->
-            <div class="mb-4">
-              <button onclick="localStorage.clear();location.reload();" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                Edit User Data
-              </button>
-            </div>
+            <!-- Themes Button -->
+            <button id="themesBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4 w-full">
+              Themes
+            </button>
+            <button id="editInputsBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 w-full" onclick="localStorage.clear();location.reload();">
+              Edit User Data
+            </button>
+
             <!-- Contact Information -->
-            <div class="mb-4">
-              <h3 class="font-bold text-md mb-2">Bugs or Issues?</h3>
-              <p class="text-sm text-gray-600">For bugs or suggestions, email Meridith Snair.</p>
+            <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
+              <div>Contact: <a href="mailto:meridith.snair28@na.oneschoolglobal.com" class="text-blue-500 hover:underline">support@studyplanner.com</a></div>
             </div>
 
             <!-- Close Button -->
-            <div class="flex justify-end">
+            <div class="flex justify-end mt-4">
               <button id="closeSettingsBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                 Close
               </button>

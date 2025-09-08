@@ -1045,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!date) return alert("Please select a date.");
     if (!teacher) return alert("Please enter the teacher's name.");
     const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    // Always save as UTC 23:59
+        // Always save as UTC 23:59
     const startDate = `${date}T23:59:00.000Z`;
     customTasks.push({
       summary: `Tutorial (${teacher})`,

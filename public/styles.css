@@ -764,3 +764,36 @@ body.dark-mode #dashboardTasks button {
 body.dark-mode #dashboardTasks button:hover {
   background-color: #2d3748 !important;
 }
+
+/* Stylize the dark mode toggle as a blue button */
+#darkModeToggle {
+  /* Hide the default checkbox */
+  appearance: none;
+  -webkit-appearance: none;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+}
+
+#darkModeToggle + span {
+  display: inline-block;
+  background-color: #3182ce;
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border: none;
+}
+
+#darkModeToggle:checked + span {
+  background-color: #2b6cb0;
+}
+
+/* Add focus style for accessibility */
+#darkModeToggle:focus + span {
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
+}

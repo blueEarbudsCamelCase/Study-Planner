@@ -97,17 +97,21 @@
           <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full flex flex-col">
             <h2 class="text-lg font-bold text-center mb-4">Settings</h2>
 
-            <!-- Themes Button -->
-            <button id="themesBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4 w-full">
-              Themes
-            </button>
+           <!-- Dark Mode Toggle -->
+            <div class="mb-4">
+              <label class="flex items-center">
+                <input type="checkbox" id="darkModeToggle" class="mr-2">
+                <span>Enable Dark Mode</span>
+              </label>
+            </div>
+
             <button id="editInputsBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 w-full" onclick="localStorage.clear();location.reload();">
               Edit User Data
             </button>
 
             <!-- Contact Information -->
             <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
-              <div>Contact: <a href="mailto:meridith.snair28@na.oneschoolglobal.com" class="text-blue-500 hover:underline">support@studyplanner.com</a></div>
+              <div>Contact: <a href="mailto:meridith.snair28@na.oneschoolglobal.com" class="text-blue-500 hover:underline">meridith.snair28@na.oneschoolglobal.com</a></div>
             </div>
 
             <!-- Close Button -->

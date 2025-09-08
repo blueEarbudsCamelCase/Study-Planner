@@ -765,7 +765,7 @@ body.dark-mode #dashboardTasks button:hover {
   background-color: #2d3748 !important;
 }
 
-/* Stylize the dark mode toggle as a blue button matching the Edit User Data button 
+ 
 #darkModeToggle {
   appearance: none;
   -webkit-appearance: none;
@@ -776,6 +776,7 @@ body.dark-mode #dashboardTasks button:hover {
   position: absolute;
 }
 
+/*
 #darkModeToggle + span {
   display: inline-block;
   width: 100%;

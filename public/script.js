@@ -1045,9 +1045,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!date) return alert("Please select a date.");
     if (!teacher) return alert("Please enter the teacher's name.");
     const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+    // Set time to 23:59:00 for correct grouping
+    const dateObj = new Date(date);
+    dateObj.setHours(23, 59, 0, 0);
     customTasks.push({
       summary: `Tutorial (${teacher})`,
-      startDate: new Date(date).toISOString(),
+      startDate: dateObj.toISOString(),
       teacher
     });
     localStorage.setItem("customTasks", JSON.stringify(customTasks));
@@ -1080,9 +1083,12 @@ document.addEventListener('DOMContentLoaded', () => {
       alert("Custom task titles must be unique.");
       return;
     }
+    // Set time to 23:59:00 for correct grouping
+    const dateObj = new Date(date);
+    dateObj.setHours(23, 59, 0, 0);
     customTasks.push({
       summary: title,
-      startDate: new Date(date).toISOString()
+      startDate: dateObj.toISOString()
     });
     localStorage.setItem("customTasks", JSON.stringify(customTasks));
     document.getElementById("addTaskPopup").classList.add("hidden");

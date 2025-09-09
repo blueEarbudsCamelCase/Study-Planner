@@ -219,7 +219,7 @@ if (localStorage.getItem("darkMode") === "enabled") {
 
   // Calculate the total time if this task is added
   const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-    const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+    const taskTime = parseInt(child.children[0].dataset.estimatedTime, 10) || 0;
     return sum + taskTime;
   }, 0);
 
@@ -338,7 +338,7 @@ backToDashboardBtn.addEventListener("click", () => {
       }
       // Calculate the total time if this task is added
       const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+        const taskTime = parseInt(child.children[0].dataset.estimatedTime, 10) || 0;
         return sum + taskTime;
       }, 0);
 
@@ -372,13 +372,14 @@ backToDashboardBtn.addEventListener("click", () => {
     taskPopup.classList.add("hidden");
     document.removeEventListener("mousedown", outsideClickListener);
   }
+  taskTime.select();
 }
   
   function runButtonColorCheck() {
   
     // Calculate the total time of tasks
     const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-      const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0; // Use the dataset value
+      const estimatedTime = parseInt(child.children[0].dataset.estimatedTime, 10) || 0; // Use the dataset value
         return sum + estimatedTime;
       }, 0);
   
@@ -396,7 +397,7 @@ backToDashboardBtn.addEventListener("click", () => {
   
   function addToAgenda(task, estimatedTime, zone) {
       console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
-    const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
+    const totalMinutes = 60;
   
     // Remove the placeholder text if it exists
     const placeholder = studyPlanDisplay.querySelector("p");
@@ -415,7 +416,7 @@ backToDashboardBtn.addEventListener("click", () => {
      } else {
        // If there are previous tasks, start after the last task's end time
        const lastTask = studyPlanDisplayTasks[studyPlanDisplayTasks.length - 1];
-       const lastTaskEndTime = new Date(lastTask.dataset.endTime); // Retrieve the end time from the dataset
+       const lastTaskEndTime = new Date(lastTask.children[0].dataset.endTime); // Retrieve the end time from the dataset
        studyStartTime = new Date(lastTaskEndTime);
      }
    //calculating end time
@@ -423,8 +424,13 @@ backToDashboardBtn.addEventListener("click", () => {
     taskEndTime.setMinutes(taskEndTime.getMinutes() + estimatedTime);
   
     // Create a new agenda item
+    const agendaContainer = document.createElement("div");
+    agendaContainer.className = "p-2";
+    agendaContainer.style.borderBottomWidth = ".5rem";
+    agendaContainer.style.borderBottomColor = "transparent";
+    agendaContainer.style.padding = "0px";
     const agendaItem = document.createElement("div");
-    agendaItem.className = "p-2 mb-2 rounded text-white";
+    agendaItem.className = "p-2 rounded text-white";
     agendaItem.dataset.startDate = task.startDate; // Store the startDate in the dataset
     agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
     agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
@@ -432,7 +438,7 @@ backToDashboardBtn.addEventListener("click", () => {
 
     // Calculate the proportional height based on the estimated time
     const percentage = (estimatedTime / totalMinutes) * 100;
-    agendaItem.style.flex = `0 0 ${percentage}%`; // Set height as a percentage of the total time
+    agendaContainer.style.flex = `0 0 ${percentage}%`; // Set height as a percentage of the total time
   
     switch (zone) {
       case "Independent":
@@ -447,19 +453,22 @@ backToDashboardBtn.addEventListener("click", () => {
       default:
         agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
     }
-  
-   // Set the content of the agenda item
+    agendaItem.style.height = agendaItem.style.width = "100%";
+    // Set the content of the agenda item
     agendaItem.innerHTML = `
-      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+      <span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex-shrink: 2; min-width: 0; margin: .25rem; margin-right: 0px;">${task.summary || "Unnamed Task"}</span>
+
+      <span style="white-space: nowrap; margin: .25rem; margin-left: 0px;">&nbsp;- ${estimatedTime} min.</span>
   
-      <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
+      <span class="text-sm text-gray-200" style="white-space: nowrap; margin: .25rem">${studyStartTime.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
     `;
   
     // Append the agenda item to the agenda box
-    studyPlanDisplay.appendChild(agendaItem);
+    agendaContainer.appendChild(agendaItem);
+    studyPlanDisplay.appendChild(agendaContainer);
   
     runButtonColorCheck(); 
     updateMinutesLeftDisplay(); // <-- Add this line
@@ -722,7 +731,7 @@ function loadStudyTasks() {
   function getFirstTaskDuration() {
     const firstTask = studyPlanDisplay.children[0];
       if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+        return parseInt(firstTask.children[0].dataset.estimatedTime, 10) || 0;
       }
       return 0;
   }
@@ -730,7 +739,7 @@ function loadStudyTasks() {
   function getSecondTaskDuration() {
     const firstTask = studyPlanDisplay.children[1];
       if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+        return parseInt(firstTask.children[0].dataset.estimatedTime, 10) || 0;
       }
       return 0;
   }
@@ -738,7 +747,7 @@ function loadStudyTasks() {
   function getThirdTaskDuration() {
     const firstTask = studyPlanDisplay.children[2];
       if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+        return parseInt(firstTask.children[0].dataset.estimatedTime, 10) || 0;
       }
       return 0;
   }
@@ -746,7 +755,7 @@ function loadStudyTasks() {
   function getFourthTaskDuration() {
     const firstTask = studyPlanDisplay.children[3];
       if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+        return parseInt(firstTask.children[0].dataset.estimatedTime, 10) || 0;
       }
       return 0;
   }
@@ -754,7 +763,7 @@ function loadStudyTasks() {
   function getFifthTaskDuration() {
     const firstTask = studyPlanDisplay.children[4];
       if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+        return parseInt(firstTask.children[0].dataset.estimatedTime, 10) || 0;
       }
       return 0;
   }
@@ -762,7 +771,7 @@ function loadStudyTasks() {
   function getSixthTaskDuration() {
     const firstTask = studyPlanDisplay.children[5];
       if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
+        return parseInt(firstTask.children[0].dataset.estimatedTime, 10) || 0;
       }
       return 0;
   }
@@ -826,10 +835,10 @@ function loadStudyTasks() {
   runScreen.classList.remove("hidden");
   // Build the runSessionTasks array from the DOM
   runSessionTasks = Array.from(studyPlanDisplay.children).map(child => ({
-    summary: child.textContent.split(" - ")[0],
-    startDate: child.dataset.startDate,
-    estimatedTime: parseInt(child.dataset.estimatedTime, 10),
-    zone: child.dataset.zone,
+    summary: child.children[0].textContent.split(" - ")[0],
+    startDate: child.children[0].dataset.startDate,
+    estimatedTime: parseInt(child.children[0].dataset.estimatedTime, 10),
+    zone: child.children[0].dataset.zone,
     completed: false
   }));
   updateRunScreenDisplay(0);
@@ -945,7 +954,7 @@ function updateMinutesLeftDisplay() {
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");
   const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-    const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+    const estimatedTime = parseInt(child.children[0].dataset.estimatedTime, 10) || 0;
     return sum + estimatedTime;
   }, 0);
   const minutesLeft = Math.max(60 - totalMinutes, 0);
@@ -1210,4 +1219,5 @@ function openEditTaskPopup(task) {
     renderDashboardTasks();
     loadStudyTasks();
   };
+
 }

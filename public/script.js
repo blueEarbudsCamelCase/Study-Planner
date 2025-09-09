@@ -954,8 +954,12 @@ function updateMinutesLeftDisplay() {
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");
   const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-    const estimatedTime = parseInt(child.children[0].dataset.estimatedTime, 10) || 0;
-    return sum + estimatedTime;
+    if(child.children.length) {
+      const estimatedTime = parseInt(child.children[0].dataset.estimatedTime, 10) || 0;
+      return sum + estimatedTime;
+    } else {
+      return sum;
+    }
   }, 0);
   const minutesLeft = Math.max(60 - totalMinutes, 0);
   minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
@@ -1014,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backToDashboardBtn.addEventListener("click", () => {
       studyScreen.classList.add("hidden");
       dashboardSection.classList.remove("hidden");
-      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic"><span>No tasks scheduled yet.</span></p>';
       runScreenTasks.innerHTML = '';
       updateMinutesLeftDisplay();
     });
@@ -1221,3 +1225,4 @@ function openEditTaskPopup(task) {
   };
 
 }
+

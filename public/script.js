@@ -1180,21 +1180,27 @@ function openEditTaskPopup(task) {
 
     // Update in customTasks if present
     let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    customTasks = customTasks.map(t =>
-      t.startDate === task.startDate ? { ...t, summary: newTitle } : t
-    );
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-
-    // Update in iCal tasks if present
-    let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
-    icalTasks = icalTasks.map(t =>
-      t.startDate === task.startDate ? { ...t, summary: newTitle } : t
-    );
-    localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
+    let updated = false;
+    customTasks = customTasks.map(t => {
+      if (t.startDate === task.startDate) {
+        updated = true;
+        return { ...t, summary: newTitle };
+      }
+      return t;
+    });
+    if (updated) {
+      localStorage.setItem("customTasks", JSON.stringify(customTasks));
+    } else {
+      // If not a custom task, update editedIcalTasks
+      let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+      editedIcalTasks[task.startDate] = newTitle;
+      localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
+    }
 
     editPopup.classList.add("hidden");
     editTitleInput.value = "";
 
+    // Re-render tasks
     renderDashboardTasks();
     loadStudyTasks();
   };

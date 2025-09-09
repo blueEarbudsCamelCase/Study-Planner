@@ -1155,6 +1155,47 @@ function updateIframeSrc(grade) {
 }
 
 function openEditTaskPopup(task) {
-  // You can implement a real edit popup here
-  alert("Edit Task: " + (task.summary || "Unnamed Event"));
+  const editPopup = document.getElementById("editTaskPopup");
+  const editTitleInput = document.getElementById("editTaskTitle");
+  const cancelBtn = document.getElementById("cancelEditTaskBtn");
+  const saveBtn = document.getElementById("saveEditTaskBtn");
+
+  // Show popup and set current title
+  editPopup.classList.remove("hidden");
+  editTitleInput.value = task.summary || "";
+
+  // Cancel button closes popup
+  cancelBtn.onclick = () => {
+    editPopup.classList.add("hidden");
+    editTitleInput.value = "";
+  };
+
+  // Save button updates the task title
+  saveBtn.onclick = () => {
+    const newTitle = editTitleInput.value.trim();
+    if (!newTitle) {
+      alert("Please enter a task title.");
+      return;
+    }
+
+    // Update in customTasks if present
+    let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+    customTasks = customTasks.map(t =>
+      t.startDate === task.startDate ? { ...t, summary: newTitle } : t
+    );
+    localStorage.setItem("customTasks", JSON.stringify(customTasks));
+
+    // Update in iCal tasks if present
+    let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
+    icalTasks = icalTasks.map(t =>
+      t.startDate === task.startDate ? { ...t, summary: newTitle } : t
+    );
+    localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
+
+    editPopup.classList.add("hidden");
+    editTitleInput.value = "";
+
+    renderDashboardTasks();
+    loadStudyTasks();
+  };
 }

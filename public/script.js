@@ -155,35 +155,29 @@ if (dashboardContainer) {
   const settingsPopup = document.getElementById("settingsPopup");
   const closeSettingsBtn = document.getElementById("closeSettingsBtn");
   const darkModeToggle = document.getElementById("darkModeToggle");
-  
-  // Open the settings popup
-  settingsBtn.addEventListener("click", () => {
-    settingsPopup.classList.remove("hidden"); // Show the popup
-    settingsPopup.style.visibility = "visible"; // Ensure visibility
-  });
-  
-  // Close the settings popup
-  closeSettingsBtn.addEventListener("click", () => {
-    settingsPopup.classList.add("hidden"); // Hide the popup
-    settingsPopup.style.visibility = "hidden"; // Ensure it's hidden
-  });
-  
-  // Toggle dark mode
-  darkModeToggle.addEventListener("change", () => {
-    if (darkModeToggle.checked) {
-      document.body.classList.add("dark-mode");
-      localStorage.setItem("darkMode", "enabled");
-    } else {
-      document.body.classList.remove("dark-mode");
-      localStorage.setItem("darkMode", "disabled");
-    }
-  });
-  
-  // Load dark mode preference on page load
-  if (localStorage.getItem("darkMode") === "enabled") {
+  const darkModeLabel = darkModeToggle.nextElementSibling; // Get the <span> label
+
+// Toggle dark mode
+darkModeToggle.addEventListener("change", () => {
+  if (darkModeToggle.checked) {
     document.body.classList.add("dark-mode");
-    darkModeToggle.checked = true;
+    localStorage.setItem("darkMode", "enabled");
+    darkModeLabel.textContent = "Disable Dark Mode";
+  } else {
+    document.body.classList.remove("dark-mode");
+    localStorage.setItem("darkMode", "disabled");
+    darkModeLabel.textContent = "Enable Dark Mode";
   }
+});
+
+// Load dark mode preference on page load
+if (localStorage.getItem("darkMode") === "enabled") {
+  document.body.classList.add("dark-mode");
+  darkModeToggle.checked = true;
+  darkModeLabel.textContent = "Disable Dark Mode";
+} else {
+  darkModeLabel.textContent = "Enable Dark Mode";
+}
   const runButton = document.getElementById("runButton");
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');

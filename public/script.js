@@ -1190,17 +1190,29 @@ function openEditTaskPopup(task) {
     });
     if (updated) {
       localStorage.setItem("customTasks", JSON.stringify(customTasks));
+      // Update the UI immediately for custom tasks
+      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
+      taskElements.forEach(el => {
+        const summarySpan = el.querySelector('span');
+        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
+      });
     } else {
       // If not a custom task, update editedIcalTasks
       let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
       editedIcalTasks[task.startDate] = newTitle;
       localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
+      // Update the UI immediately for iCal tasks
+      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
+      taskElements.forEach(el => {
+        const summarySpan = el.querySelector('span');
+        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
+      });
     }
 
     editPopup.classList.add("hidden");
     editTitleInput.value = "";
 
-    // Re-render tasks
+    // Optionally, still refresh tasks for consistency
     renderDashboardTasks();
     loadStudyTasks();
   };

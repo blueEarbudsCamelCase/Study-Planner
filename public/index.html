@@ -61,7 +61,7 @@
   </div>
 
   <!-- Dashboard Content -->
-  <div id="dashboardContainer" class="flex-grow container mx-auto px-4 py-8 flex flex-col justify-between h-[calc(100vh-96px)]" style="height: calc(100vh - 138px)">
+  <div id="dashboardContainer" class="flex-grow container mx-auto px-4 py-8 flex flex-col justify-between h-[calc(100vh-96px)]" style="height: calc(100vh - 20px - 13rem)">
     <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4 min-h-0">
       <!-- Iframe Section -->
       <div class="bookings-iframe-container bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
@@ -90,7 +90,7 @@
             </button>
           </div>
         </h3>
-        <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1" style="overflow-y:auto; border:1px solid #cdcece; border-radius:8px; padding:10px; background:#fff;"></ul>
+        <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1" style="max-height: 100%; overflow-y:auto; border:1px solid #cdcece; border-radius:8px; padding:10px; background:#fff;"></ul>
       </div>
         <!-- Settings Popup (replace the old one with this) -->
         <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -132,7 +132,7 @@
 </div>
 
  <!-- === Study Planner Section === -->
-<section id="studyPlannerSection" class="hidden p-6">
+<section id="studyPlannerSection" class="hidden p-6 container">
   <h1 class="text-2xl font-bold mb-4 flex items-center justify-between">
   Study Session
   <button id="refreshStudyTasksBtn" title="Refresh Study Tasks" aria-label="Refresh Study Tasks" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
@@ -145,14 +145,14 @@
     <!-- Tasks List -->
     <div class="w-1/2">
       <h3 class="font-bold text-lg mb-2">Tasks</h3>
-      <ul id="studyTasks" class="list-disc list-inside text-base space-y-1"></ul>
+      <ul style="height: calc(100vh - 20px - 19.5rem)" id="studyTasks" class="list-disc list-inside text-base space-y-1"></ul>
     </div>
 
     <!-- Study Plan Display -->
     <div class="w-1/2">
       <h3 class="font-bold text-lg mb-2">Your Study Plan:</h3>
-      <div id="studyPlanDisplay" class="p-4 bg-gray-100 rounded shadow-md">
-        <p class="text-gray-500 italic">No tasks scheduled yet.</p>
+      <div id="studyPlanDisplay" class="p-4 bg-gray-100 rounded shadow-md" style="height: calc(100vh - 20px - 19.5rem);">
+        <p class="text-gray-500 italic"><span>No tasks scheduled yet.</span></p>
       </div>
     </div>
   </div>
@@ -294,4 +294,5 @@
 </div>
 <script src="script.js"></script> 
 </body>
+
 </html>

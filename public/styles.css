@@ -277,8 +277,6 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 
 #studyTasks {
   display: none; /* Hide the tasks list initially */
-  max-height: 400px; /* Set the maximum height for the tasks list */
-  max-width: 400px; /* Set the maximum width for the tasks list */
   overflow-y: auto; /* Enable vertical scrolling */
   border: 1px solid #cdcece; /* Light border for a clean look */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
@@ -288,7 +286,6 @@ background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 
 #studyPlannerSection {
-  max-width: 800px; /* Set a maximum width for the section */
   margin: 2rem auto; /* Center the section horizontally and add vertical spacing */
   padding: 2rem; /* Add padding around the section */
   background-color: #ffffff; /* White background for the section */
@@ -340,7 +337,6 @@ align-items: flex-start;
 #studyPlanDisplay {
 display: flex; /* Use flexbox for proportional sizing */
 flex-direction: column; /* Stack tasks vertically */
-height: 400px; /* Fixed height for the total time */
 border: 1px solid #cdcece;
 border-radius: 8px;
 overflow: hidden; /* Prevent overflow */
@@ -348,6 +344,7 @@ background-color: #ffffff; /* Light background */
 padding: 8px;
 box-sizing: border-box;
 margin: 0;
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
 }
 
 #studyPlanDisplay div {
@@ -800,4 +797,5 @@ body.dark-mode #dashboardTasks button:hover {
 
 #darkModeToggle:focus + span {
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
+
 }*/

@@ -1,5 +1,5 @@
 const dashboardSection = document.getElementById("dashboardSection");
-const scheduleSetupSection = document.getElementById("scheduleSetupSection");    
+const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
 // Define fetchIcalFeed globally
 function fetchIcalFeed() {
@@ -42,13 +42,13 @@ function checkIcalFeed() {
   }
 }
 
-  document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+document.getElementById('scheduleForm').addEventListener('submit', (e) => {
   e.preventDefault();
 
   const icalUrl = document.getElementById('icalUrl').value;
   localStorage.setItem('icalFeedUrl', icalUrl);
-  console.log("iCal URL saved:", icalUrl); 
-  });  
+  console.log("iCal URL saved:", icalUrl);
+});
 
 
 // Fetch the iCal feed when the page loads
@@ -70,92 +70,92 @@ if (dashboardContainer) {
 }
 //everything from here on is functional
 
-  // Helper function to parse iCal dates
-  function parseIcalDate(rawDate) {
-    if (rawDate.includes('T')) {
-      // Handle full date-time format (e.g., 20250423T193000Z)
-      const year = parseInt(rawDate.substring(0, 4), 10);
-      const month = parseInt(rawDate.substring(4, 6), 10) - 1; // Month is zero-based
-      const day = parseInt(rawDate.substring(6, 8), 10);
-      const hours = parseInt(rawDate.substring(9, 11), 10);
-      const minutes = parseInt(rawDate.substring(11, 13), 10);
-      const seconds = parseInt(rawDate.substring(13, 15), 10);
-      return new Date(Date.UTC(year, month, day, hours, minutes, seconds)).toISOString();
-    } else {
-      // Handle date-only format (e.g., 20250422)
-      const year = parseInt(rawDate.substring(0, 4), 10);
-      const month = parseInt(rawDate.substring(4, 6), 10) - 1; // Month is zero-based
-      const day = parseInt(rawDate.substring(6, 8), 10);
-      return new Date(year, month, day).toISOString();
-    }
+// Helper function to parse iCal dates
+function parseIcalDate(rawDate) {
+  if (rawDate.includes('T')) {
+    // Handle full date-time format (e.g., 20250423T193000Z)
+    const year = parseInt(rawDate.substring(0, 4), 10);
+    const month = parseInt(rawDate.substring(4, 6), 10) - 1; // Month is zero-based
+    const day = parseInt(rawDate.substring(6, 8), 10);
+    const hours = parseInt(rawDate.substring(9, 11), 10);
+    const minutes = parseInt(rawDate.substring(11, 13), 10);
+    const seconds = parseInt(rawDate.substring(13, 15), 10);
+    return new Date(Date.UTC(year, month, day, hours, minutes, seconds)).toISOString();
+  } else {
+    // Handle date-only format (e.g., 20250422)
+    const year = parseInt(rawDate.substring(0, 4), 10);
+    const month = parseInt(rawDate.substring(4, 6), 10) - 1; // Month is zero-based
+    const day = parseInt(rawDate.substring(6, 8), 10);
+    return new Date(year, month, day).toISOString();
   }
-  
-  window.parseIcalFeed = function parseIcalFeed(data) {
-    if (!data) {
-      console.error("No data provided to parseIcalFeed.");
-      return;
+}
+
+window.parseIcalFeed = function parseIcalFeed(data) {
+  if (!data) {
+    console.error("No data provided to parseIcalFeed.");
+    return;
+  }
+
+  const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
+  const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
+
+  // Load previous edits
+  const editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+
+  const events = [];
+  const lines = data.split('\n');
+  let event = {};
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  lines.forEach(line => {
+    if (line.startsWith('SUMMARY:')) {
+      let summary = line.replace('SUMMARY:', '').trim();
+      if (summary.includes('[')) {
+        summary = summary.split('[')[0].trim();
+      }
+      event.summary = summary;
     }
-
-    const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
-    const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
-
-    // Load previous edits
-    const editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
-
-    const events = [];
-    const lines = data.split('\n');
-    let event = {};
-
-    const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    lines.forEach(line => {
-      if (line.startsWith('SUMMARY:')) {
-        let summary = line.replace('SUMMARY:', '').trim();
-        if (summary.includes('[')) {
-          summary = summary.split('[')[0].trim();
-        }
-        event.summary = summary;
+    if (line.startsWith('DTSTART')) {
+      const start = line.includes(':') ? line.split(':')[1].trim() : null;
+      if (start) {
+        event.startDate = parseIcalDate(start);
       }
-      if (line.startsWith('DTSTART')) {
-        const start = line.includes(':') ? line.split(':')[1].trim() : null;
-        if (start) {
-          event.startDate = parseIcalDate(start);
-        }
+    }
+    if (line.startsWith('DTEND')) {
+      const end = line.includes(':') ? line.split(':')[1].trim() : null;
+      if (end) {
+        event.endDate = parseIcalDate(end);
       }
-      if (line.startsWith('DTEND')) {
-        const end = line.includes(':') ? line.split(':')[1].trim() : null;
-        if (end) {
-          event.endDate = parseIcalDate(end);
-        }
+    }
+    if (line.trim() === 'END:VEVENT') {
+      const taskKey = `${event.startDate}`;
+      const eventStartDate = new Date(event.startDate);
+
+      // Apply edits if present
+      if (editedIcalTasks[taskKey]) {
+        event.summary = editedIcalTasks[taskKey];
       }
-      if (line.trim() === 'END:VEVENT') {
-        const taskKey = `${event.startDate}`;
-        const eventStartDate = new Date(event.startDate);
 
-        // Apply edits if present
-        if (editedIcalTasks[taskKey]) {
-          event.summary = editedIcalTasks[taskKey];
-        }
-
-        if (!completedTaskKeys.includes(`${event.summary}-${event.startDate}`) && eventStartDate >= sevenDaysAgo) {
-          events.push(event);
-        }
-        event = {};
+      if (!completedTaskKeys.includes(`${event.summary}-${event.startDate}`) && eventStartDate >= sevenDaysAgo) {
+        events.push(event);
       }
-    });
+      event = {};
+    }
+  });
 
-    localStorage.setItem("icalTasks", JSON.stringify(events));
-    localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
-  };
-      
-      // Toggle study planning screen
-  // Get references to the settings button, popup, and dark mode toggle
-  const settingsBtn = document.getElementById("settingsBtn");
-  const settingsPopup = document.getElementById("settingsPopup");
-  const closeSettingsBtn = document.getElementById("closeSettingsBtn");
-  const darkModeToggle = document.getElementById("darkModeToggle");
-  const darkModeLabel = darkModeToggle ? darkModeToggle.nextElementSibling : null; // Get the <span> label if present
+  localStorage.setItem("icalTasks", JSON.stringify(events));
+  localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+};
+
+// Toggle study planning screen
+// Get references to the settings button, popup, and dark mode toggle
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsPopup = document.getElementById("settingsPopup");
+const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+const darkModeToggle = document.getElementById("darkModeToggle");
+const darkModeLabel = darkModeToggle ? darkModeToggle.nextElementSibling : null; // Get the <span> label if present
 
 // Toggle dark mode (guarded)
 if (darkModeToggle) {
@@ -235,44 +235,44 @@ if (closeSettingsBtn) {
   });
 }
 
-  const runButton = document.getElementById("runButton");
-  const studyScreen = document.getElementById('studyPlannerSection');
-  const runScreen = document.getElementById('runScreen');
-  const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
-  const startStudyBtn = document.getElementById("startStudyBtn");
-  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
-  const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
-  const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
-  const mapButton = document.getElementById('mapButton');
-  const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
-  const cancelMapButton = document.getElementById('cancelMapButton');
-  const saveMapButton = document.getElementById('saveMapButton');
-  let baseTimer = document.querySelector('.base-timer')
-  
-  startStudyBtn.addEventListener("click", () => {
-    dashboardSection.classList.add("hidden"); // Hide the dashboard section
-    studyScreen.classList.remove("hidden"); // Show the study setup screen
-    loadStudyTasks();
-  });
+const runButton = document.getElementById("runButton");
+const studyScreen = document.getElementById('studyPlannerSection');
+const runScreen = document.getElementById('runScreen');
+const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
+const startStudyBtn = document.getElementById("startStudyBtn");
+const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
+const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
+const mapButton = document.getElementById('mapButton');
+const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
+const cancelMapButton = document.getElementById('cancelMapButton');
+const saveMapButton = document.getElementById('saveMapButton');
+let baseTimer = document.querySelector('.base-timer')
 
-  mapButton.addEventListener("click", () => {
-    mapPopup.classList.remove("hidden");
-  });
+startStudyBtn.addEventListener("click", () => {
+  dashboardSection.classList.add("hidden"); // Hide the dashboard section
+  studyScreen.classList.remove("hidden"); // Show the study setup screen
+  loadStudyTasks();
+});
 
-  cancelMapButton.addEventListener("click", () => {
-    mapPopup.classList.add("hidden");
-    document.getElementById("mapTime").value = "";
-    document.getElementById("mapZone").value = ""; // Reset to default value
-  });
+mapButton.addEventListener("click", () => {
+  mapPopup.classList.remove("hidden");
+});
 
-  saveMapButton.onclick = () => {
-    const estimatedTime = parseInt(mapTime.value, 10); // Ensure it's a number
-    const selectedZone = mapZone.value;
+cancelMapButton.addEventListener("click", () => {
+  mapPopup.classList.add("hidden");
+  document.getElementById("mapTime").value = "";
+  document.getElementById("mapZone").value = ""; // Reset to default value
+});
 
-    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-      alert("Please enter a valid estimated time.");
-      return;
-    }
+saveMapButton.onclick = () => {
+  const estimatedTime = parseInt(mapTime.value, 10); // Ensure it's a number
+  const selectedZone = mapZone.value;
+
+  if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+    alert("Please enter a valid estimated time.");
+    return;
+  }
 
   // Calculate the total time if this task is added
   const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
@@ -285,59 +285,59 @@ if (closeSettingsBtn) {
     alert("This task would go past the end of the Study.");
     return;
   }
-    console.log(`MAP Practice, Time: ${estimatedTime}, Zone: ${selectedZone}`);
- 
-    // Create a task object with the name "MAP Practice"
+  console.log(`MAP Practice, Time: ${estimatedTime}, Zone: ${selectedZone}`);
+
+  // Create a task object with the name "MAP Practice"
   const mapTask = {
     summary: "MAP Practice",
     startDate: new Date().toISOString(), // Use the current time as the start date
   };
 
-    addToAgenda(mapTask, estimatedTime, selectedZone);
+  addToAgenda(mapTask, estimatedTime, selectedZone);
 
-    mapPopup.classList.add("hidden");
-    document.getElementById("mapTime").value = "";
-    document.getElementById("mapZone").value = "";
-  };
+  mapPopup.classList.add("hidden");
+  document.getElementById("mapTime").value = "";
+  document.getElementById("mapZone").value = "";
+};
 backToDashboardBtn.addEventListener("click", () => {
-    studyScreen.classList.add("hidden"); // Hide the study planner section
-    dashboardSection.classList.remove("hidden"); // Show the dashboard section
-    studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-    runScreenTasks.innerHTML = '';
+  studyScreen.classList.add("hidden"); // Hide the study planner section
+  dashboardSection.classList.remove("hidden"); // Show the dashboard section
+  studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+  runScreenTasks.innerHTML = '';
 
-    updateMinutesLeftDisplay();
-  });
-  
-  backToPlanScreenBtn.addEventListener("click", () => {
-    runScreen.classList.add('hidden');
-    dashboardSection.classList.remove('hidden');
-    studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-    runScreenTasks.innerHTML = '';
-    runButtonColorCheck();
-    updateMinutesLeftDisplay();
-   
-    // Exit PiP mode if active
-    if (document.pictureInPictureElement) {
-      document.exitPictureInPicture().catch(error => {
-        console.error("Error exiting Picture-in-Picture:", error);
-      });
-    }
-  
-    console.log("Study plan and run screen cleared.");
-  
-    // Fetch, parse, and reload tasks
-    fetchIcalFeed()
-      .then(() => {
-        parseIcalFeed();
-        loadStudyTasks();
-      })
-      .catch(error => {
-        console.error("Error fetching or parsing tasks:", error);
-      });
-  });
-  
-  
-  function openTaskPopup(task) {
+  updateMinutesLeftDisplay();
+});
+
+backToPlanScreenBtn.addEventListener("click", () => {
+  runScreen.classList.add('hidden');
+  dashboardSection.classList.remove('hidden');
+  studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+  runScreenTasks.innerHTML = '';
+  runButtonColorCheck();
+  updateMinutesLeftDisplay();
+
+  // Exit PiP mode if active
+  if (document.pictureInPictureElement) {
+    document.exitPictureInPicture().catch(error => {
+      console.error("Error exiting Picture-in-Picture:", error);
+    });
+  }
+
+  console.log("Study plan and run screen cleared.");
+
+  // Fetch, parse, and reload tasks
+  fetchIcalFeed()
+    .then(() => {
+      parseIcalFeed();
+      loadStudyTasks();
+    })
+    .catch(error => {
+      console.error("Error fetching or parsing tasks:", error);
+    });
+});
+
+
+function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
   const taskTime = document.getElementById("taskTime");
   let selectedZone = null;
@@ -430,99 +430,99 @@ backToDashboardBtn.addEventListener("click", () => {
     document.removeEventListener("mousedown", outsideClickListener);
   }
 }
-  
-  function runButtonColorCheck() {
-  
-    // Calculate the total time of tasks
-    const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-      const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0; // Use the dataset value
-        return sum + estimatedTime;
-      }, 0);
-  
-    console.log("Total Minutes:", totalMinutes);
-  
-    // Update the button's color based on the total time
-    if (totalMinutes === 60) {
-      runButton.classList.add("enabled");
-      runButton.disabled = false;
-    } else {
-      runButton.classList.remove("enabled");
-      runButton.disabled = true;
-    }
-  }
-  
-  function addToAgenda(task, estimatedTime, zone) {
-      console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
-    const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
-  
-    // Remove the placeholder text if it exists
-    const placeholder = studyPlanDisplay.querySelector("p");
-    if (placeholder) {
-      placeholder.remove();
-    }
-  
-     // Calculate the start time for the study session
-     let studyStartTime;
-     const studyPlanDisplayTasks = Array.from(studyPlanDisplay.children);
-   
-     if (studyPlanDisplayTasks.length === 0) {
-       // If this is the first task, start 1 minute from now
-       studyStartTime = new Date();
-       studyStartTime.setMinutes(studyStartTime.getMinutes() + 1);
-     } else {
-       // If there are previous tasks, start after the last task's end time
-       const lastTask = studyPlanDisplayTasks[studyPlanDisplayTasks.length - 1];
-       const lastTaskEndTime = new Date(lastTask.dataset.endTime); // Retrieve the end time from the dataset
-       studyStartTime = new Date(lastTaskEndTime);
-     }
-   //calculating end time
-    const taskEndTime = new Date(studyStartTime);
-    taskEndTime.setMinutes(taskEndTime.getMinutes() + estimatedTime);
-  
-    // Create a new agenda item
-    const agendaItem = document.createElement("div");
-    agendaItem.className = "p-2 mb-2 rounded text-white";
-    agendaItem.dataset.startDate = task.startDate; // Store the startDate in the dataset
-    agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
-    agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
-    agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
 
-    // Calculate the proportional height based on the estimated time
-    const percentage = (estimatedTime / totalMinutes) * 100;
-    agendaItem.style.flex = `0 0 ${percentage}%`; // Set height as a percentage of the total time
-  
-    switch (zone) {
-      case "Independent":
-        agendaItem.style.backgroundColor = "#3182ce"; // Blue
-        break;
-      case "Semi-Collaborative":
-        agendaItem.style.backgroundColor = "#38a169"; // Green
-        break;
-      case "Collaborative":
-        agendaItem.style.backgroundColor = "#e53e3e"; // Red
-        break;
-      default:
-        agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
-    }
-  
-   // Set the content of the agenda item
-    agendaItem.innerHTML = `
+function runButtonColorCheck() {
+
+  // Calculate the total time of tasks
+  const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+    const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0; // Use the dataset value
+    return sum + estimatedTime;
+  }, 0);
+
+  console.log("Total Minutes:", totalMinutes);
+
+  // Update the button's color based on the total time
+  if (totalMinutes === 60) {
+    runButton.classList.add("enabled");
+    runButton.disabled = false;
+  } else {
+    runButton.classList.remove("enabled");
+    runButton.disabled = true;
+  }
+}
+
+function addToAgenda(task, estimatedTime, zone) {
+  console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
+  const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
+
+  // Remove the placeholder text if it exists
+  const placeholder = studyPlanDisplay.querySelector("p");
+  if (placeholder) {
+    placeholder.remove();
+  }
+
+  // Calculate the start time for the study session
+  let studyStartTime;
+  const studyPlanDisplayTasks = Array.from(studyPlanDisplay.children);
+
+  if (studyPlanDisplayTasks.length === 0) {
+    // If this is the first task, start 1 minute from now
+    studyStartTime = new Date();
+    studyStartTime.setMinutes(studyStartTime.getMinutes() + 1);
+  } else {
+    // If there are previous tasks, start after the last task's end time
+    const lastTask = studyPlanDisplayTasks[studyPlanDisplayTasks.length - 1];
+    const lastTaskEndTime = new Date(lastTask.dataset.endTime); // Retrieve the end time from the dataset
+    studyStartTime = new Date(lastTaskEndTime);
+  }
+  //calculating end time
+  const taskEndTime = new Date(studyStartTime);
+  taskEndTime.setMinutes(taskEndTime.getMinutes() + estimatedTime);
+
+  // Create a new agenda item
+  const agendaItem = document.createElement("div");
+  agendaItem.className = "p-2 mb-2 rounded text-white";
+  agendaItem.dataset.startDate = task.startDate; // Store the startDate in the dataset
+  agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
+  agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
+  agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
+
+  // Calculate the proportional height based on the estimated time
+  const percentage = (estimatedTime / totalMinutes) * 100;
+  agendaItem.style.flex = `0 0 ${percentage}%`; // Set height as a percentage of the total time
+
+  switch (zone) {
+    case "Independent":
+      agendaItem.style.backgroundColor = "#3182ce"; // Blue
+      break;
+    case "Semi-Collaborative":
+      agendaItem.style.backgroundColor = "#38a169"; // Green
+      break;
+    case "Collaborative":
+      agendaItem.style.backgroundColor = "#e53e3e"; // Red
+      break;
+    default:
+      agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
+  }
+
+  // Set the content of the agenda item
+  agendaItem.innerHTML = `
       <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
   
       <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+    hour: "2-digit",
+    minute: "2-digit",
+  })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
     `;
-  
-    // Append the agenda item to the agenda box
-    studyPlanDisplay.appendChild(agendaItem);
-  
-    runButtonColorCheck(); 
-    updateMinutesLeftDisplay(); // <-- Add this line
-  }
-  
-  // Utility to get all tasks (ical + custom)
+
+  // Append the agenda item to the agenda box
+  studyPlanDisplay.appendChild(agendaItem);
+
+  runButtonColorCheck();
+  updateMinutesLeftDisplay(); // <-- Add this line
+}
+
+// Utility to get all tasks (ical + custom)
 function getAllTasks() {
   const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
   const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
@@ -619,82 +619,82 @@ function loadStudyTasks() {
   }
   tasksList.style.display = "block";
   const today = new Date();
-  
-    // Group tasks by date
-    const tasksByDate = tasks.reduce((acc, task) => {
-      const taskDate = new Date(task.startDate).toDateString(); // Group by date string
-      if (!acc[taskDate]) {
-        acc[taskDate] = [];
+
+  // Group tasks by date
+  const tasksByDate = tasks.reduce((acc, task) => {
+    const taskDate = new Date(task.startDate).toDateString(); // Group by date string
+    if (!acc[taskDate]) {
+      acc[taskDate] = [];
+    }
+    acc[taskDate].push(task);
+    return acc;
+  }, {});
+
+  // Ensure "Today" header is always present
+  const todayKey = today.toDateString();
+  if (!tasksByDate[todayKey]) {
+    tasksByDate[todayKey] = []; // Add an empty array for today if no tasks exist
+  }
+
+  let todayHeading = null;
+
+  // Render tasks with headings
+  Object.keys(tasksByDate)
+    .sort((a, b) => new Date(a) - new Date(b)) // Sort dates chronologically
+    .forEach(date => {
+      const parsedDate = new Date(date);
+      const dateHeading = document.createElement("h3");
+
+      // Replace today's date with "Today"
+      dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
+      dateHeading.className = "font-bold text-lg mt-4 mb-2";
+      tasksList.appendChild(dateHeading);
+
+      if (parsedDate.toDateString() === today.toDateString()) {
+        todayHeading = dateHeading;
       }
-      acc[taskDate].push(task);
-      return acc;
-    }, {});
-  
-    // Ensure "Today" header is always present
-    const todayKey = today.toDateString();
-    if (!tasksByDate[todayKey]) {
-      tasksByDate[todayKey] = []; // Add an empty array for today if no tasks exist
-    }
-  
-    let todayHeading = null;
-    
-    // Render tasks with headings
-    Object.keys(tasksByDate)
-      .sort((a, b) => new Date(a) - new Date(b)) // Sort dates chronologically
-      .forEach(date => {
-        const parsedDate = new Date(date);
-        const dateHeading = document.createElement("h3");
-  
-        // Replace today's date with "Today"
-        dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
-        dateHeading.className = "font-bold text-lg mt-4 mb-2";
-        tasksList.appendChild(dateHeading);
-  
-        if (parsedDate.toDateString() === today.toDateString()) {
-          todayHeading = dateHeading; 
-        }
-  
-        if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
-          // Add a placeholder if there are no tasks for today
-          const placeholder = document.createElement("li");
-          placeholder.textContent = "You've completed all of today's tasks. Great job!";
-          placeholder.className = "text-gray-500 italic";
-          tasksList.appendChild(placeholder);
-        }
-  
-        tasksByDate[date].forEach(task => {
-          const li = document.createElement("li");
-          li.className = "mb-1 flex items-center";
-  
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.className = "mr-2";
-          checkbox.addEventListener("change", () => moveToCompleted(task, li));
-  
-          const button = document.createElement("button");
-          button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
-          button.textContent = task.summary || "Unnamed Event";
-  
-          button.addEventListener("click", () => {
-            openTaskPopup(task);
-          });
-  
-          li.appendChild(checkbox);
-          li.appendChild(button);
-  
-          // Scroll to today's tasks
-          if (todayHeading) {
-      setTimeout(() => {
-        todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 10); // Slight delay to ensure the DOM is fully updated before scrolling
-    }
-  
-          tasksList.appendChild(li);
+
+      if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
+        // Add a placeholder if there are no tasks for today
+        const placeholder = document.createElement("li");
+        placeholder.textContent = "You've completed all of today's tasks. Great job!";
+        placeholder.className = "text-gray-500 italic";
+        tasksList.appendChild(placeholder);
+      }
+
+      tasksByDate[date].forEach(task => {
+        const li = document.createElement("li");
+        li.className = "mb-1 flex items-center";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "mr-2";
+        checkbox.addEventListener("change", () => moveToCompleted(task, li));
+
+        const button = document.createElement("button");
+        button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
+        button.textContent = task.summary || "Unnamed Event";
+
+        button.addEventListener("click", () => {
+          openTaskPopup(task);
         });
+
+        li.appendChild(checkbox);
+        li.appendChild(button);
+
+        // Scroll to today's tasks
+        if (todayHeading) {
+          setTimeout(() => {
+            todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 10); // Slight delay to ensure the DOM is fully updated before scrolling
+        }
+
+        tasksList.appendChild(li);
       });
-    }
-  
-  function playBeep() {
+    });
+}
+
+function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = ctx.createOscillator();
   oscillator.type = 'sine';
@@ -705,7 +705,7 @@ function loadStudyTasks() {
   oscillator.onended = () => ctx.close();
 }
 
-  function moveToCompleted(task, taskElement, isDashboard = false) {
+function moveToCompleted(task, taskElement, isDashboard = false) {
   console.log("[moveToCompleted] Called for:", task.summary, task.startDate, "isDashboard:", isDashboard);
   const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
   completedTasks.push(task);
@@ -748,137 +748,137 @@ function loadStudyTasks() {
 }
 
 // Timer Constants
-  let TIME_LIMIT = 3600; // Set the timer duration in seconds
-  let timePassed = 0;
-  let timeLeft = TIME_LIMIT;
-  let timerInterval = null;
-  
-  const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
-  
-  // Format time as MM:SS
-  function formatTimeLeft(time) {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+let TIME_LIMIT = 3600; // Set the timer duration in seconds
+let timePassed = 0;
+let timeLeft = TIME_LIMIT;
+let timerInterval = null;
+
+const FULL_DASH_ARRAY = 283; // Full circumference of the timer circle
+
+// Format time as MM:SS
+function formatTimeLeft(time) {
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+}
+
+// Calculate the fraction of time left
+function calculateTimeFraction() {
+  const rawTimeFraction = timeLeft / TIME_LIMIT;
+  return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+}
+
+// Update the circle's dash array
+function setCircleDasharray() {
+  const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
+  baseTimer
+    .querySelector("#base-timer-path-remaining")
+    .setAttribute("stroke-dasharray", circleDasharray);
+}
+
+function getFirstTaskDuration() {
+  const firstTask = studyPlanDisplay.children[0];
+  if (firstTask) {
+    return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
   }
-  
-  // Calculate the fraction of time left
-  function calculateTimeFraction() {
-    const rawTimeFraction = timeLeft / TIME_LIMIT;
-    return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+  return 0;
+}
+
+function getSecondTaskDuration() {
+  const firstTask = studyPlanDisplay.children[1];
+  if (firstTask) {
+    return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
   }
-  
-  // Update the circle's dash array
-  function setCircleDasharray() {
-    const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
-    baseTimer
-      .querySelector("#base-timer-path-remaining")
-      .setAttribute("stroke-dasharray", circleDasharray);
+  return 0;
+}
+
+function getThirdTaskDuration() {
+  const firstTask = studyPlanDisplay.children[2];
+  if (firstTask) {
+    return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
   }
-  
-  function getFirstTaskDuration() {
-    const firstTask = studyPlanDisplay.children[0];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
+  return 0;
+}
+
+function getFourthTaskDuration() {
+  const firstTask = studyPlanDisplay.children[3];
+  if (firstTask) {
+    return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
   }
-  
-  function getSecondTaskDuration() {
-    const firstTask = studyPlanDisplay.children[1];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
+  return 0;
+}
+
+function getFifthTaskDuration() {
+  const firstTask = studyPlanDisplay.children[4];
+  if (firstTask) {
+    return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
   }
-  
-  function getThirdTaskDuration() {
-    const firstTask = studyPlanDisplay.children[2];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
+  return 0;
+}
+
+function getSixthTaskDuration() {
+  const firstTask = studyPlanDisplay.children[5];
+  if (firstTask) {
+    return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
   }
-  
-  function getFourthTaskDuration() {
-    const firstTask = studyPlanDisplay.children[3];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
+  return 0;
+}
+
+
+function startTaskTimer(taskIndex) {
+  const taskDurations = [
+    getFirstTaskDuration(),
+    getSecondTaskDuration(),
+    getThirdTaskDuration(),
+    getFourthTaskDuration(),
+    getFifthTaskDuration(),
+    getSixthTaskDuration(),
+  ];
+
+  // Check if the task exists
+  if (taskIndex >= taskDurations.length || taskDurations[taskIndex] === 0) {
+    console.log("No more tasks to start.");
+    return; // Stop if there are no more tasks
   }
-  
-  function getFifthTaskDuration() {
-    const firstTask = studyPlanDisplay.children[4];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  function getSixthTaskDuration() {
-    const firstTask = studyPlanDisplay.children[5];
-      if(firstTask) {
-        return parseInt(firstTask.dataset.estimatedTime, 10) || 0;
-      }
-      return 0;
-  }
-  
-  
-  function startTaskTimer(taskIndex) {
-    const taskDurations = [
-      getFirstTaskDuration(),
-      getSecondTaskDuration(),
-      getThirdTaskDuration(),
-      getFourthTaskDuration(),
-      getFifthTaskDuration(),
-      getSixthTaskDuration(),
-    ];
-  
-    // Check if the task exists
-    if (taskIndex >= taskDurations.length || taskDurations[taskIndex] === 0) {
-      console.log("No more tasks to start.");
-      return; // Stop if there are no more tasks
-    }
-  
-    TIME_LIMIT = taskDurations[taskIndex] * 60; // Convert minutes to seconds
-    timePassed = 0;
-    timeLeft = TIME_LIMIT;
-  
+
+  TIME_LIMIT = taskDurations[taskIndex] * 60; // Convert minutes to seconds
+  timePassed = 0;
+  timeLeft = TIME_LIMIT;
+
+  // Update the timer label
+  baseTimer.querySelector("#base-timer-label").textContent = formatTimeLeft(timeLeft);
+  setCircleDasharray();
+
+  // Clear any existing timer
+  clearInterval(timerInterval);
+
+  // Start the timer
+  timerInterval = setInterval(() => {
+    timePassed += 1;
+    timeLeft = TIME_LIMIT - timePassed;
+
     // Update the timer label
     baseTimer.querySelector("#base-timer-label").textContent = formatTimeLeft(timeLeft);
-    setCircleDasharray();
-  
-    // Clear any existing timer
-    clearInterval(timerInterval);
-  
-    // Start the timer
-    timerInterval = setInterval(() => {
-      timePassed += 1;
-      timeLeft = TIME_LIMIT - timePassed;
-  
-      // Update the timer label
-      baseTimer.querySelector("#base-timer-label").textContent = formatTimeLeft(timeLeft);
-  
-      // Update the circle dash array
-      if (timeLeft > 0) {
-        setCircleDasharray();
-      } else {
-        clearInterval(timerInterval); // Stop the timer
-        playBeep(); // Play a beep sound
-        console.log("Timer ended. Keeping the circle empty.");
-        baseTimer
-          .querySelector("#base-timer-path-remaining")
-          .setAttribute("stroke-dasharray", "0 283"); // Keep the circle empty
-      }
-    }, 1000);
-  }
 
-  let runSessionTasks = [];
+    // Update the circle dash array
+    if (timeLeft > 0) {
+      setCircleDasharray();
+    } else {
+      clearInterval(timerInterval); // Stop the timer
+      playBeep(); // Play a beep sound
+      console.log("Timer ended. Keeping the circle empty.");
+      baseTimer
+        .querySelector("#base-timer-path-remaining")
+        .setAttribute("stroke-dasharray", "0 283"); // Keep the circle empty
+    }
+  }, 1000);
+}
+
+let runSessionTasks = [];
 
 
-  // Initialize the timer when the runScreen is shown
- runButton.onclick = () => {
+// Initialize the timer when the runScreen is shown
+runButton.onclick = () => {
   studyScreen.classList.add("hidden");
   runScreen.classList.remove("hidden");
   // Build the runSessionTasks array from the DOM
@@ -892,10 +892,10 @@ function loadStudyTasks() {
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
-  
-  const runScreenTasks = document.getElementById("runScreenTasks")
-  
-  function updateRunScreenDisplay(taskIndex) {
+
+const runScreenTasks = document.getElementById("runScreenTasks")
+
+function updateRunScreenDisplay(taskIndex) {
   // Only show tasks that are not completed
   const incompleteTasks = runSessionTasks.filter(task => !task.completed);
   const currentTask = incompleteTasks[taskIndex];
@@ -904,42 +904,40 @@ function loadStudyTasks() {
   runScreenTasks.innerHTML = `
     <div class="current-task">
       <h2 class="font-bold text-lg mb-2">Current Task</h2>
-      ${
-        currentTask
-          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(currentTask.zone)};">
+      ${currentTask
+      ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(currentTask.zone)};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
                 <label for="currentTaskCheckbox">${currentTask.summary} - ${currentTask.estimatedTime} min.</label>
               </div>`
-          : `<p class="text-gray-500 italic">No current task.</p>`
-      }
+      : `<p class="text-gray-500 italic">No current task.</p>`
+    }
     </div>
     <div class="upcoming-tasks">
       <h2 class="font-bold text-lg mb-2">Upcoming Tasks</h2>
-      ${
-        upcomingTasks.length > 0
-          ? upcomingTasks
-              .map(
-                (task) => `
+      ${upcomingTasks.length > 0
+      ? upcomingTasks
+        .map(
+          (task) => `
                 <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(task.zone)};">
                   <label>${task.summary} - ${task.estimatedTime} min.</label>
                 </div>
               `
-              )
-              .join("")
-          : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
-      }
+        )
+        .join("")
+      : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
+    }
     </div>
   `;
 
-    // Handle marking the current task as completed
-    const currentTaskCheckbox = document.getElementById("currentTaskCheckbox");
-    if (currentTaskCheckbox) {
-      currentTaskCheckbox.addEventListener("change", () => {
-        if (currentTaskCheckbox.checked) {
-          playBeep();
-          currentTask.completed = true;
-          moveToCompleted(currentTask, null);  
- 
+  // Handle marking the current task as completed
+  const currentTaskCheckbox = document.getElementById("currentTaskCheckbox");
+  if (currentTaskCheckbox) {
+    currentTaskCheckbox.addEventListener("change", () => {
+      if (currentTaskCheckbox.checked) {
+        playBeep();
+        currentTask.completed = true;
+        moveToCompleted(currentTask, null);
+
         // Wait for fade-out animation (500ms), then update display and timer
         setTimeout(() => {
           const stillIncomplete = runSessionTasks.filter(task => !task.completed);
@@ -958,7 +956,7 @@ function loadStudyTasks() {
   }
 }
 
- // Helper function to get the color based on the zone
+// Helper function to get the color based on the zone
 function getTaskZoneColor(zone) {
   switch (zone) {
     case "Independent":
@@ -971,50 +969,50 @@ function getTaskZoneColor(zone) {
       return "#718096"; // Gray (fallback)
   }
 }
-  // Add an event listener to the PiP button
-  const pipButton = document.getElementById('enablePiPButton');
-  const runScreenBox = document.getElementById('runScreenBox');
-  if (pipButton) {
-    // If the browser supports the documentPictureInPicture API, wire it up; otherwise provide a no-op/fallback
-    if (typeof window.documentPictureInPicture !== 'undefined') {
-      pipButton.addEventListener('click', () => {
-        try {
-          if (window.documentPictureInPicture.window) {
-            window.documentPictureInPicture.window.close();
-            pipButton.textContent = "Show Popup";
-            return;
-          }
-          window.documentPictureInPicture.requestWindow().then(pipWindow => {
-            pipButton.textContent = "Hide Popup"; // Update button text
-            for (let styleSheet of document.querySelectorAll("link[rel=stylesheet]")) {
-              let newStyleSheet = document.createElement("link");
-              newStyleSheet.rel = "stylesheet";
-              newStyleSheet.href = styleSheet.href;
-              pipWindow.document.body.append(newStyleSheet);
-            }
-            pipWindow.document.body.append(baseTimer);
-            baseTimer = pipWindow.document.querySelector(".base-timer");
-            pipWindow.addEventListener("pagehide", () => {
-              if (runScreenBox && runScreenBox.children[0]) {
-                runScreenBox.children[0].insertBefore(baseTimer, runScreenBox.children[0].children[0]);
-              }
-              pipButton.textContent = "Show Popup";
-            });
-          }).catch(error => {
-            console.error("Error enabling Picture-in-Picture:", error);
-            alert('Picture-in-Picture could not be enabled.');
-          });
-        } catch (err) {
-          console.error('PiP error:', err);
+// Add an event listener to the PiP button
+const pipButton = document.getElementById('enablePiPButton');
+const runScreenBox = document.getElementById('runScreenBox');
+if (pipButton) {
+  // If the browser supports the documentPictureInPicture API, wire it up; otherwise provide a no-op/fallback
+  if (typeof window.documentPictureInPicture !== 'undefined') {
+    pipButton.addEventListener('click', () => {
+      try {
+        if (window.documentPictureInPicture.window) {
+          window.documentPictureInPicture.window.close();
+          pipButton.textContent = "Show Popup";
+          return;
         }
-      });
-    } else {
-      // Fallback: avoid throwing and provide a user-friendly message
-      pipButton.addEventListener('click', () => {
-        alert('Picture-in-Picture is not supported by this browser.');
-      });
-    }
+        window.documentPictureInPicture.requestWindow().then(pipWindow => {
+          pipButton.textContent = "Hide Popup"; // Update button text
+          for (let styleSheet of document.querySelectorAll("link[rel=stylesheet]")) {
+            let newStyleSheet = document.createElement("link");
+            newStyleSheet.rel = "stylesheet";
+            newStyleSheet.href = styleSheet.href;
+            pipWindow.document.body.append(newStyleSheet);
+          }
+          pipWindow.document.body.append(baseTimer);
+          baseTimer = pipWindow.document.querySelector(".base-timer");
+          pipWindow.addEventListener("pagehide", () => {
+            if (runScreenBox && runScreenBox.children[0]) {
+              runScreenBox.children[0].insertBefore(baseTimer, runScreenBox.children[0].children[0]);
+            }
+            pipButton.textContent = "Show Popup";
+          });
+        }).catch(error => {
+          console.error("Error enabling Picture-in-Picture:", error);
+          alert('Picture-in-Picture could not be enabled.');
+        });
+      } catch (err) {
+        console.error('PiP error:', err);
+      }
+    });
+  } else {
+    // Fallback: avoid throwing and provide a user-friendly message
+    pipButton.addEventListener('click', () => {
+      alert('Picture-in-Picture is not supported by this browser.');
+    });
   }
+}
 function updateMinutesLeftDisplay() {
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");
@@ -1113,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!date) return alert("Please select a date.");
     if (!teacher) return alert("Please enter the teacher's name.");
     const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-        // Always save as UTC 23:59
+    // Always save as UTC 23:59
     const startDate = `${date}T23:59:00.000Z`;
     customTasks.push({
       summary: `Tutorial (${teacher})`,

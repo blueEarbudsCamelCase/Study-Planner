@@ -1,117 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Study Planner</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"> 
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="bg-gray-100 font-sans">
-<!-- Schedule Setup Section -->
-<div id="scheduleSetupSection" class="hidden min-h-screen flex flex-col items-center justify-center p-8">
-  <form id="scheduleForm" class="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl">
-    <h2 class="text-2xl font-bold mb-6">Input your iCal Feed:</h2>
+  <!-- Schedule Setup Section -->
+  <div id="scheduleSetupSection" class="hidden min-h-screen flex flex-col items-center justify-center p-8">
+    <form id="scheduleForm" class="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl">
+      <h2 class="text-2xl font-bold mb-6">Input your iCal Feed:</h2>
 
-    <!-- iCal Feed Input -->
-    <div class="mb-4">
-      <input
-        type="url"
-        id="icalUrl"
-        placeholder="https://example.com/calendar.ics"
-        class="w-full px-3 py-2 border rounded-md"
-      />
+      <!-- iCal Feed Input -->
       <div class="mb-4">
-        <label for="gradeSelect" class="block mb-2 font-semibold">Select Your Grade:</label>
-        <select id="gradeSelect" class="w-full px-3 py-2 border rounded-md">
-          <option value="7-8">Grade 7/8</option>
-          <option value="9-10">Grade 9/10</option>
-          <option value="11-12">Grade 11/12</option>
-        </select>
+        <input type="url" id="icalUrl" placeholder="https://example.com/calendar.ics"
+          class="w-full px-3 py-2 border rounded-md" />
+        <div class="mb-4">
+          <label for="gradeSelect" class="block mb-2 font-semibold">Select Your Grade:</label>
+          <select id="gradeSelect" class="w-full px-3 py-2 border rounded-md">
+            <option value="7-8">Grade 7/8</option>
+            <option value="9-10">Grade 9/10</option>
+            <option value="11-12">Grade 11/12</option>
+          </select>
+        </div>
+        <p id="icalMessage" class="text-sm text-gray-500 mt-2 hidden">
+          No iCal feed saved. Please provide a valid URL.
+        </p>
       </div>
-      <p id="icalMessage" class="text-sm text-gray-500 mt-2 hidden">
-        No iCal feed saved. Please provide a valid URL.
-      </p>
-    </div>
 
-    <!-- Save Button -->
-    <button
-      type="submit"
-      onclick="location.reload()"
-      id="urlSaveButton"
-      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-    >
-      Save
-    </button>
-  </form>
-</div>
+      <!-- Save Button -->
+      <button type="submit" onclick="location.reload()" id="urlSaveButton"
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+        Save
+      </button>
+    </form>
+  </div>
 
   <!-- Dashboard Section -->
   <div id="dashboardSection" class="min-h-screen flex flex-col bg-gray-100 font-sans">
-  <!-- Header -->
-  <div id="header" class="w-full bg-white shadow-lg p-4 z-50">
-    <div class="max-w-7xl mx-auto flex justify-center items-center">
-      <h2 class="text-3xl font-bold">Welcome to Your Dashboard</h2>
-      <!-- Settings Button and Popup -->
-          <button id="settingsBtn" class="absolute top-4 right-4 bg-gray-500 text-white p-2 rounded-full hover:bg-gray-600 transition">
-            <i class="fas fa-cog"></i>
-          </button>
+    <!-- Header -->
+    <div id="header" class="w-full bg-white shadow-lg p-4 z-50">
+      <div class="max-w-7xl mx-auto flex justify-center items-center">
+        <h2 class="text-3xl font-bold">Welcome to Your Dashboard</h2>
+        <!-- Settings Button and Popup -->
+        <button id="settingsBtn"
+          class="absolute top-4 right-4 bg-gray-500 text-white p-2 rounded-full hover:bg-gray-600 transition">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
     </div>
-  </div>
 
-  <!-- Dashboard Content -->
-  <div id="dashboardContainer" class="flex-grow container mx-auto px-4 py-8 flex flex-col justify-between h-[calc(100vh-96px)]" style="height: calc(100vh - 20px - 13rem)">
-    <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4 min-h-0">
-      <!-- Iframe Section -->
-      <div class="bookings-iframe-container bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-bold">Book a Tutorial:</h3>
-          <button id="addTutorialBtn" title="Add Tutorial" aria-label="Add Tutorial" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
-        </div>
-        <iframe
-          id="bookingsIframe"
-          src="https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled"
-          class="w-full h-full rounded-xl flex-1"
-          scrolling='yes'
-          title="Book a Tutorial"
-          aria-label="Book a Tutorial">
-        </iframe>
-      </div>
-
-      <!-- Tasks Section -->
-      <div class="bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
-        <h3 class="text-xl font-bold mb-4 flex items-center justify-between">
-          Tasks
-          <div class="flex items-center">
-            <button id="addTaskBtn" title="Add Task" aria-label="Add Task" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
-            <button id="refreshTasksBtn" title="Refresh Tasks" aria-label="Refresh Tasks" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
-              <i class="fas fa-sync" style="font-size:1rem;display:flex;align-items:center;justify-content:center;"></i>
-            </button>
+    <!-- Dashboard Content -->
+    <div id="dashboardContainer"
+      class="flex-grow container mx-auto px-4 py-8 flex flex-col justify-between h-[calc(100vh-96px)]"
+      style="height: calc(100vh - 20px - 13rem)">
+      <div class="flex flex-col lg:flex-row gap-8 h-full flex-grow mt-4 min-h-0">
+        <!-- Iframe Section -->
+        <div class="bookings-iframe-container bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Book a Tutorial:</h3>
+            <button id="addTutorialBtn" title="Add Tutorial" aria-label="Add Tutorial"
+              class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
           </div>
-        </h3>
-        <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1" style="max-height: 100%; overflow-y:auto; border:1px solid #cdcece; border-radius:8px; padding:10px; background:#fff;"></ul>
-      </div>
+          <iframe id="bookingsIframe"
+            src="https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled"
+            class="w-full h-full rounded-xl flex-1" scrolling='yes' title="Book a Tutorial"
+            aria-label="Book a Tutorial">
+          </iframe>
+        </div>
+
+        <!-- Tasks Section -->
+        <div class="bg-white shadow-2xl rounded-2xl p-8 flex-1 min-h-0 flex flex-col">
+          <h3 class="text-xl font-bold mb-4 flex items-center justify-between">
+            Tasks
+            <div class="flex items-center">
+              <button id="addTaskBtn" title="Add Task" aria-label="Add Task"
+                class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">+</button>
+              <button id="refreshTasksBtn" title="Refresh Tasks" aria-label="Refresh Tasks"
+                class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
+                <i class="fas fa-sync"
+                  style="font-size:1rem;display:flex;align-items:center;justify-content:center;"></i>
+              </button>
+            </div>
+          </h3>
+          <ul id="dashboardTasks" class="list-disc list-inside text-base space-y-1"
+            style="max-height: 100%; overflow-y:auto; border:1px solid #cdcece; border-radius:8px; padding:10px; background:#fff;">
+          </ul>
+        </div>
         <!-- Settings Popup (replace the old one with this) -->
-        <div id="settingsPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div id="settingsPopup"
+          class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full flex flex-col">
             <h2 class="text-lg font-bold text-center mb-4">Settings</h2>
 
-           <!-- Dark Mode Toggle -->
+            <!-- Dark Mode Toggle -->
             <div class="mb-4">
               <label class="flex items-center">
                 <input type="checkbox" id="darkModeToggle" class="mr-2">
-                <span class="text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4 w-full">Enable Dark Mode</span>
+                <span class="text-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4 w-full">Enable
+                  Dark Mode</span>
               </label>
             </div>
 
-            <button id="editInputsBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 w-full" onclick="localStorage.clear();location.reload();">
+            <button id="editInputsBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4 w-full"
+              onclick="localStorage.clear();location.reload();">
               Edit User Data
             </button>
 
             <!-- Contact Information -->
             <div class="mt-6 border-t pt-4 text-center text-sm text-gray-500">
-              <div>Contact: <a href="mailto:meridith.snair28@na.oneschoolglobal.com" class="text-blue-500 hover:underline">meridith.snair28@na.oneschoolglobal.com</a></div>
+              <div>Contact: <a href="mailto:meridith.snair28@na.oneschoolglobal.com"
+                  class="text-blue-500 hover:underline">meridith.snair28@na.oneschoolglobal.com</a></div>
             </div>
 
             <!-- Close Button -->
@@ -124,175 +128,187 @@
         </div>
       </div>
     </div>
-  
+
     <!-- Start Study Button -->
-    <button id="startStudyBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 transition duration-300 mt-0">
+    <button id="startStudyBtn"
+      class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 transition duration-300 mt-0">
       Plan Your Study
     </button>
-</div>
+  </div>
 
- <!-- === Study Planner Section === -->
-<section id="studyPlannerSection" class="hidden p-6 container">
-  <h1 class="text-2xl font-bold mb-4 flex items-center justify-between">
-  Study Session
-  <button id="refreshStudyTasksBtn" title="Refresh Study Tasks" aria-label="Refresh Study Tasks" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
-    <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
-      <i class="fas fa-sync" style="font-size:0.85rem;"></i>
-    </span>
-  </button>
-</h1>
-  <div class="flex space-x-4">
-    <!-- Tasks List -->
-    <div class="w-1/2">
-      <h3 class="font-bold text-lg mb-2">Tasks</h3>
-      <ul style="height: calc(100vh - 20px - 19.5rem)" id="studyTasks" class="list-disc list-inside text-base space-y-1"></ul>
+  <!-- === Study Planner Section === -->
+  <section id="studyPlannerSection" class="hidden p-6 container">
+    <h1 class="text-2xl font-bold mb-4 flex items-center justify-between">
+      Study Session
+      <button id="refreshStudyTasksBtn" title="Refresh Study Tasks" aria-label="Refresh Study Tasks"
+        class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
+        <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+          <i class="fas fa-sync" style="font-size:0.85rem;"></i>
+        </span>
+      </button>
+    </h1>
+    <div class="flex space-x-4">
+      <!-- Tasks List -->
+      <div class="w-1/2">
+        <h3 class="font-bold text-lg mb-2">Tasks</h3>
+        <ul style="height: calc(100vh - 20px - 19.5rem)" id="studyTasks"
+          class="list-disc list-inside text-base space-y-1"></ul>
+      </div>
+
+      <!-- Study Plan Display -->
+      <div class="w-1/2">
+        <h3 class="font-bold text-lg mb-2">Your Study Plan:</h3>
+        <div id="studyPlanDisplay" class="p-4 bg-gray-100 rounded shadow-md"
+          style="height: calc(100vh - 20px - 19.5rem);">
+          <p class="text-gray-500 italic"><span>No tasks scheduled yet.</span></p>
+        </div>
+      </div>
     </div>
 
-    <!-- Study Plan Display -->
-    <div class="w-1/2">
-      <h3 class="font-bold text-lg mb-2">Your Study Plan:</h3>
-      <div id="studyPlanDisplay" class="p-4 bg-gray-100 rounded shadow-md" style="height: calc(100vh - 20px - 19.5rem);">
-        <p class="text-gray-500 italic"><span>No tasks scheduled yet.</span></p>
+    <div class="flex items-center justify-between mt-4">
+      <div class="flex items-center space-x-2">
+        <button id="mapButton">MAP Practice</button>
+        <button id="runButton" disabled>Start</button>
+      </div>
+      <div id="minutesLeftDisplay" class="text-gray-600 font-bold w-40 text-right"></div>
+    </div>
+
+    <button id="backToDashboardBtn" class="bg-red-500 text-white px-4 py-2 rounded shadow-md">Back to Dashboard</button>
+  </section>
+
+  <!----MAP Practice Popup -->
+
+  <div id="mapPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+      <h2 class="text-lg font-bold text-center mb-4">MAP Practice Details</h2>
+      <label class="block mb-2">Estimated Time (minutes):</label>
+      <input type="number" id="mapTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
+
+      <label class="block mb-2">Zone:</label>
+      <select id="mapZone" class="w-full border border-gray-300 rounded p-2 mb-4" title="Select your MAP Practice zone"
+        aria-label="Zone">
+        <option value="Independent">Focus</option>
+        <option value="Semi-Collaborative">Semi-Collaborative</option>
+        <option value="Collaborative">Collaborative</option>
+      </select>
+
+      <div class="flex justify-end gap-2">
+        <button id="cancelMapButton" class="text-gray-600 hover:underline">Cancel</button>
+        <button id="saveMapButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
       </div>
     </div>
   </div>
 
-<div class="flex items-center justify-between mt-4">
-    <div class="flex items-center space-x-2">
-      <button id="mapButton">MAP Practice</button>
-      <button id="runButton" disabled>Start</button>
-    </div>
-  <div id="minutesLeftDisplay" class="text-gray-600 font-bold w-40 text-right"></div>
-</div>
+  <!-- Task Popup -->
 
-  <button id="backToDashboardBtn" class="bg-red-500 text-white px-4 py-2 rounded shadow-md">Back to Dashboard</button>
-</section>
-  
-<!----MAP Practice Popup -->
+  <div id="taskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full relative">
+      <h2 class="text-lg font-bold text-center mb-4">Task Details</h2>
+      <label class="block mb-2">Estimated Time (minutes):</label>
+      <input type="number" id="taskTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
+      <div class="flex space-x-2 mb-4">
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">5</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">10</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">15</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">20</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">25</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">30</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">35</button>
+        <button type="button"
+          class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">40</button>
+      </div>
 
-<div id="mapPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-bold text-center mb-4">MAP Practice Details</h2>
-    <label class="block mb-2">Estimated Time (minutes):</label>
-    <input type="number" id="mapTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
-
-    <label class="block mb-2">Zone:</label>
-    <select id="mapZone" class="w-full border border-gray-300 rounded p-2 mb-4" title="Select your MAP Practice zone" aria-label="Zone">
-      <option value="Independent">Focus</option>
-      <option value="Semi-Collaborative">Semi-Collaborative</option>
-      <option value="Collaborative">Collaborative</option>
-    </select>
-
-    <div class="flex justify-end gap-2">
-      <button id="cancelMapButton" class="text-gray-600 hover:underline">Cancel</button>
-      <button id="saveMapButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Task Popup -->
-
-<div id="taskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full relative">
-    <h2 class="text-lg font-bold text-center mb-4">Task Details</h2>
-    <label class="block mb-2">Estimated Time (minutes):</label>
-    <input type="number" id="taskTime" class="w-full border border-gray-300 rounded p-2 mb-4" />
-    <div class="flex space-x-2 mb-4">
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">5</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">10</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">15</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">20</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">25</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">30</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">35</button>
-      <button type="button" class="time-btn bg-gray-200 rounded w-10 h-10 text-sm font-bold hover:bg-gray-300">40</button>
-    </div>
-
-    <label class="block mb-2">Zone:</label>
-    <div id="zoneButtonGroup" class="flex space-x-2 mb-4">
-      <button type="button" class="zone-btn bg-blue-600 text-white rounded w-32 h-10 text-xs font-bold" data-zone="Independent">Focus</button>
-      <button type="button" class="zone-btn bg-green-600 text-white rounded w-32 h-10 text-xs font-bold" data-zone="Semi-Collaborative">Semi-Collaborative</button>
-      <button type="button" class="zone-btn bg-red-600 text-white rounded w-32 h-10 text-xs font-bold" data-zone="Collaborative">Collaborative</button>
+      <label class="block mb-2">Zone:</label>
+      <div id="zoneButtonGroup" class="flex space-x-2 mb-4">
+        <button type="button" class="zone-btn bg-blue-600 text-white rounded w-32 h-10 text-xs font-bold"
+          data-zone="Independent">Focus</button>
+        <button type="button" class="zone-btn bg-green-600 text-white rounded w-32 h-10 text-xs font-bold"
+          data-zone="Semi-Collaborative">Semi-Collaborative</button>
+        <button type="button" class="zone-btn bg-red-600 text-white rounded w-32 h-10 text-xs font-bold"
+          data-zone="Collaborative">Collaborative</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="runScreen" class="hidden p-6">
-  <div id="runScreenBox" class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-300">
-    <div class="flex flex-col items-center">
-      <!-- timer -->
-  <div class="base-timer">
-    <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <g class="base-timer__circle">
-        <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45" />
-        <path
-        id="base-timer-path-remaining"
-        stroke-dasharray="283"
-        class="base-timer__path-remaining ${remainingPathColor}"
-        d="
+  <div id="runScreen" class="hidden p-6">
+    <div id="runScreenBox" class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg border border-gray-300">
+      <div class="flex flex-col items-center">
+        <!-- timer -->
+        <div class="base-timer">
+          <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g class="base-timer__circle">
+              <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45" />
+              <path id="base-timer-path-remaining" stroke-dasharray="283"
+                class="base-timer__path-remaining ${remainingPathColor}" d="
           M 50, 50
           m -45, 0
           a 45,45 0 1,0 90,0
           a 45,45 0 1,0 -90,0
-        "
-      ></path>
-      </g>
-    </svg>
-    <span id="base-timer-label" class="base-timer__label">
-    </span>
-  </div>
-      <!-- Tasks -->
-      <div id="runScreenTasks" class="w-full"></div>
-      <!-- Popup Button -->
-      <button id="enablePiPButton" class="bg-blue-500 text-white px-4 py-2 rounded">Show Popup</button>
-      <!-- Exit Button -->
-      <button id="backToPlanScreenBtn" class="bg-red-500 text-white px-4 py-2 rounded shadow-md mt-4">
-        Exit
-      </button>
+        "></path>
+            </g>
+          </svg>
+          <span id="base-timer-label" class="base-timer__label">
+          </span>
+        </div>
+        <!-- Tasks -->
+        <div id="runScreenTasks" class="w-full"></div>
+        <!-- Popup Button -->
+        <button id="enablePiPButton" class="bg-blue-500 text-white px-4 py-2 rounded">Show Popup</button>
+        <!-- Exit Button -->
+        <button id="backToPlanScreenBtn" class="bg-red-500 text-white px-4 py-2 rounded shadow-md mt-4">
+          Exit
+        </button>
+      </div>
     </div>
   </div>
-</div>
-<!-- Add Tutorial Popup -->
-<div id="addTutorialPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-bold text-center mb-4">Add Tutorial</h2>
-    <label class="block mb-2">Date:</label>
-    <input type="date" id="tutorialDate" class="w-full border border-gray-300 rounded p-2 mb-4" />
-    <label class="block mb-2">Teacher's Name:</label>
-    <input type="text" id="tutorialTeacher" class="w-full border border-gray-300 rounded p-2 mb-4" />
-    <div class="flex justify-end gap-2">
-      <button id="cancelTutorialBtn" class="text-gray-600 hover:underline">Cancel</button>
-      <button id="saveTutorialBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+  <!-- Add Tutorial Popup -->
+  <div id="addTutorialPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+      <h2 class="text-lg font-bold text-center mb-4">Add Tutorial</h2>
+      <label class="block mb-2">Date:</label>
+      <input type="date" id="tutorialDate" class="w-full border border-gray-300 rounded p-2 mb-4" />
+      <label class="block mb-2">Teacher's Name:</label>
+      <input type="text" id="tutorialTeacher" class="w-full border border-gray-300 rounded p-2 mb-4" />
+      <div class="flex justify-end gap-2">
+        <button id="cancelTutorialBtn" class="text-gray-600 hover:underline">Cancel</button>
+        <button id="saveTutorialBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+      </div>
     </div>
   </div>
-</div>
-<!-- Add Task Popup -->
-<div id="addTaskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-bold text-center mb-4">Add Task</h2>
-    <label class="block mb-2">Task Title:</label>
-    <input type="text" id="customTaskTitle" class="w-full border border-gray-300 rounded p-2 mb-4" />
-    <label class="block mb-2">Date:</label>
-    <input type="date" id="customTaskDate" class="w-full border border-gray-300 rounded p-2 mb-4" />
-    <div class="flex justify-end gap-2">
-      <button id="cancelTaskBtn" class="text-gray-600 hover:underline">Cancel</button>
-      <button id="saveTaskBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+  <!-- Add Task Popup -->
+  <div id="addTaskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+      <h2 class="text-lg font-bold text-center mb-4">Add Task</h2>
+      <label class="block mb-2">Task Title:</label>
+      <input type="text" id="customTaskTitle" class="w-full border border-gray-300 rounded p-2 mb-4" />
+      <label class="block mb-2">Date:</label>
+      <input type="date" id="customTaskDate" class="w-full border border-gray-300 rounded p-2 mb-4" />
+      <div class="flex justify-end gap-2">
+        <button id="cancelTaskBtn" class="text-gray-600 hover:underline">Cancel</button>
+        <button id="saveTaskBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+      </div>
     </div>
   </div>
-</div>
-<!-- Edit Task Popup -->
-<div id="editTaskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
-    <h2 class="text-lg font-bold text-center mb-4">Edit Task</h2>
-    <label class="block mb-2">Task Title:</label>
-    <input type="text" id="editTaskTitle" class="w-full border border-gray-300 rounded p-2 mb-4" />
-    <div class="flex justify-end gap-2">
-      <button id="cancelEditTaskBtn" class="text-gray-600 hover:underline">Cancel</button>
-      <button id="saveEditTaskBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+  <!-- Edit Task Popup -->
+  <div id="editTaskPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full">
+      <h2 class="text-lg font-bold text-center mb-4">Edit Task</h2>
+      <label class="block mb-2">Task Title:</label>
+      <input type="text" id="editTaskTitle" class="w-full border border-gray-300 rounded p-2 mb-4" />
+      <div class="flex justify-end gap-2">
+        <button id="cancelEditTaskBtn" class="text-gray-600 hover:underline">Cancel</button>
+        <button id="saveEditTaskBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+      </div>
     </div>
   </div>
-</div>
-<script src="script.js"></script> 
+  <script src="script.js"></script>
 </body>
 
 </html>

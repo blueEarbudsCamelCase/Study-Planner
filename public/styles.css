@@ -234,9 +234,12 @@ transition: background-color 0.3s ease; /* Smooth hover effect */
 background-color: #2d3748; /* Darker gray on hover */
 }
 
+.hidden {
+visibility: hidden;
+}
+
 /* Popup Styles */
 #settingsPopup {
-visibility: hidden; /* Initially hidden */
 display: flex;
 align-items: center;
 justify-content: center;
@@ -799,3 +802,4 @@ body.dark-mode #dashboardTasks button:hover {
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
 
 }*/
+

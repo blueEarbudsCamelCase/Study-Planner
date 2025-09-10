@@ -155,33 +155,36 @@ if (dashboardContainer) {
   const settingsPopup = document.getElementById("settingsPopup");
   const closeSettingsBtn = document.getElementById("closeSettingsBtn");
   const darkModeToggle = document.getElementById("darkModeToggle");
-  const darkModeLabel = darkModeToggle.nextElementSibling; // Get the <span> label
+  const darkModeLabel = darkModeToggle ? darkModeToggle.nextElementSibling : null; // Get the <span> label if present
 
-// Toggle dark mode
-darkModeToggle.addEventListener("change", () => {
-  if (darkModeToggle.checked) {
-    document.body.classList.add("dark-mode");
-    localStorage.setItem("darkMode", "enabled");
-    darkModeLabel.textContent = "Disable Dark Mode";
-  } else {
-    document.body.classList.remove("dark-mode");
-    localStorage.setItem("darkMode", "disabled");
-    darkModeLabel.textContent = "Enable Dark Mode";
-  }
-});
+// Toggle dark mode (guarded)
+if (darkModeToggle) {
+  darkModeToggle.addEventListener("change", () => {
+    if (darkModeToggle.checked) {
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("darkMode", "enabled");
+      if (darkModeLabel) darkModeLabel.textContent = "Disable Dark Mode";
+    } else {
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("darkMode", "disabled");
+      if (darkModeLabel) darkModeLabel.textContent = "Enable Dark Mode";
+    }
+  });
+}
 
 // Load dark mode preference on page load
 if (localStorage.getItem("darkMode") === "enabled") {
   document.body.classList.add("dark-mode");
-  darkModeToggle.checked = true;
-  darkModeLabel.textContent = "Disable Dark Mode";
+  if (darkModeToggle) darkModeToggle.checked = true;
+  if (darkModeLabel) darkModeLabel.textContent = "Disable Dark Mode";
 } else {
-  darkModeLabel.textContent = "Enable Dark Mode";
+  if (darkModeLabel) darkModeLabel.textContent = "Enable Dark Mode";
 }
 
 // --- Added: settings popup open/close handlers ---
 function openSettingsPopup() {
   if (!settingsPopup) return;
+  console.debug('[settings] openSettingsPopup called');
   settingsPopup.classList.remove("hidden");
   // Add outside click listener
   setTimeout(() => {
@@ -193,6 +196,7 @@ function openSettingsPopup() {
 
 function closeSettingsPopup() {
   if (!settingsPopup) return;
+  console.debug('[settings] closeSettingsPopup called');
   settingsPopup.classList.add("hidden");
   document.removeEventListener("mousedown", outsideSettingsClickListener);
   document.removeEventListener("keydown", settingsEscapeListener);
@@ -215,6 +219,7 @@ function settingsEscapeListener(e) {
 // Wire up the buttons (guard for missing elements)
 if (settingsBtn) {
   settingsBtn.addEventListener("click", () => {
+    console.debug('[settings] settingsBtn clicked');
     // Toggle visibility
     if (settingsPopup && settingsPopup.classList.contains("hidden")) {
       openSettingsPopup();
@@ -968,31 +973,48 @@ function getTaskZoneColor(zone) {
 }
   // Add an event listener to the PiP button
   const pipButton = document.getElementById('enablePiPButton');
-  
-  pipButton.addEventListener('click', () => {
-  if (documentPictureInPicture.window) {
-    documentPictureInPicture.window.close();
-  } else {
-      // Request PiP mode
-      documentPictureInPicture.requestWindow().then(pipWindow => {
-        pipButton.textContent = "Hide Popup"; // Update button text
-        for(let styleSheet of document.querySelectorAll("link[rel=stylesheet]")) {
-          let newStyleSheet = document.createElement("link");
-          newStyleSheet.rel = "stylesheet";
-          newStyleSheet.href = styleSheet.href;
-          pipWindow.document.body.append(newStyleSheet);
+  const runScreenBox = document.getElementById('runScreenBox');
+  if (pipButton) {
+    // If the browser supports the documentPictureInPicture API, wire it up; otherwise provide a no-op/fallback
+    if (typeof window.documentPictureInPicture !== 'undefined') {
+      pipButton.addEventListener('click', () => {
+        try {
+          if (window.documentPictureInPicture.window) {
+            window.documentPictureInPicture.window.close();
+            pipButton.textContent = "Show Popup";
+            return;
+          }
+          window.documentPictureInPicture.requestWindow().then(pipWindow => {
+            pipButton.textContent = "Hide Popup"; // Update button text
+            for (let styleSheet of document.querySelectorAll("link[rel=stylesheet]")) {
+              let newStyleSheet = document.createElement("link");
+              newStyleSheet.rel = "stylesheet";
+              newStyleSheet.href = styleSheet.href;
+              pipWindow.document.body.append(newStyleSheet);
+            }
+            pipWindow.document.body.append(baseTimer);
+            baseTimer = pipWindow.document.querySelector(".base-timer");
+            pipWindow.addEventListener("pagehide", () => {
+              if (runScreenBox && runScreenBox.children[0]) {
+                runScreenBox.children[0].insertBefore(baseTimer, runScreenBox.children[0].children[0]);
+              }
+              pipButton.textContent = "Show Popup";
+            });
+          }).catch(error => {
+            console.error("Error enabling Picture-in-Picture:", error);
+            alert('Picture-in-Picture could not be enabled.');
+          });
+        } catch (err) {
+          console.error('PiP error:', err);
         }
-        pipWindow.document.body.append(baseTimer);
-        baseTimer = pipWindow.document.querySelector(".base-timer");
-        pipWindow.addEventListener("pagehide", () => {
-          runScreenBox.children[0].insertBefore(baseTimer, runScreenBox.children[0].children[0]);
-          pipButton.textContent = "Show Popup"
-        });
-      }).catch(error => {
-        console.error("Error enabling Picture-in-Picture:", error);
+      });
+    } else {
+      // Fallback: avoid throwing and provide a user-friendly message
+      pipButton.addEventListener('click', () => {
+        alert('Picture-in-Picture is not supported by this browser.');
       });
     }
-  });
+  }
 function updateMinutesLeftDisplay() {
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");

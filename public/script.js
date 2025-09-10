@@ -178,6 +178,58 @@ if (localStorage.getItem("darkMode") === "enabled") {
 } else {
   darkModeLabel.textContent = "Enable Dark Mode";
 }
+
+// --- Added: settings popup open/close handlers ---
+function openSettingsPopup() {
+  if (!settingsPopup) return;
+  settingsPopup.classList.remove("hidden");
+  // Add outside click listener
+  setTimeout(() => {
+    document.addEventListener("mousedown", outsideSettingsClickListener);
+  }, 0);
+  // Add Escape key listener
+  document.addEventListener("keydown", settingsEscapeListener);
+}
+
+function closeSettingsPopup() {
+  if (!settingsPopup) return;
+  settingsPopup.classList.add("hidden");
+  document.removeEventListener("mousedown", outsideSettingsClickListener);
+  document.removeEventListener("keydown", settingsEscapeListener);
+}
+
+function outsideSettingsClickListener(e) {
+  const inner = settingsPopup.querySelector(".bg-white");
+  if (!inner) return;
+  if (!inner.contains(e.target)) {
+    closeSettingsPopup();
+  }
+}
+
+function settingsEscapeListener(e) {
+  if (e.key === "Escape") {
+    closeSettingsPopup();
+  }
+}
+
+// Wire up the buttons (guard for missing elements)
+if (settingsBtn) {
+  settingsBtn.addEventListener("click", () => {
+    // Toggle visibility
+    if (settingsPopup && settingsPopup.classList.contains("hidden")) {
+      openSettingsPopup();
+    } else {
+      closeSettingsPopup();
+    }
+  });
+}
+
+if (closeSettingsBtn) {
+  closeSettingsBtn.addEventListener("click", () => {
+    closeSettingsPopup();
+  });
+}
+
   const runButton = document.getElementById("runButton");
   const studyScreen = document.getElementById('studyPlannerSection');
   const runScreen = document.getElementById('runScreen');

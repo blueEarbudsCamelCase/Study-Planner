@@ -1198,64 +1198,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
-
-  // MAP Practice Popup logic (match Task popup behavior)
-  const mapPopup = document.getElementById("mapPopup");
-  const mapTime = document.getElementById("mapTime");
-  const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
-  let mapSelectedZone = null;
-  let mapTimeSelected = false;
-  let mapZoneSelected = false;
-
-  if (mapPopup && mapTime && mapZoneButtonGroup) {
-    // Assign event listeners to time buttons
-    mapPopup.querySelectorAll('.time-btn').forEach(btn => {
-      btn.onclick = () => {
-        mapTime.value = btn.textContent;
-        mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-        tryMapAutoSave();
-      };
-    });
-
-    // Assign event listeners to zone buttons
-    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
-      btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
-      btn.onclick = () => {
-        mapSelectedZone = btn.dataset.zone;
-        mapZoneSelected = true;
-        mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-        if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-        if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-        if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-        tryMapAutoSave();
-      };
-    });
-
-    // Listen for time input changes
-    mapTime.oninput = () => {
-      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-      tryMapAutoSave();
-    };
-
-    function tryMapAutoSave() {
-      if (mapTimeSelected && mapZoneSelected) {
-        // Enable Save button
-        document.getElementById("saveMapButton").disabled = false;
-      } else {
-        document.getElementById("saveMapButton").disabled = true;
-      }
-    }
-
-    // Reset Save button on popup open
-    document.getElementById("mapButton").addEventListener("click", () => {
-      mapTime.value = "";
-      mapSelectedZone = null;
-      mapTimeSelected = false;
-      mapZoneSelected = false;
-      document.getElementById("saveMapButton").disabled = true;
-      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-    });
-  }
 });
 
 function updateIframeSrc(grade) {
@@ -1511,61 +1453,43 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDashboardTasks();
   loadStudyTasks();
 
-  // MAP Practice Popup logic (match Task popup behavior)
-  const mapPopup = document.getElementById("mapPopup");
-  const mapTime = document.getElementById("mapTime");
-  const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
-  let mapSelectedZone = null;
-  let mapTimeSelected = false;
-  let mapZoneSelected = false;
+  // Custom teacher dropdown logic
+  const teacherInput = document.getElementById('tutorialTeacher');
+  const teacherDropdown = document.getElementById('teacherDropdown');
 
-  if (mapPopup && mapTime && mapZoneButtonGroup) {
-    // Assign event listeners to time buttons
-    mapPopup.querySelectorAll('.time-btn').forEach(btn => {
-      btn.onclick = () => {
-        mapTime.value = btn.textContent;
-        mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-        tryMapAutoSave();
-      };
-    });
-
-    // Assign event listeners to zone buttons
-    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
-      btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
-      btn.onclick = () => {
-        mapSelectedZone = btn.dataset.zone;
-        mapZoneSelected = true;
-        mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-        if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-        if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-        if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-        tryMapAutoSave();
-      };
-    });
-
-    // Listen for time input changes
-    mapTime.oninput = () => {
-      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-      tryMapAutoSave();
-    };
-
-    function tryMapAutoSave() {
-      if (mapTimeSelected && mapZoneSelected) {
-        // Enable Save button
-        document.getElementById("saveMapButton").disabled = false;
-      } else {
-        document.getElementById("saveMapButton").disabled = true;
+  if (teacherInput && teacherDropdown) {
+    teacherInput.addEventListener('input', function () {
+      const value = this.value.trim().toLowerCase();
+      teacherDropdown.innerHTML = '';
+      if (value.length === 0) {
+        teacherDropdown.classList.add('hidden');
+        return;
       }
-    }
+      const matches = teacherList.filter(name => name.toLowerCase().includes(value));
+      if (matches.length === 0) {
+        teacherDropdown.classList.add('hidden');
+        return;
+      }
+      matches.forEach(name => {
+        const option = document.createElement('div');
+        option.textContent = name;
+        option.className = 'px-3 py-2 cursor-pointer hover:bg-blue-100';
+        option.onclick = () => {
+          teacherInput.value = name;
+          teacherDropdown.classList.add('hidden');
+        };
+        teacherDropdown.appendChild(option);
+      });
+      // Position dropdown below input
+      const rect = teacherInput.getBoundingClientRect();
+      teacherDropdown.style.top = (teacherInput.offsetTop + teacherInput.offsetHeight) + 'px';
+      teacherDropdown.style.left = teacherInput.offsetLeft + 'px';
+      teacherDropdown.style.width = teacherInput.offsetWidth + 'px';
+      teacherDropdown.classList.remove('hidden');
+    });
 
-    // Reset Save button on popup open
-    document.getElementById("mapButton").addEventListener("click", () => {
-      mapTime.value = "";
-      mapSelectedZone = null;
-      mapTimeSelected = false;
-      mapZoneSelected = false;
-      document.getElementById("saveMapButton").disabled = true;
-      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+    teacherInput.addEventListener('blur', function () {
+      setTimeout(() => teacherDropdown.classList.add('hidden'), 150);
     });
   }
 });

@@ -243,6 +243,8 @@ const startStudyBtn = document.getElementById("startStudyBtn");
 const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
 const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
+const mapButton = document.getElementById('mapButton');
+const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
 let baseTimer = document.querySelector('.base-timer')
 
 startStudyBtn.addEventListener("click", () => {
@@ -251,8 +253,12 @@ startStudyBtn.addEventListener("click", () => {
   loadStudyTasks();
 });
 
+mapButton.addEventListener("click", () => {
+  mapPopup.classList.remove("hidden");
+});
+
+
   // MAP Practice Popup logic (match Task popup behavior)
-  const mapPopup = document.getElementById("mapPopup");
   const mapTime = document.getElementById("mapTime");
   const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
   let mapSelectedZone = null;
@@ -308,7 +314,7 @@ startStudyBtn.addEventListener("click", () => {
       mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
     });
   }
-  
+
 backToDashboardBtn.addEventListener("click", () => {
   studyScreen.classList.add("hidden"); // Hide the study planner section
   dashboardSection.classList.remove("hidden"); // Show the dashboard section

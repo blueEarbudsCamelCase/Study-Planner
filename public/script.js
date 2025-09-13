@@ -243,10 +243,6 @@ const startStudyBtn = document.getElementById("startStudyBtn");
 const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
 const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
-const mapButton = document.getElementById('mapButton');
-const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
-const cancelMapButton = document.getElementById('cancelMapButton');
-const saveMapButton = document.getElementById('saveMapButton');
 let baseTimer = document.querySelector('.base-timer')
 
 startStudyBtn.addEventListener("click", () => {
@@ -255,50 +251,64 @@ startStudyBtn.addEventListener("click", () => {
   loadStudyTasks();
 });
 
-mapButton.addEventListener("click", () => {
-  mapPopup.classList.remove("hidden");
-});
+  // MAP Practice Popup logic (match Task popup behavior)
+  const mapPopup = document.getElementById("mapPopup");
+  const mapTime = document.getElementById("mapTime");
+  const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
+  let mapSelectedZone = null;
+  let mapTimeSelected = false;
+  let mapZoneSelected = false;
 
-cancelMapButton.addEventListener("click", () => {
-  mapPopup.classList.add("hidden");
-  document.getElementById("mapTime").value = "";
-  document.getElementById("mapZone").value = ""; // Reset to default value
-});
+  if (mapPopup && mapTime && mapZoneButtonGroup) {
+    // Assign event listeners to time buttons
+    mapPopup.querySelectorAll('.time-btn').forEach(btn => {
+      btn.onclick = () => {
+        mapTime.value = btn.textContent;
+        mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+        tryMapAutoSave();
+      };
+    });
 
-saveMapButton.onclick = () => {
-  const estimatedTime = parseInt(mapTime.value, 10); // Ensure it's a number
-  const selectedZone = mapZone.value;
+    // Assign event listeners to zone buttons
+    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
+      btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
+      btn.onclick = () => {
+        mapSelectedZone = btn.dataset.zone;
+        mapZoneSelected = true;
+        mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+        if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+        if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+        if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+        tryMapAutoSave();
+      };
+    });
 
-  if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-    alert("Please enter a valid estimated time.");
-    return;
+    // Listen for time input changes
+    mapTime.oninput = () => {
+      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+      tryMapAutoSave();
+    };
+
+    function tryMapAutoSave() {
+      if (mapTimeSelected && mapZoneSelected) {
+        // Enable Save button
+        document.getElementById("saveMapButton").disabled = false;
+      } else {
+        document.getElementById("saveMapButton").disabled = true;
+      }
+    }
+
+    // Reset Save button on popup open
+    document.getElementById("mapButton").addEventListener("click", () => {
+      mapTime.value = "";
+      mapSelectedZone = null;
+      mapTimeSelected = false;
+      mapZoneSelected = false;
+      document.getElementById("saveMapButton").disabled = true;
+      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+    });
   }
-
-  // Calculate the total time if this task is added
-  const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-    const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-    return sum + taskTime;
-  }, 0);
-
-  if (currentTotalMinutes + estimatedTime > 60) {
-    // Display an error message if the total time exceeds 60 minutes
-    alert("This task would go past the end of the Study.");
-    return;
-  }
-  console.log(`MAP Practice, Time: ${estimatedTime}, Zone: ${selectedZone}`);
-
-  // Create a task object with the name "MAP Practice"
-  const mapTask = {
-    summary: "MAP Practice",
-    startDate: new Date().toISOString(), // Use the current time as the start date
-  };
-
-  addToAgenda(mapTask, estimatedTime, selectedZone);
-
-  mapPopup.classList.add("hidden");
-  document.getElementById("mapTime").value = "";
-  document.getElementById("mapZone").value = "";
-};
+  
 backToDashboardBtn.addEventListener("click", () => {
   studyScreen.classList.add("hidden"); // Hide the study planner section
   dashboardSection.classList.remove("hidden"); // Show the dashboard section

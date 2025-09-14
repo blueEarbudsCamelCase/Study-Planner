@@ -1577,7 +1577,7 @@ function openMapPopup() {
         alert("This task would go past the end of the Study.");
         return;
       }
-      console.log('[tryAutoSave] Saving MAP Practice:', , estimatedTime, selectedZone);
+      console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
       addToAgenda("MAP Practice - ", estimatedTime, selectedZone);
       /*estimatedTime = estimatedTime;
       zone = selectedZone;*/

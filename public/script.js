@@ -295,22 +295,12 @@ mapButton.addEventListener("click", () => {
       tryMapAutoSave();
     };
 
-    function tryMapAutoSave() {
-      if (mapTimeSelected && mapZoneSelected) {
-        // Enable Save button
-        document.getElementById("saveMapButton").disabled = false;
-      } else {
-        document.getElementById("saveMapButton").disabled = true;
-      }
-    }
-
     // Reset Save button on popup open
     document.getElementById("mapButton").addEventListener("click", () => {
       mapTime.value = "";
       mapSelectedZone = null;
       mapTimeSelected = false;
       mapZoneSelected = false;
-      document.getElementById("saveMapButton").disabled = true;
       mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
     });
   }

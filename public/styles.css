@@ -31,6 +31,22 @@
   /* Smooth transition for hover effect */
 }
 
+/* Prevent the whole page from scrolling and reserve space for the fixed bottom button.
+   The page won't scroll; long content scrolls inside the section instead. */
+html, body {
+  height: 100%;
+  overflow: hidden; /* Disable viewport scroll */
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+/* Reserve external space for the fixed bottom button so it does not overlap content.
+   Adjust this value if you change the button size/margins. */
+body {
+  padding-bottom: 96px; /* space for #backToDashboardBtn (button height + margins) */
+}
+
 /* Dark Mode Styles */
 body.dark-mode {
   background-color: #1a202c;
@@ -384,8 +400,8 @@ body.dark-mode #taskPopup {
   margin: 2rem auto;
   /* Center the section horizontally and add vertical spacing */
   padding: 2rem;
-  /* Add padding around the section */
-  padding-bottom: 7.5rem; /* Reserve space for the fixed bottom button */
+  /* Remove internal bottom padding so spacing is outside the container */
+  padding-bottom: 0;
   background-color: #ffffff;
   /* White background for the section */
   border-radius: 12px;
@@ -394,6 +410,11 @@ body.dark-mode #taskPopup {
   /* Slightly stronger shadow for depth */
   border: 1px solid #e2e8f0;
   /* Light border for a clean look */
+
+  /* Make the section fit the viewport (minus reserved bottom area) and allow internal scrolling */
+  max-height: calc(100vh - 96px - 4rem); /* 96px for button + approx 4rem total vertical margins */
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 #studyPlannerSection h1 {
@@ -695,7 +716,7 @@ body.dark-mode #studyTasks button:hover {
   position: fixed;
   bottom: 16px;
   right: 16px;
-  z-index: 60; /* Keep it above the page but below modals */
+  z-index: 80; /* increased to ensure visibility above content */
   background-color: #e53e3e;
   /* Red background */
   color: #ffffff;

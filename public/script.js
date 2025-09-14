@@ -1594,3 +1594,53 @@ function openMapPopup() {
     document.removeEventListener("mousedown", outsideClickListener);
   }
 }
+
+// Add this helper to support the MAP popup auto-save flow
+function tryMapAutoSave() {
+  console.log('[tryMapAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
+  if (mapTimeSelected && mapZoneSelected) {
+    const estimatedTime = parseInt(mapTime.value, 10);
+    console.log('[tryMapAutoSave] estimatedTime:', estimatedTime, 'mapSelectedZone:', mapSelectedZone);
+    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+      alert("Please enter a valid estimated time.");
+      return;
+    }
+
+    // Calculate the total minutes already scheduled
+    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+      return sum + taskTime;
+    }, 0);
+
+    if (currentTotalMinutes + estimatedTime > 60) {
+      alert("This task would go past the end of the Study.");
+      return;
+    }
+
+    // Create a MAP Practice task object and add to agenda
+    const mapTask = {
+      summary: "MAP Practice",
+      startDate: new Date().toISOString()
+    };
+
+    addToAgenda(mapTask, estimatedTime, mapSelectedZone);
+    mapTask.estimatedTime = estimatedTime;
+    mapTask.zone = mapSelectedZone;
+
+    // Close and reset the MAP popup UI
+    if (mapPopup) {
+      mapPopup.classList.add('hidden');
+    }
+    if (mapZoneButtonGroup) {
+      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+    }
+    if (mapTime) mapTime.value = "";
+    mapSelectedZone = null;
+    mapTimeSelected = false;
+    mapZoneSelected = false;
+
+    // Refresh UI state
+    renderDashboardTasks();
+    loadStudyTasks();
+  }
+}

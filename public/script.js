@@ -1509,3 +1509,98 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+function openMapPopup() {
+  const mapPopup = document.getElementById("mapPopup");
+  const mapTime = document.getElementById("mapTime");
+  let mapSelectedZone = null;
+  let mapTimeSelected = false;
+  let mapZoneSelected = false;
+
+  // Reset the popup fields
+  mapTime.value = "";
+  mapSelectedZone = null;
+  mapTimeSelected = false;
+  mapZoneSelected = false;
+
+  // Assign event listeners to time buttons (use .time-btn class in HTML)
+  document.querySelectorAll('.time-btn').forEach(btn => {
+    btn.onclick = () => {
+      console.log('[Time Button Clicked]', btn.textContent);
+      taskTime.value = btn.textContent;
+      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
+      tryAutoSave();
+    };
+  });
+
+  // Highlight default button (none selected)
+  document.querySelectorAll('.zone-btn').forEach(btn => {
+    btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
+    btn.onclick = () => {
+      console.log('[Zone Button Clicked]', btn.dataset.zone);
+      selectedZone = btn.dataset.zone;
+      zoneSelected = true;
+      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+      if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+      if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
+      tryAutoSave();
+    };
+  });
+
+  // Listen for time input changes
+  mapTime.oninput = () => {
+    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+    tryAutoSave();
+  };
+
+  // Try to auto-save when both are selected
+  function tryAutoSave() {
+    console.log('[tryAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
+    if (mapTimeSelected && mapZoneSelected) {
+      const estimatedTime = parseInt(taskTime.value, 10);
+      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
+      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+        alert("Please enter a valid estimated time.");
+        return;
+      }
+      // Calculate the total time if this task is added
+      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+        return sum + taskTime;
+      }, 0);
+
+      if (currentTotalMinutes + estimatedTime > 60) {
+        alert("This task would go past the end of the Study.");
+        return;
+      }
+      console.log('[tryAutoSave] Saving MAP Practice:', , estimatedTime, selectedZone);
+      addToAgenda("MAP Practice - ", estimatedTime, selectedZone);
+      /*estimatedTime = estimatedTime;
+      zone = selectedZone;*/
+      closeMapPopup();
+    }
+  }
+
+  // Show the popup
+  mapPopup.classList.remove("hidden");
+
+  // Close popup when clicking outside the inner box
+  setTimeout(() => {
+    document.addEventListener("mousedown", outsideClickListener);
+  }, 0);
+
+  function outsideClickListener(e) {
+    if (!mapPopup.querySelector('.bg-white').contains(e.target)) {
+      closeMapPopup();
+    }
+  }
+
+  function closeMapPopup() {
+    mapPopup.classList.add("hidden");
+    document.removeEventListener("mousedown", outsideClickListener);
+  }
+}

@@ -494,8 +494,9 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
   agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
   agendaItem.dataset.priority = priority ? "true" : "false";
 
-  // Note: per request we DO NOT show the priority emphasis in the studyPlannerSection view.
-  // We still keep the dataset flag so the run session / storage can access it if needed.
+  if (priority) {
+    agendaItem.classList.add('priority-task');
+  }
 
   // Calculate the proportional height based on the estimated time
   const percentage = (estimatedTime / totalMinutes) * 100;
@@ -515,14 +516,16 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
       agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
   }
 
+  const priorityMark = priority ? `<span class="priority-star">★</span>` : "";
+
   // Set the content of the agenda item
   agendaItem.innerHTML = `
-      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
 
       <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+    hour: "2-digit",
+    minute: "2-digit",
+  })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
     `;
 
   // Append the agenda item to the agenda box
@@ -564,76 +567,68 @@ function getAllTasks() {
 
 // Render dashboard tasks
 function renderDashboardTasks({ scrollToToday = false } = {}) {
-    const dashboardTasks = document.getElementById("dashboardTasks");
-    dashboardTasks.innerHTML = "";
-    const tasks = getAllTasks();
-    if (tasks.length === 0) {
-      dashboardTasks.innerHTML = "<li>No tasks scheduled yet.</li>";
-      return;
-    }
-    const today = new Date();
-    const tasksByDate = tasks.reduce((acc, task) => {
-      const taskDate = new Date(task.startDate).toDateString();
-      if (!acc[taskDate]) acc[taskDate] = [];
-      acc[taskDate].push(task);
-      return acc;
-    }, {});
-    const todayKey = today.toDateString();
-    if (!tasksByDate[todayKey]) tasksByDate[todayKey] = [];
-    let todayHeading = null;
-    Object.keys(tasksByDate)
-      .sort((a, b) => new Date(a) - new Date(b))
-      .forEach(date => {
-        const parsedDate = new Date(date);
-        const dateHeading = document.createElement("h3");
-        dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
-        dateHeading.className = "font-bold text-lg mt-4 mb-2";
-        dashboardTasks.appendChild(dateHeading);
-        if (parsedDate.toDateString() === today.toDateString()) {
-          todayHeading = dateHeading;
-        }
-        if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
-          const placeholder = document.createElement("li");
-          placeholder.textContent = "You've completed all of today's tasks. Great job!";
-          placeholder.className = "text-gray-500 italic";
-          dashboardTasks.appendChild(placeholder);
-        }
-        tasksByDate[date].forEach(task => {
-          const li = document.createElement("li");
-          li.className = "mb-1 flex items-center";
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.className = "mr-2";
-          checkbox.addEventListener("change", () => {
-            moveToCompleted(task, li, true);
-            li.classList.add('fade-out');
-            setTimeout(() => {
-              renderDashboardTasks({ scrollToToday: true }); // Always refresh and scroll to today
-            }, 500);
-          });
-          const button = document.createElement("button");
-          button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
-
-          // Show priority star and emphasis on the dashboard only
-        if (task.priority) {
-          button.innerHTML = `<span class="priority-star">★</span>${task.summary || "Unnamed Event"}`;
-          button.classList.add('priority-task');
-        } else {
-          button.textContent = task.summary || "Unnamed Event";
-        }
-
-          button.onclick = () => openEditTaskPopup(task);
-          li.appendChild(checkbox);
-          li.appendChild(button);
-          dashboardTasks.appendChild(li);
+  const dashboardTasks = document.getElementById("dashboardTasks");
+  dashboardTasks.innerHTML = "";
+  const tasks = getAllTasks();
+  if (tasks.length === 0) {
+    dashboardTasks.innerHTML = "<li>No tasks scheduled yet.</li>";
+    return;
+  }
+  const today = new Date();
+  const tasksByDate = tasks.reduce((acc, task) => {
+    const taskDate = new Date(task.startDate).toDateString();
+    if (!acc[taskDate]) acc[taskDate] = [];
+    acc[taskDate].push(task);
+    return acc;
+  }, {});
+  const todayKey = today.toDateString();
+  if (!tasksByDate[todayKey]) tasksByDate[todayKey] = [];
+  let todayHeading = null;
+  Object.keys(tasksByDate)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .forEach(date => {
+      const parsedDate = new Date(date);
+      const dateHeading = document.createElement("h3");
+      dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
+      dateHeading.className = "font-bold text-lg mt-4 mb-2";
+      dashboardTasks.appendChild(dateHeading);
+      if (parsedDate.toDateString() === today.toDateString()) {
+        todayHeading = dateHeading;
+      }
+      if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
+        const placeholder = document.createElement("li");
+        placeholder.textContent = "You've completed all of today's tasks. Great job!";
+        placeholder.className = "text-gray-500 italic";
+        dashboardTasks.appendChild(placeholder);
+      }
+      tasksByDate[date].forEach(task => {
+        const li = document.createElement("li");
+        li.className = "mb-1 flex items-center";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "mr-2";
+        checkbox.addEventListener("change", () => {
+          moveToCompleted(task, li, true);
+          li.classList.add('fade-out');
+          setTimeout(() => {
+            renderDashboardTasks({ scrollToToday: true }); // Always refresh and scroll to today
+          }, 500);
         });
+        const button = document.createElement("button");
+        button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
+        button.textContent = task.summary || "Unnamed Event";
+        button.onclick = () => openEditTaskPopup(task);
+        li.appendChild(checkbox);
+        li.appendChild(button);
+        dashboardTasks.appendChild(li);
       });
-    // Scroll to today's heading
-    if (todayHeading && scrollToToday) {
-      setTimeout(() => {
-        todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 10);
-    }
+    });
+  // Scroll to today's heading
+  if (todayHeading && scrollToToday) {
+    setTimeout(() => {
+      todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 10);
+  }
 }
 
 // Render study planner tasks (override to include custom tasks)
@@ -702,7 +697,6 @@ function loadStudyTasks() {
 
         const button = document.createElement("button");
         button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
-        // Do NOT show priority emphasis in the study planner list (per request)
         button.textContent = task.summary || "Unnamed Event";
 
         button.addEventListener("click", () => {
@@ -978,6 +972,24 @@ function startTaskTimer(taskIndex) {
 
 let runSessionTasks = [];
 
+
+// Initialize the timer when the runScreen is shown
+runButton.onclick = () => {
+  studyScreen.classList.add("hidden");
+  runScreen.classList.remove("hidden");
+  // Build the runSessionTasks array from the DOM
+  runSessionTasks = Array.from(studyPlanDisplay.children).map(child => ({
+    summary: child.textContent.split(" - ")[0],
+    startDate: child.dataset.startDate,
+    estimatedTime: parseInt(child.dataset.estimatedTime, 10),
+    zone: child.dataset.zone,
+    completed: false
+  }));
+  updateRunScreenDisplay(0);
+  startTaskTimer(0);
+};
+
+const runScreenTasks = document.getElementById("runScreenTasks")
 
 function updateRunScreenDisplay(taskIndex) {
   // Only show tasks that are not completed
@@ -1325,75 +1337,146 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Replace the broken openMapPopup implementation with a corrected one that uses the map-specific variables
 function openMapPopup() {
-  const mapPopupEl = document.getElementById("mapPopup");
-  if (!mapPopupEl) return;
+  const mapPopup = document.getElementById("mapPopup");
+  const mapTime = document.getElementById("mapTime");
+  let mapSelectedZone = null;
+  let mapTimeSelected = false;
+  let mapZoneSelected = false;
 
-  // Reset the popup fields (use the existing top-level mapTime/mapZoneButtonGroup/mapSelectedZone vars)
-  if (typeof mapTime !== "undefined" && mapTime) mapTime.value = "";
+  // Reset the popup fields
+  mapTime.value = "";
   mapSelectedZone = null;
   mapTimeSelected = false;
   mapZoneSelected = false;
 
-  // Ensure zone button visual state reset
-  if (typeof mapZoneButtonGroup !== "undefined" && mapZoneButtonGroup) {
-    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-  }
-
-  // Add time button handlers scoped to the MAP popup
-  mapPopupEl.querySelectorAll('.time-btn').forEach(btn => {
+  // Assign event listeners to time buttons (use .time-btn class in HTML)
+  document.querySelectorAll('.time-btn').forEach(btn => {
     btn.onclick = () => {
-      if (typeof mapTime !== "undefined" && mapTime) {
-        mapTime.value = btn.textContent;
-        mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-        tryMapAutoSave();
-      }
+      console.log('[Time Button Clicked]', btn.textContent);
+      taskTime.value = btn.textContent;
+      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
+      tryAutoSave();
     };
   });
 
-  // Add zone button handlers scoped to the MAP popup
-  if (typeof mapZoneButtonGroup !== "undefined" && mapZoneButtonGroup) {
-    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
-      btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
-      btn.onclick = () => {
-        mapSelectedZone = btn.dataset.zone;
-        mapZoneSelected = true;
-        mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-        if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-        if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-        if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-        tryMapAutoSave();
-      };
-    });
-  }
+  // Highlight default button (none selected)
+  document.querySelectorAll('.zone-btn').forEach(btn => {
+    btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
+    btn.onclick = () => {
+      console.log('[Zone Button Clicked]', btn.dataset.zone);
+      selectedZone = btn.dataset.zone;
+      zoneSelected = true;
+      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+      if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+      if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
+      tryAutoSave();
+    };
+  });
 
   // Listen for time input changes
-  if (typeof mapTime !== "undefined" && mapTime) {
-    mapTime.oninput = () => {
-      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-      tryMapAutoSave();
-    };
+  mapTime.oninput = () => {
+    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+    tryAutoSave();
+  };
+
+  // Try to auto-save when both are selected
+  function tryAutoSave() {
+    console.log('[tryAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
+    if (mapTimeSelected && mapZoneSelected) {
+      const estimatedTime = parseInt(taskTime.value, 10);
+      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
+      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+        alert("Please enter a valid estimated time.");
+        return;
+      }
+      // Calculate the total time if this task is added
+      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+        return sum + taskTime;
+      }, 0);
+
+      if (currentTotalMinutes + estimatedTime > 60) {
+        alert("This task would go past the end of the Study.");
+        return;
+      }
+      console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
+  addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
+      /*estimatedTime = estimatedTime;
+      zone = selectedZone;*/
+      closeMapPopup();
+    }
   }
 
   // Show the popup
-  mapPopupEl.classList.remove("hidden");
+  mapPopup.classList.remove("hidden");
 
   // Close popup when clicking outside the inner box
   setTimeout(() => {
-    document.addEventListener("mousedown", outsideMapClickListener);
+    document.addEventListener("mousedown", outsideClickListener);
   }, 0);
 
-  function outsideMapClickListener(e) {
-    const inner = mapPopupEl.querySelector('.bg-white');
-    if (!inner) return;
-    if (!inner.contains(e.target)) {
+  function outsideClickListener(e) {
+    if (!mapPopup.querySelector('.bg-white').contains(e.target)) {
       closeMapPopup();
     }
   }
 
   function closeMapPopup() {
-    mapPopupEl.classList.add("hidden");
-    document.removeEventListener("mousedown", outsideMapClickListener);
+    mapPopup.classList.add("hidden");
+    document.removeEventListener("mousedown", outsideClickListener);
+  }
+}
+
+// Add this helper to support the MAP popup auto-save flow
+function tryMapAutoSave() {
+  console.log('[tryMapAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
+  if (mapTimeSelected && mapZoneSelected) {
+    const estimatedTime = parseInt(mapTime.value, 10);
+    console.log('[tryMapAutoSave] estimatedTime:', estimatedTime, 'mapSelectedZone:', mapSelectedZone);
+    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+      alert("Please enter a valid estimated time.");
+      return;
+    }
+
+    // Calculate the total minutes already scheduled
+    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+      return sum + taskTime;
+    }, 0);
+
+    if (currentTotalMinutes + estimatedTime > 60) {
+      alert("This task would go past the end of the Study.");
+      return;
+    }
+
+    // Create a MAP Practice task object and add to agenda
+    const mapTask = {
+      summary: "MAP Practice",
+      startDate: new Date().toISOString()
+    };
+
+  addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
+    mapTask.estimatedTime = estimatedTime;
+    mapTask.zone = mapSelectedZone;
+
+    // Close and reset the MAP popup UI
+    if (mapPopup) {
+      mapPopup.classList.add('hidden');
+    }
+    if (mapZoneButtonGroup) {
+      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+    }
+    if (mapTime) mapTime.value = "";
+    mapSelectedZone = null;
+    mapTimeSelected = false;
+    mapZoneSelected = false;
+
+    // Refresh UI state
+    renderDashboardTasks();
+    loadStudyTasks();
   }
 }

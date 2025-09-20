@@ -346,9 +346,11 @@ backToPlanScreenBtn.addEventListener("click", () => {
 function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
   const taskTime = document.getElementById("taskTime");
+  const priorityCheckbox = document.getElementById("taskPriority");
   let selectedZone = null;
   let timeSelected = false;
   let zoneSelected = false;
+  let prioritySelected = !!task.priority;
 
   // Reset the popup fields
   taskTime.value = "";
@@ -410,11 +412,21 @@ function openTaskPopup(task) {
         return;
       }
       console.log('[tryAutoSave] Saving task:', task, estimatedTime, selectedZone);
-      addToAgenda(task, estimatedTime, selectedZone);
+      // assign priority to the task
+      task.priority = !!prioritySelected;
+      addToAgenda(task, estimatedTime, selectedZone, task.priority);
       task.estimatedTime = estimatedTime;
       task.zone = selectedZone;
       closePopup();
     }
+  }
+
+  if (priorityCheckbox) {
+    priorityCheckbox.checked = prioritySelected;
+    priorityCheckbox.onchange = () => {
+      prioritySelected = !!priorityCheckbox.checked;
+      tryAutoSave();
+    };
   }
 
   // Show the popup
@@ -457,8 +469,8 @@ function runButtonColorCheck() {
   }
 }
 
-function addToAgenda(task, estimatedTime, zone) {
-  console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
+function addToAgenda(task, estimatedTime, zone, priority = false) {
+  console.log("Adding task to agenda:", { task, estimatedTime, zone, priority }); // Debugging log
   const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
 
   // Remove the placeholder text if it exists
@@ -492,6 +504,11 @@ function addToAgenda(task, estimatedTime, zone) {
   agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
   agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
   agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
+  agendaItem.dataset.priority = priority ? "true" : "false";
+
+  if (priority) {
+    agendaItem.classList.add('priority-task');
+  }
 
   // Calculate the proportional height based on the estimated time
   const percentage = (estimatedTime / totalMinutes) * 100;
@@ -511,10 +528,12 @@ function addToAgenda(task, estimatedTime, zone) {
       agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
   }
 
+  const priorityMark = priority ? `<span class="priority-star">★</span>` : "";
+
   // Set the content of the agenda item
   agendaItem.innerHTML = `
-      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
-  
+      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+
       <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -1568,7 +1587,7 @@ function openMapPopup() {
         return;
       }
       console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
-      addToAgenda("MAP Practice - ", estimatedTime, selectedZone);
+  addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
       /*estimatedTime = estimatedTime;
       zone = selectedZone;*/
       closeMapPopup();
@@ -1623,7 +1642,7 @@ function tryMapAutoSave() {
       startDate: new Date().toISOString()
     };
 
-    addToAgenda(mapTask, estimatedTime, mapSelectedZone);
+  addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
     mapTask.estimatedTime = estimatedTime;
     mapTask.zone = mapSelectedZone;
 

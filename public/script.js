@@ -247,6 +247,9 @@ const mapButton = document.getElementById('mapButton');
 const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
 let baseTimer = document.querySelector('.base-timer')
 
+// ADD: ensure runScreenTasks is available before any handlers use it
+const runScreenTasks = document.getElementById("runScreenTasks");
+
 startStudyBtn.addEventListener("click", () => {
   dashboardSection.classList.add("hidden"); // Hide the dashboard section
   studyScreen.classList.remove("hidden"); // Show the study setup screen

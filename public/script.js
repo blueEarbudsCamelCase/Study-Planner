@@ -247,6 +247,9 @@ const mapButton = document.getElementById('mapButton');
 const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
 let baseTimer = document.querySelector('.base-timer')
 
+// ADD: ensure runScreenTasks is available before any handlers use it
+const runScreenTasks = document.getElementById("runScreenTasks");
+
 startStudyBtn.addEventListener("click", () => {
   dashboardSection.classList.add("hidden"); // Hide the dashboard section
   studyScreen.classList.remove("hidden"); // Show the study setup screen
@@ -346,11 +349,9 @@ backToPlanScreenBtn.addEventListener("click", () => {
 function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
   const taskTime = document.getElementById("taskTime");
-  const priorityCheckbox = document.getElementById("taskPriority");
   let selectedZone = null;
   let timeSelected = false;
   let zoneSelected = false;
-  let prioritySelected = !!task.priority;
 
   // Reset the popup fields
   taskTime.value = "";
@@ -412,21 +413,11 @@ function openTaskPopup(task) {
         return;
       }
       console.log('[tryAutoSave] Saving task:', task, estimatedTime, selectedZone);
-      // assign priority to the task
-      task.priority = !!prioritySelected;
-      addToAgenda(task, estimatedTime, selectedZone, task.priority);
+      addToAgenda(task, estimatedTime, selectedZone, !!task.priority);
       task.estimatedTime = estimatedTime;
       task.zone = selectedZone;
       closePopup();
     }
-  }
-
-  if (priorityCheckbox) {
-    priorityCheckbox.checked = prioritySelected;
-    priorityCheckbox.onchange = () => {
-      prioritySelected = !!priorityCheckbox.checked;
-      tryAutoSave();
-    };
   }
 
   // Show the popup
@@ -506,9 +497,8 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
   agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
   agendaItem.dataset.priority = priority ? "true" : "false";
 
-  if (priority) {
-    agendaItem.classList.add('priority-task');
-  }
+  // Note: per request we DO NOT show the priority emphasis in the studyPlannerSection view.
+  // We still keep the dataset flag so the run session / storage can access it if needed.
 
   // Calculate the proportional height based on the estimated time
   const percentage = (estimatedTime / totalMinutes) * 100;
@@ -528,16 +518,14 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
       agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
   }
 
-  const priorityMark = priority ? `<span class="priority-star">★</span>` : "";
-
   // Set the content of the agenda item
   agendaItem.innerHTML = `
-      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
 
       <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+        hour: "2-digit",
+        minute: "2-digit",
+      })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
     `;
 
   // Append the agenda item to the agenda box
@@ -555,11 +543,22 @@ function getAllTasks() {
   const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
   const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
 
+  // Load stored iCal priorities (set via Edit popup)
+  const icalPriorities = JSON.parse(localStorage.getItem("icalPriorities") || "{}");
+
+  // Attach priority flags to iCal tasks based on saved map
+  const normalizedIcal = icalTasks.map(t => {
+    return { ...t, priority: !!icalPriorities[t.startDate] };
+  });
+
+  // Ensure custom tasks keep their priority flag (default false)
+  const normalizedCustom = customTasks.map(t => ({ ...t, priority: !!t.priority }));
+
   // Filter out completed tasks from both sources
-  const filteredIcalTasks = icalTasks.filter(
+  const filteredIcalTasks = normalizedIcal.filter(
     t => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
   );
-  const filteredCustomTasks = customTasks.filter(
+  const filteredCustomTasks = normalizedCustom.filter(
     t => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
   );
 
@@ -568,68 +567,76 @@ function getAllTasks() {
 
 // Render dashboard tasks
 function renderDashboardTasks({ scrollToToday = false } = {}) {
-  const dashboardTasks = document.getElementById("dashboardTasks");
-  dashboardTasks.innerHTML = "";
-  const tasks = getAllTasks();
-  if (tasks.length === 0) {
-    dashboardTasks.innerHTML = "<li>No tasks scheduled yet.</li>";
-    return;
-  }
-  const today = new Date();
-  const tasksByDate = tasks.reduce((acc, task) => {
-    const taskDate = new Date(task.startDate).toDateString();
-    if (!acc[taskDate]) acc[taskDate] = [];
-    acc[taskDate].push(task);
-    return acc;
-  }, {});
-  const todayKey = today.toDateString();
-  if (!tasksByDate[todayKey]) tasksByDate[todayKey] = [];
-  let todayHeading = null;
-  Object.keys(tasksByDate)
-    .sort((a, b) => new Date(a) - new Date(b))
-    .forEach(date => {
-      const parsedDate = new Date(date);
-      const dateHeading = document.createElement("h3");
-      dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
-      dateHeading.className = "font-bold text-lg mt-4 mb-2";
-      dashboardTasks.appendChild(dateHeading);
-      if (parsedDate.toDateString() === today.toDateString()) {
-        todayHeading = dateHeading;
-      }
-      if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
-        const placeholder = document.createElement("li");
-        placeholder.textContent = "You've completed all of today's tasks. Great job!";
-        placeholder.className = "text-gray-500 italic";
-        dashboardTasks.appendChild(placeholder);
-      }
-      tasksByDate[date].forEach(task => {
-        const li = document.createElement("li");
-        li.className = "mb-1 flex items-center";
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "mr-2";
-        checkbox.addEventListener("change", () => {
-          moveToCompleted(task, li, true);
-          li.classList.add('fade-out');
-          setTimeout(() => {
-            renderDashboardTasks({ scrollToToday: true }); // Always refresh and scroll to today
-          }, 500);
+    const dashboardTasks = document.getElementById("dashboardTasks");
+    dashboardTasks.innerHTML = "";
+    const tasks = getAllTasks();
+    if (tasks.length === 0) {
+      dashboardTasks.innerHTML = "<li>No tasks scheduled yet.</li>";
+      return;
+    }
+    const today = new Date();
+    const tasksByDate = tasks.reduce((acc, task) => {
+      const taskDate = new Date(task.startDate).toDateString();
+      if (!acc[taskDate]) acc[taskDate] = [];
+      acc[taskDate].push(task);
+      return acc;
+    }, {});
+    const todayKey = today.toDateString();
+    if (!tasksByDate[todayKey]) tasksByDate[todayKey] = [];
+    let todayHeading = null;
+    Object.keys(tasksByDate)
+      .sort((a, b) => new Date(a) - new Date(b))
+      .forEach(date => {
+        const parsedDate = new Date(date);
+        const dateHeading = document.createElement("h3");
+        dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
+        dateHeading.className = "font-bold text-lg mt-4 mb-2";
+        dashboardTasks.appendChild(dateHeading);
+        if (parsedDate.toDateString() === today.toDateString()) {
+          todayHeading = dateHeading;
+        }
+        if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
+          const placeholder = document.createElement("li");
+          placeholder.textContent = "You've completed all of today's tasks. Great job!";
+          placeholder.className = "text-gray-500 italic";
+          dashboardTasks.appendChild(placeholder);
+        }
+        tasksByDate[date].forEach(task => {
+          const li = document.createElement("li");
+          li.className = "mb-1 flex items-center";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "mr-2";
+          checkbox.addEventListener("change", () => {
+            moveToCompleted(task, li, true);
+            li.classList.add('fade-out');
+            setTimeout(() => {
+              renderDashboardTasks({ scrollToToday: true }); // Always refresh and scroll to today
+            }, 500);
+          });
+          const button = document.createElement("button");
+          button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
+
+          // Show priority star and emphasis on the dashboard only
+        if (task.priority) {
+          button.innerHTML = `<span class="priority-star">★</span>${task.summary || "Unnamed Event"}`;
+          button.classList.add('priority-task');
+        } else {
+          button.textContent = task.summary || "Unnamed Event";
+        }
+
+          button.onclick = () => openEditTaskPopup(task);
+          li.appendChild(checkbox);
+          li.appendChild(button);
+          dashboardTasks.appendChild(li);
         });
-        const button = document.createElement("button");
-        button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
-        button.textContent = task.summary || "Unnamed Event";
-        button.onclick = () => openEditTaskPopup(task);
-        li.appendChild(checkbox);
-        li.appendChild(button);
-        dashboardTasks.appendChild(li);
       });
-    });
-  // Scroll to today's heading
-  if (todayHeading && scrollToToday) {
-    setTimeout(() => {
-      todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 10);
-  }
+    // Scroll to today's heading
+    if (todayHeading && scrollToToday) {
+      setTimeout(() => {
+        todayHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 10);
+    }
 }
 
 // Render study planner tasks (override to include custom tasks)
@@ -698,6 +705,7 @@ function loadStudyTasks() {
 
         const button = document.createElement("button");
         button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
+        // Do NOT show priority emphasis in the study planner list (per request)
         button.textContent = task.summary || "Unnamed Event";
 
         button.addEventListener("click", () => {
@@ -717,6 +725,78 @@ function loadStudyTasks() {
         tasksList.appendChild(li);
       });
     });
+}
+
+// Open Edit Task Popup: allows editing title and priority for a given task
+function openEditTaskPopup(task) {
+  const editPopup = document.getElementById('editTaskPopup');
+  if (!editPopup) return;
+
+  const editTitleInput = document.getElementById('editTaskTitle');
+  const editPriorityCheckbox = document.getElementById('editTaskPriority');
+  const cancelBtn = document.getElementById('cancelEditTaskBtn');
+  const saveBtn = document.getElementById('saveEditTaskBtn');
+
+  // Populate fields
+  editTitleInput.value = task.summary || '';
+  if (editPriorityCheckbox) editPriorityCheckbox.checked = !!task.priority;
+
+  // Show popup
+  editPopup.classList.remove('hidden');
+
+  // Cancel handler
+  if (cancelBtn) {
+    cancelBtn.onclick = () => {
+      editPopup.classList.add('hidden');
+      editTitleInput.value = '';
+      if (editPriorityCheckbox) editPriorityCheckbox.checked = false;
+    };
+  }
+
+  // Save handler
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      const newTitle = (editTitleInput.value || '').trim();
+      const newPriority = editPriorityCheckbox ? !!editPriorityCheckbox.checked : false;
+      if (!newTitle) {
+        alert('Please enter a task title.');
+        return;
+      }
+
+      // Try updating customTasks first
+      let customTasks = JSON.parse(localStorage.getItem('customTasks') || '[]');
+      let updated = false;
+      customTasks = customTasks.map(t => {
+        if (t.startDate === task.startDate && t.summary === task.summary) {
+          updated = true;
+          return { ...t, summary: newTitle, priority: newPriority };
+        }
+        return t;
+      });
+
+      if (updated) {
+        localStorage.setItem('customTasks', JSON.stringify(customTasks));
+      } else {
+        // For iCal tasks, record edited title and priority maps
+        const editedIcalTasks = JSON.parse(localStorage.getItem('editedIcalTasks') || '{}');
+        editedIcalTasks[task.startDate] = newTitle;
+        localStorage.setItem('editedIcalTasks', JSON.stringify(editedIcalTasks));
+
+        const icalPriorities = JSON.parse(localStorage.getItem('icalPriorities') || '{}');
+        icalPriorities[task.startDate] = newPriority;
+        localStorage.setItem('icalPriorities', JSON.stringify(icalPriorities));
+      }
+
+      // Hide and clear popup
+      editPopup.classList.add('hidden');
+      editTitleInput.value = '';
+      if (editPriorityCheckbox) editPriorityCheckbox.checked = false;
+
+      // Refresh rendered lists
+      renderDashboardTasks({ scrollToToday: true });
+      loadStudyTasks();
+    };
+  }
 }
 
 function playBeep() {
@@ -901,24 +981,6 @@ function startTaskTimer(taskIndex) {
 
 let runSessionTasks = [];
 
-
-// Initialize the timer when the runScreen is shown
-runButton.onclick = () => {
-  studyScreen.classList.add("hidden");
-  runScreen.classList.remove("hidden");
-  // Build the runSessionTasks array from the DOM
-  runSessionTasks = Array.from(studyPlanDisplay.children).map(child => ({
-    summary: child.textContent.split(" - ")[0],
-    startDate: child.dataset.startDate,
-    estimatedTime: parseInt(child.dataset.estimatedTime, 10),
-    zone: child.dataset.zone,
-    completed: false
-  }));
-  updateRunScreenDisplay(0);
-  startTaskTimer(0);
-};
-
-const runScreenTasks = document.getElementById("runScreenTasks")
 
 function updateRunScreenDisplay(taskIndex) {
   // Only show tasks that are not completed
@@ -1223,260 +1285,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
-});
-
-function updateIframeSrc(grade) {
-  const bookingsIframe = document.getElementById('bookingsIframe');
-  if (!bookingsIframe) return;
-  let src = "";
-  switch (grade) {
-    case "7-8":
-      src = "https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
-      break;
-    case "9-10":
-      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
-      break;
-    case "11-12":
-      src = "https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
-      break;
-    default:
-      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
-  }
-  bookingsIframe.src = src;
-}
-
-function openEditTaskPopup(task) {
-  const editPopup = document.getElementById("editTaskPopup");
-  const editTitleInput = document.getElementById("editTaskTitle");
-  const cancelBtn = document.getElementById("cancelEditTaskBtn");
-  const saveBtn = document.getElementById("saveEditTaskBtn");
-
-  // Show popup and set current title
-  editPopup.classList.remove("hidden");
-  editTitleInput.value = task.summary || "";
-
-  // Cancel button closes popup
-  cancelBtn.onclick = () => {
-    editPopup.classList.add("hidden");
-    editTitleInput.value = "";
-  };
-
-  // Save button updates the task title
-  saveBtn.onclick = () => {
-    const newTitle = editTitleInput.value.trim();
-    if (!newTitle) {
-      alert("Please enter a task title.");
-      return;
-    }
-
-    // Update in customTasks if present
-    let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    let updated = false;
-    customTasks = customTasks.map(t => {
-      if (t.startDate === task.startDate) {
-        updated = true;
-        return { ...t, summary: newTitle };
-      }
-      return t;
-    });
-    if (updated) {
-      localStorage.setItem("customTasks", JSON.stringify(customTasks));
-      // Update the UI immediately for custom tasks
-      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
-      taskElements.forEach(el => {
-        const summarySpan = el.querySelector('span');
-        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
-      });
-    } else {
-      // If not a custom task, update editedIcalTasks
-      let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
-      editedIcalTasks[task.startDate] = newTitle;
-      localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
-      // Update the UI immediately for iCal tasks
-      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
-      taskElements.forEach(el => {
-        const summarySpan = el.querySelector('span');
-        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
-      });
-    }
-
-    editPopup.classList.add("hidden");
-    editTitleInput.value = "";
-
-    // Optionally, still refresh tasks for consistency
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
-}
-
-// Custom teacher dropdown logic
-const teacherList = [
-  "Adam Miskic","Aimee Lissel","Alex Avila","Alex Hutchinson","Alison Quinn","Allison Rhoades","Amanda Edwin","Amanda Lishamer","Andrea Tucker","Andrew Kralik","Angela Conry","Anne Lenihan","Anthony Newman","April Enochs","Ashlie Kaul","Bailey Kobs","Benjamin Yule","Boram Kim","Brian Boutette","Brian Kim","Brian Merryweather","Brian Naismith","Brodie Ogg","Cara Johnson","Cassandra Montello","Chris Gamble","Courtney Garrah","Craig Smale","Craig Wall","Dalton Fitting","Damien Jordan","Dan Larson-Knight","Dani Idler","David Macfarlane","Desiree Lemieux","Devin Tide","Dilenny De La Cruz","Ebony Bennett","Elie MacLean","Emily Atchue","Erin Martin","Evan Rogers","Isaac Hager","Jaimmie-Lee Jordan","James Fraser","Jane Ballou","Jane Zegers","Janet Valdez","Jascenth McKenzie","Jenelle Jeffrey","Jess Meissner","Jessica McCullough","Joanie Wolfram","John Van Ess","Josanne Timothy","Joseph Raygada","Juanika Joseph","Karen Lake","Kate Nelson","Kathleen Vivian","Kayla Jansky","Kelle Patrick","Keri Deskins","Kessandra Blackman","Khadija Darlington","Kristen Jakala","Kristin Iula","Kyle Craig","Kyle Gay","Kyler Johnson","Latasha Whiting","Leanna Laidlow","Lindsay Ebata","MacKenzie Screpnek","Maria Caoagdan","Maria Luepke","Martha Blue","Matthew Robinson","Matthew Windsor","Michael Froberg","Michele Weiss","Michelle Meadows","Michelle Panting","Nicholas Delouis","Nicole Chevrier","Nicole Danks","Olivia Garside","Pam Small/Freger","Patricia Stuhl","Peter Henninger","Rachelle Liski","Rhea Goodridge","Rheanne Foth","Rob Pothaar","Roxanne Catellier","Ryan Coombs","Ryanne Marchan","Sam Farelli","Samuel Poole","Sara Alfaro","Scott Fransky","Shakeira Waithe","Sharlene Kistow","Sharie Snagg","Stephanie Bakonyi","Steven Reeder","Suzan Brown","Taryn Fenwick","Thomas Coroneos","Tina Liu","Tishauna Petrie-Barrant","Tonia Manges","Tres Barker","Wendy Omland","William Nagel","William Swidorski","Woody Arrowood","Zakk Taylor","Zaleena Esahack"
-];
-
-document.addEventListener('DOMContentLoaded', () => {
-  // DOM elements
-  const dashboardSection = document.getElementById("dashboardSection");
-  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
-  const dashboardContainer = document.getElementById("dashboardContainer");
-  const startStudyBtn = document.getElementById("startStudyBtn");
-  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
-  const studyScreen = document.getElementById('studyPlannerSection');
-  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
-  const runScreenTasks = document.getElementById("runScreenTasks");
-  const runButton = document.getElementById("runButton");
-  const gradeSelect = document.getElementById('gradeSelect');
-  const bookingsIframe = document.getElementById('bookingsIframe');
-
-  // Only run if dashboardContainer exists
-  if (dashboardContainer) {
-    checkIcalFeed();
-
-    fetchIcalFeed()
-      .then(() => {
-        renderDashboardTasks({ scrollToToday: true });
-        loadStudyTasks();
-      })
-      .catch(error => {
-        console.error("Error fetching or parsing iCal feed:", error);
-        // Optionally show an error message elsewhere if needed
-      });
-  }
-
-  // Add event listeners only if elements exist
-  if (startStudyBtn) {
-    startStudyBtn.addEventListener("click", () => {
-      dashboardSection.classList.add("hidden");
-      studyScreen.classList.remove("hidden");
-      loadStudyTasks();
-    });
-  }
-
-  if (backToDashboardBtn) {
-    backToDashboardBtn.addEventListener("click", () => {
-      studyScreen.classList.add("hidden");
-      dashboardSection.classList.remove("hidden");
-      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-      runScreenTasks.innerHTML = '';
-      updateMinutesLeftDisplay();
-    });
-  }
-
-  // Set grade selection from localStorage
-  const savedGrade = localStorage.getItem('userGrade');
-  if (savedGrade && gradeSelect) {
-    gradeSelect.value = savedGrade;
-    updateIframeSrc(savedGrade || gradeSelect.value);
-  }
-
-  // Add grade change listener
-  if (gradeSelect) {
-    gradeSelect.addEventListener('change', (e) => {
-      const grade = e.target.value;
-      localStorage.setItem('userGrade', grade);
-      updateIframeSrc(grade);
-    });
-  }
-
-  // Add Tutorial Popup logic
-  const addTutorialBtn = document.getElementById("addTutorialBtn");
-  const cancelTutorialBtn = document.getElementById("cancelTutorialBtn");
-  const saveTutorialBtn = document.getElementById("saveTutorialBtn");
-  if (addTutorialBtn) addTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.remove("hidden");
-  if (cancelTutorialBtn) cancelTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.add("hidden");
-  if (saveTutorialBtn) saveTutorialBtn.onclick = () => {
-    const date = document.getElementById("tutorialDate").value;
-    const teacher = document.getElementById("tutorialTeacher").value.trim();
-    if (!date) return alert("Please select a date.");
-    if (!teacher) return alert("Please enter the teacher's name.");
-    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    // Always save as UTC 23:59
-    const startDate = `${date}T23:59:00.000Z`;
-    customTasks.push({
-      summary: `Tutorial (${teacher})`,
-      startDate,
-      teacher
-    });
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    document.getElementById("addTutorialPopup").classList.add("hidden");
-    document.getElementById("tutorialDate").value = "";
-    document.getElementById("tutorialTeacher").value = "";
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
-
-  // Add Task Popup logic
-  const addTaskBtn = document.getElementById("addTaskBtn");
-  const cancelTaskBtn = document.getElementById("cancelTaskBtn");
-  const saveTaskBtn = document.getElementById("saveTaskBtn");
-  if (addTaskBtn) addTaskBtn.onclick = () => document.getElementById("addTaskPopup").classList.remove("hidden");
-  if (cancelTaskBtn) cancelTaskBtn.onclick = () => {
-    document.getElementById("addTaskPopup").classList.add("hidden");
-    document.getElementById("customTaskTitle").value = "";
-    document.getElementById("customTaskDate").value = "";
-  };
-  if (saveTaskBtn) saveTaskBtn.onclick = () => {
-    const title = document.getElementById("customTaskTitle").value.trim();
-    const date = document.getElementById("customTaskDate").value;
-    if (!title || !date) {
-      alert("Please enter a title and date.");
-      return;
-    }
-    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    if (customTasks.some(t => t.summary === title)) {
-      alert("Custom task titles must be unique.");
-      return;
-    }
-    // Always save as UTC 23:59
-    const startDate = `${date}T23:59:00.000Z`;
-    customTasks.push({
-      summary: title,
-      startDate
-    });
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    document.getElementById("addTaskPopup").classList.add("hidden");
-    document.getElementById("customTaskTitle").value = "";
-    document.getElementById("customTaskDate").value = "";
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
-
-  // Add refresh button logic for dashboard
-  const refreshTasksBtn = document.getElementById("refreshTasksBtn");
-  if (refreshTasksBtn) {
-    refreshTasksBtn.onclick = () => {
-      refreshTasksBtn.classList.add("fa-spin");
-      fetchIcalFeed()
-        .then(() => {
-          renderDashboardTasks({ scrollToToday: true });
-          loadStudyTasks();
-          setTimeout(() => refreshTasksBtn.classList.remove("fa-spin"), 500);
-        })
-        .catch(() => {
-          setTimeout(() => refreshTasksBtn.classList.remove("fa-spin"), 500);
-        });
-    };
-  }
-
-  // Add refresh button logic for study planner
-  const refreshStudyTasksBtn = document.getElementById("refreshStudyTasksBtn");
-  if (refreshStudyTasksBtn) {
-    refreshStudyTasksBtn.onclick = () => {
-      refreshStudyTasksBtn.classList.add("fa-spin");
-      fetchIcalFeed()
-        .then(() => {
-          loadStudyTasks();
-          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
-        })
-        .catch(() => {
-          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
-        });
-    };
-  }
-
-  // Initial dashboard render
-  renderDashboardTasks();
-  loadStudyTasks();
 
   // Custom teacher dropdown logic
   const teacherInput = document.getElementById('tutorialTeacher');
@@ -1520,146 +1328,75 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// Replace the broken openMapPopup implementation with a corrected one that uses the map-specific variables
 function openMapPopup() {
-  const mapPopup = document.getElementById("mapPopup");
-  const mapTime = document.getElementById("mapTime");
-  let mapSelectedZone = null;
-  let mapTimeSelected = false;
-  let mapZoneSelected = false;
+  const mapPopupEl = document.getElementById("mapPopup");
+  if (!mapPopupEl) return;
 
-  // Reset the popup fields
-  mapTime.value = "";
+  // Reset the popup fields (use the existing top-level mapTime/mapZoneButtonGroup/mapSelectedZone vars)
+  if (typeof mapTime !== "undefined" && mapTime) mapTime.value = "";
   mapSelectedZone = null;
   mapTimeSelected = false;
   mapZoneSelected = false;
 
-  // Assign event listeners to time buttons (use .time-btn class in HTML)
-  document.querySelectorAll('.time-btn').forEach(btn => {
+  // Ensure zone button visual state reset
+  if (typeof mapZoneButtonGroup !== "undefined" && mapZoneButtonGroup) {
+    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+  }
+
+  // Add time button handlers scoped to the MAP popup
+  mapPopupEl.querySelectorAll('.time-btn').forEach(btn => {
     btn.onclick = () => {
-      console.log('[Time Button Clicked]', btn.textContent);
-      taskTime.value = btn.textContent;
-      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
-      tryAutoSave();
+      if (typeof mapTime !== "undefined" && mapTime) {
+        mapTime.value = btn.textContent;
+        mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+        tryMapAutoSave();
+      }
     };
   });
 
-  // Highlight default button (none selected)
-  document.querySelectorAll('.zone-btn').forEach(btn => {
-    btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
-    btn.onclick = () => {
-      console.log('[Zone Button Clicked]', btn.dataset.zone);
-      selectedZone = btn.dataset.zone;
-      zoneSelected = true;
-      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-      if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-      if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-      if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
-      tryAutoSave();
-    };
-  });
+  // Add zone button handlers scoped to the MAP popup
+  if (typeof mapZoneButtonGroup !== "undefined" && mapZoneButtonGroup) {
+    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
+      btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
+      btn.onclick = () => {
+        mapSelectedZone = btn.dataset.zone;
+        mapZoneSelected = true;
+        mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+        if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+        if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+        if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+        tryMapAutoSave();
+      };
+    });
+  }
 
   // Listen for time input changes
-  mapTime.oninput = () => {
-    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-    tryAutoSave();
-  };
-
-  // Try to auto-save when both are selected
-  function tryAutoSave() {
-    console.log('[tryAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
-    if (mapTimeSelected && mapZoneSelected) {
-      const estimatedTime = parseInt(taskTime.value, 10);
-      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
-      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-        alert("Please enter a valid estimated time.");
-        return;
-      }
-      // Calculate the total time if this task is added
-      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-        return sum + taskTime;
-      }, 0);
-
-      if (currentTotalMinutes + estimatedTime > 60) {
-        alert("This task would go past the end of the Study.");
-        return;
-      }
-      console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
-  addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
-      /*estimatedTime = estimatedTime;
-      zone = selectedZone;*/
-      closeMapPopup();
-    }
+  if (typeof mapTime !== "undefined" && mapTime) {
+    mapTime.oninput = () => {
+      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+      tryMapAutoSave();
+    };
   }
 
   // Show the popup
-  mapPopup.classList.remove("hidden");
+  mapPopupEl.classList.remove("hidden");
 
   // Close popup when clicking outside the inner box
   setTimeout(() => {
-    document.addEventListener("mousedown", outsideClickListener);
+    document.addEventListener("mousedown", outsideMapClickListener);
   }, 0);
 
-  function outsideClickListener(e) {
-    if (!mapPopup.querySelector('.bg-white').contains(e.target)) {
+  function outsideMapClickListener(e) {
+    const inner = mapPopupEl.querySelector('.bg-white');
+    if (!inner) return;
+    if (!inner.contains(e.target)) {
       closeMapPopup();
     }
   }
 
   function closeMapPopup() {
-    mapPopup.classList.add("hidden");
-    document.removeEventListener("mousedown", outsideClickListener);
-  }
-}
-
-// Add this helper to support the MAP popup auto-save flow
-function tryMapAutoSave() {
-  console.log('[tryMapAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
-  if (mapTimeSelected && mapZoneSelected) {
-    const estimatedTime = parseInt(mapTime.value, 10);
-    console.log('[tryMapAutoSave] estimatedTime:', estimatedTime, 'mapSelectedZone:', mapSelectedZone);
-    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-      alert("Please enter a valid estimated time.");
-      return;
-    }
-
-    // Calculate the total minutes already scheduled
-    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-      return sum + taskTime;
-    }, 0);
-
-    if (currentTotalMinutes + estimatedTime > 60) {
-      alert("This task would go past the end of the Study.");
-      return;
-    }
-
-    // Create a MAP Practice task object and add to agenda
-    const mapTask = {
-      summary: "MAP Practice",
-      startDate: new Date().toISOString()
-    };
-
-  addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
-    mapTask.estimatedTime = estimatedTime;
-    mapTask.zone = mapSelectedZone;
-
-    // Close and reset the MAP popup UI
-    if (mapPopup) {
-      mapPopup.classList.add('hidden');
-    }
-    if (mapZoneButtonGroup) {
-      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-    }
-    if (mapTime) mapTime.value = "";
-    mapSelectedZone = null;
-    mapTimeSelected = false;
-    mapZoneSelected = false;
-
-    // Refresh UI state
-    renderDashboardTasks();
-    loadStudyTasks();
+    mapPopupEl.classList.add("hidden");
+    document.removeEventListener("mousedown", outsideMapClickListener);
   }
 }

@@ -986,19 +986,6 @@ body.dark-mode .bookings-iframe-container iframe {
   /* Light border for iframe in dark mode */
 }
 
-/* Priority styling (high-priority tasks) */
-.priority-star {
-  color: gold;
-  font-weight: 700;
-  margin-right: 6px;
-}
-
-.priority-task {
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.08);
-  border-left: 4px solid gold;
-  font-weight: 700;
-}
-
 body.dark-mode #dashboardTasks {
   background-color: #2d3748 !important;
   color: #f7fafc !important;

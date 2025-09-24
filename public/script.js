@@ -450,7 +450,7 @@ function runButtonColorCheck() {
 
 function addToAgenda(task, estimatedTime, zone) {
   console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
-  const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
+  const totalMinutes = 60; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
 
   // Remove the placeholder text if it exists
   const placeholder = studyPlanDisplay.querySelector("p");

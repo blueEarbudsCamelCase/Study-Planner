@@ -346,9 +346,11 @@ backToPlanScreenBtn.addEventListener("click", () => {
 function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
   const taskTime = document.getElementById("taskTime");
+  const priorityCheckbox = document.getElementById("taskPriority");
   let selectedZone = null;
   let timeSelected = false;
   let zoneSelected = false;
+  let prioritySelected = !!task.priority;
 
   // Reset the popup fields
   taskTime.value = "";
@@ -356,29 +358,76 @@ function openTaskPopup(task) {
   timeSelected = false;
   zoneSelected = false;
 
-  // Assign event listeners to time buttons scoped to this popup
-  taskPopup.querySelectorAll('.time-btn').forEach(btn => {
-    // overwrite any previous handler to avoid leaking behavior
+  // Assign event listeners to time buttons (use .time-btn class in HTML)
+  document.querySelectorAll('.time-btn').forEach(btn => {
     btn.onclick = () => {
+      console.log('[Time Button Clicked]', btn.textContent);
       taskTime.value = btn.textContent;
       timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
       tryAutoSave();
     };
   });
 
-  // Highlight default button (none selected) - scope to this popup
-  taskPopup.querySelectorAll('.zone-btn').forEach(btn => {
+  // Highlight default button (none selected)
+  document.querySelectorAll('.zone-btn').forEach(btn => {
     btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
     btn.onclick = () => {
+      console.log('[Zone Button Clicked]', btn.dataset.zone);
       selectedZone = btn.dataset.zone;
       zoneSelected = true;
-      taskPopup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
       if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
       if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
       if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
       tryAutoSave();
     };
   });
+
+  // Listen for time input changes
+  taskTime.oninput = () => {
+    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+    tryAutoSave();
+  };
+
+  // Try to auto-save when both are selected
+  function tryAutoSave() {
+    console.log('[tryAutoSave] timeSelected:', timeSelected, 'zoneSelected:', zoneSelected);
+    if (timeSelected && zoneSelected) {
+      const estimatedTime = parseInt(taskTime.value, 10);
+      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
+      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+        alert("Please enter a valid estimated time.");
+        return;
+      }
+      // Calculate the total time if this task is added
+      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+        return sum + taskTime;
+      }, 0);
+
+      if (currentTotalMinutes + estimatedTime > 60) {
+        alert("This task would go past the end of the Study.");
+        return;
+      }
+      console.log('[tryAutoSave] Saving task:', task, estimatedTime, selectedZone);
+      // assign priority to the task
+      task.priority = !!prioritySelected;
+      addToAgenda(task, estimatedTime, selectedZone, task.priority);
+      task.estimatedTime = estimatedTime;
+      task.zone = selectedZone;
+      closePopup();
+    }
+  }
+
+  if (priorityCheckbox) {
+    priorityCheckbox.checked = prioritySelected;
+    priorityCheckbox.onchange = () => {
+      prioritySelected = !!priorityCheckbox.checked;
+      tryAutoSave();
+    };
+  }
 
   // Show the popup
   taskPopup.classList.remove("hidden");
@@ -397,34 +446,6 @@ function openTaskPopup(task) {
   function closePopup() {
     taskPopup.classList.add("hidden");
     document.removeEventListener("mousedown", outsideClickListener);
-  }
-
-  // Try to auto-save when both are selected
-  function tryAutoSave() {
-    console.log('[tryAutoSave] timeSelected:', timeSelected, 'zoneSelected:', zoneSelected);
-    if (timeSelected && zoneSelected) {
-      const estimatedTime = parseInt(taskTime.value, 10);
-      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
-      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-        alert("Please enter a valid estimated time.");
-        return;
-      }
-      // Calculate the total time if this task is added
-      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-        const taskTimeVal = parseInt(child.dataset.estimatedTime, 10) || 0;
-        return sum + taskTimeVal;
-      }, 0);
-
-      if (currentTotalMinutes + estimatedTime > 60) {
-        alert("This task would go past the end of the Study.");
-        return;
-      }
-      console.log('[tryAutoSave] Saving task:', task, estimatedTime, selectedZone);
-      addToAgenda(task, estimatedTime, selectedZone);
-      task.estimatedTime = estimatedTime;
-      task.zone = selectedZone;
-      closePopup();
-    }
   }
 }
 
@@ -448,8 +469,8 @@ function runButtonColorCheck() {
   }
 }
 
-function addToAgenda(task, estimatedTime, zone) {
-  console.log("Adding task to agenda:", { task, estimatedTime, zone }); // Debugging log
+function addToAgenda(task, estimatedTime, zone, priority = false) {
+  console.log("Adding task to agenda:", { task, estimatedTime, zone, priority }); // Debugging log
   const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
 
   // Remove the placeholder text if it exists
@@ -483,6 +504,11 @@ function addToAgenda(task, estimatedTime, zone) {
   agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
   agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
   agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
+  agendaItem.dataset.priority = priority ? "true" : "false";
+
+  if (priority) {
+    agendaItem.classList.add('priority-task');
+  }
 
   // Calculate the proportional height based on the estimated time
   const percentage = (estimatedTime / totalMinutes) * 100;
@@ -502,10 +528,12 @@ function addToAgenda(task, estimatedTime, zone) {
       agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
   }
 
+  const priorityMark = priority ? `<span class="priority-star">★</span>` : "";
+
   // Set the content of the agenda item
   agendaItem.innerHTML = `
-      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
-  
+      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+
       <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -1195,6 +1223,260 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
+});
+
+function updateIframeSrc(grade) {
+  const bookingsIframe = document.getElementById('bookingsIframe');
+  if (!bookingsIframe) return;
+  let src = "";
+  switch (grade) {
+    case "7-8":
+      src = "https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      break;
+    case "9-10":
+      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      break;
+    case "11-12":
+      src = "https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      break;
+    default:
+      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+  }
+  bookingsIframe.src = src;
+}
+
+function openEditTaskPopup(task) {
+  const editPopup = document.getElementById("editTaskPopup");
+  const editTitleInput = document.getElementById("editTaskTitle");
+  const cancelBtn = document.getElementById("cancelEditTaskBtn");
+  const saveBtn = document.getElementById("saveEditTaskBtn");
+
+  // Show popup and set current title
+  editPopup.classList.remove("hidden");
+  editTitleInput.value = task.summary || "";
+
+  // Cancel button closes popup
+  cancelBtn.onclick = () => {
+    editPopup.classList.add("hidden");
+    editTitleInput.value = "";
+  };
+
+  // Save button updates the task title
+  saveBtn.onclick = () => {
+    const newTitle = editTitleInput.value.trim();
+    if (!newTitle) {
+      alert("Please enter a task title.");
+      return;
+    }
+
+    // Update in customTasks if present
+    let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+    let updated = false;
+    customTasks = customTasks.map(t => {
+      if (t.startDate === task.startDate) {
+        updated = true;
+        return { ...t, summary: newTitle };
+      }
+      return t;
+    });
+    if (updated) {
+      localStorage.setItem("customTasks", JSON.stringify(customTasks));
+      // Update the UI immediately for custom tasks
+      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
+      taskElements.forEach(el => {
+        const summarySpan = el.querySelector('span');
+        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
+      });
+    } else {
+      // If not a custom task, update editedIcalTasks
+      let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+      editedIcalTasks[task.startDate] = newTitle;
+      localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
+      // Update the UI immediately for iCal tasks
+      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
+      taskElements.forEach(el => {
+        const summarySpan = el.querySelector('span');
+        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
+      });
+    }
+
+    editPopup.classList.add("hidden");
+    editTitleInput.value = "";
+
+    // Optionally, still refresh tasks for consistency
+    renderDashboardTasks();
+    loadStudyTasks();
+  };
+}
+
+// Custom teacher dropdown logic
+const teacherList = [
+  "Adam Miskic","Aimee Lissel","Alex Avila","Alex Hutchinson","Alison Quinn","Allison Rhoades","Amanda Edwin","Amanda Lishamer","Andrea Tucker","Andrew Kralik","Angela Conry","Anne Lenihan","Anthony Newman","April Enochs","Ashlie Kaul","Bailey Kobs","Benjamin Yule","Boram Kim","Brian Boutette","Brian Kim","Brian Merryweather","Brian Naismith","Brodie Ogg","Cara Johnson","Cassandra Montello","Chris Gamble","Courtney Garrah","Craig Smale","Craig Wall","Dalton Fitting","Damien Jordan","Dan Larson-Knight","Dani Idler","David Macfarlane","Desiree Lemieux","Devin Tide","Dilenny De La Cruz","Ebony Bennett","Elie MacLean","Emily Atchue","Erin Martin","Evan Rogers","Isaac Hager","Jaimmie-Lee Jordan","James Fraser","Jane Ballou","Jane Zegers","Janet Valdez","Jascenth McKenzie","Jenelle Jeffrey","Jess Meissner","Jessica McCullough","Joanie Wolfram","John Van Ess","Josanne Timothy","Joseph Raygada","Juanika Joseph","Karen Lake","Kate Nelson","Kathleen Vivian","Kayla Jansky","Kelle Patrick","Keri Deskins","Kessandra Blackman","Khadija Darlington","Kristen Jakala","Kristin Iula","Kyle Craig","Kyle Gay","Kyler Johnson","Latasha Whiting","Leanna Laidlow","Lindsay Ebata","MacKenzie Screpnek","Maria Caoagdan","Maria Luepke","Martha Blue","Matthew Robinson","Matthew Windsor","Michael Froberg","Michele Weiss","Michelle Meadows","Michelle Panting","Nicholas Delouis","Nicole Chevrier","Nicole Danks","Olivia Garside","Pam Small/Freger","Patricia Stuhl","Peter Henninger","Rachelle Liski","Rhea Goodridge","Rheanne Foth","Rob Pothaar","Roxanne Catellier","Ryan Coombs","Ryanne Marchan","Sam Farelli","Samuel Poole","Sara Alfaro","Scott Fransky","Shakeira Waithe","Sharlene Kistow","Sharie Snagg","Stephanie Bakonyi","Steven Reeder","Suzan Brown","Taryn Fenwick","Thomas Coroneos","Tina Liu","Tishauna Petrie-Barrant","Tonia Manges","Tres Barker","Wendy Omland","William Nagel","William Swidorski","Woody Arrowood","Zakk Taylor","Zaleena Esahack"
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  // DOM elements
+  const dashboardSection = document.getElementById("dashboardSection");
+  const scheduleSetupSection = document.getElementById("scheduleSetupSection");
+  const dashboardContainer = document.getElementById("dashboardContainer");
+  const startStudyBtn = document.getElementById("startStudyBtn");
+  const backToDashboardBtn = document.getElementById("backToDashboardBtn");
+  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const runScreenTasks = document.getElementById("runScreenTasks");
+  const runButton = document.getElementById("runButton");
+  const gradeSelect = document.getElementById('gradeSelect');
+  const bookingsIframe = document.getElementById('bookingsIframe');
+
+  // Only run if dashboardContainer exists
+  if (dashboardContainer) {
+    checkIcalFeed();
+
+    fetchIcalFeed()
+      .then(() => {
+        renderDashboardTasks({ scrollToToday: true });
+        loadStudyTasks();
+      })
+      .catch(error => {
+        console.error("Error fetching or parsing iCal feed:", error);
+        // Optionally show an error message elsewhere if needed
+      });
+  }
+
+  // Add event listeners only if elements exist
+  if (startStudyBtn) {
+    startStudyBtn.addEventListener("click", () => {
+      dashboardSection.classList.add("hidden");
+      studyScreen.classList.remove("hidden");
+      loadStudyTasks();
+    });
+  }
+
+  if (backToDashboardBtn) {
+    backToDashboardBtn.addEventListener("click", () => {
+      studyScreen.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
+      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = '';
+      updateMinutesLeftDisplay();
+    });
+  }
+
+  // Set grade selection from localStorage
+  const savedGrade = localStorage.getItem('userGrade');
+  if (savedGrade && gradeSelect) {
+    gradeSelect.value = savedGrade;
+    updateIframeSrc(savedGrade || gradeSelect.value);
+  }
+
+  // Add grade change listener
+  if (gradeSelect) {
+    gradeSelect.addEventListener('change', (e) => {
+      const grade = e.target.value;
+      localStorage.setItem('userGrade', grade);
+      updateIframeSrc(grade);
+    });
+  }
+
+  // Add Tutorial Popup logic
+  const addTutorialBtn = document.getElementById("addTutorialBtn");
+  const cancelTutorialBtn = document.getElementById("cancelTutorialBtn");
+  const saveTutorialBtn = document.getElementById("saveTutorialBtn");
+  if (addTutorialBtn) addTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.remove("hidden");
+  if (cancelTutorialBtn) cancelTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.add("hidden");
+  if (saveTutorialBtn) saveTutorialBtn.onclick = () => {
+    const date = document.getElementById("tutorialDate").value;
+    const teacher = document.getElementById("tutorialTeacher").value.trim();
+    if (!date) return alert("Please select a date.");
+    if (!teacher) return alert("Please enter the teacher's name.");
+    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+    // Always save as UTC 23:59
+    const startDate = `${date}T23:59:00.000Z`;
+    customTasks.push({
+      summary: `Tutorial (${teacher})`,
+      startDate,
+      teacher
+    });
+    localStorage.setItem("customTasks", JSON.stringify(customTasks));
+    document.getElementById("addTutorialPopup").classList.add("hidden");
+    document.getElementById("tutorialDate").value = "";
+    document.getElementById("tutorialTeacher").value = "";
+    renderDashboardTasks();
+    loadStudyTasks();
+  };
+
+  // Add Task Popup logic
+  const addTaskBtn = document.getElementById("addTaskBtn");
+  const cancelTaskBtn = document.getElementById("cancelTaskBtn");
+  const saveTaskBtn = document.getElementById("saveTaskBtn");
+  if (addTaskBtn) addTaskBtn.onclick = () => document.getElementById("addTaskPopup").classList.remove("hidden");
+  if (cancelTaskBtn) cancelTaskBtn.onclick = () => {
+    document.getElementById("addTaskPopup").classList.add("hidden");
+    document.getElementById("customTaskTitle").value = "";
+    document.getElementById("customTaskDate").value = "";
+  };
+  if (saveTaskBtn) saveTaskBtn.onclick = () => {
+    const title = document.getElementById("customTaskTitle").value.trim();
+    const date = document.getElementById("customTaskDate").value;
+    if (!title || !date) {
+      alert("Please enter a title and date.");
+      return;
+    }
+    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
+    if (customTasks.some(t => t.summary === title)) {
+      alert("Custom task titles must be unique.");
+      return;
+    }
+    // Always save as UTC 23:59
+    const startDate = `${date}T23:59:00.000Z`;
+    customTasks.push({
+      summary: title,
+      startDate
+    });
+    localStorage.setItem("customTasks", JSON.stringify(customTasks));
+    document.getElementById("addTaskPopup").classList.add("hidden");
+    document.getElementById("customTaskTitle").value = "";
+    document.getElementById("customTaskDate").value = "";
+    renderDashboardTasks();
+    loadStudyTasks();
+  };
+
+  // Add refresh button logic for dashboard
+  const refreshTasksBtn = document.getElementById("refreshTasksBtn");
+  if (refreshTasksBtn) {
+    refreshTasksBtn.onclick = () => {
+      refreshTasksBtn.classList.add("fa-spin");
+      fetchIcalFeed()
+        .then(() => {
+          renderDashboardTasks({ scrollToToday: true });
+          loadStudyTasks();
+          setTimeout(() => refreshTasksBtn.classList.remove("fa-spin"), 500);
+        })
+        .catch(() => {
+          setTimeout(() => refreshTasksBtn.classList.remove("fa-spin"), 500);
+        });
+    };
+  }
+
+  // Add refresh button logic for study planner
+  const refreshStudyTasksBtn = document.getElementById("refreshStudyTasksBtn");
+  if (refreshStudyTasksBtn) {
+    refreshStudyTasksBtn.onclick = () => {
+      refreshStudyTasksBtn.classList.add("fa-spin");
+      fetchIcalFeed()
+        .then(() => {
+          loadStudyTasks();
+          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+        })
+        .catch(() => {
+          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+        });
+    };
+  }
+
+  // Initial dashboard render
+  renderDashboardTasks();
+  loadStudyTasks();
 
   // Custom teacher dropdown logic
   const teacherInput = document.getElementById('tutorialTeacher');
@@ -1241,7 +1523,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function openMapPopup() {
   const mapPopup = document.getElementById("mapPopup");
   const mapTime = document.getElementById("mapTime");
-  const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
   let mapSelectedZone = null;
   let mapTimeSelected = false;
   let mapZoneSelected = false;
@@ -1252,34 +1533,66 @@ function openMapPopup() {
   mapTimeSelected = false;
   mapZoneSelected = false;
 
-  // Assign event listeners to time buttons scoped to this popup
-  mapPopup.querySelectorAll('.time-btn').forEach(btn => {
+  // Assign event listeners to time buttons (use .time-btn class in HTML)
+  document.querySelectorAll('.time-btn').forEach(btn => {
     btn.onclick = () => {
-      mapTime.value = btn.textContent;
-      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-      tryMapAutoSave();
+      console.log('[Time Button Clicked]', btn.textContent);
+      taskTime.value = btn.textContent;
+      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
+      tryAutoSave();
     };
   });
 
-  // Assign event listeners to zone buttons scoped to this popup
-  mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
+  // Highlight default button (none selected)
+  document.querySelectorAll('.zone-btn').forEach(btn => {
     btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
     btn.onclick = () => {
-      mapSelectedZone = btn.dataset.zone;
-      mapZoneSelected = true;
-      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-      if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-      if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-      if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-      tryMapAutoSave();
+      console.log('[Zone Button Clicked]', btn.dataset.zone);
+      selectedZone = btn.dataset.zone;
+      zoneSelected = true;
+      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+      if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+      if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
+      tryAutoSave();
     };
   });
 
   // Listen for time input changes
   mapTime.oninput = () => {
-    mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-    tryMapAutoSave();
+    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+    tryAutoSave();
   };
+
+  // Try to auto-save when both are selected
+  function tryAutoSave() {
+    console.log('[tryAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
+    if (mapTimeSelected && mapZoneSelected) {
+      const estimatedTime = parseInt(taskTime.value, 10);
+      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
+      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+        alert("Please enter a valid estimated time.");
+        return;
+      }
+      // Calculate the total time if this task is added
+      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+        return sum + taskTime;
+      }, 0);
+
+      if (currentTotalMinutes + estimatedTime > 60) {
+        alert("This task would go past the end of the Study.");
+        return;
+      }
+      console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
+  addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
+      /*estimatedTime = estimatedTime;
+      zone = selectedZone;*/
+      closeMapPopup();
+    }
+  }
 
   // Show the popup
   mapPopup.classList.remove("hidden");
@@ -1329,7 +1642,7 @@ function tryMapAutoSave() {
       startDate: new Date().toISOString()
     };
 
-    addToAgenda(mapTask, estimatedTime, mapSelectedZone);
+  addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
     mapTask.estimatedTime = estimatedTime;
     mapTask.zone = mapSelectedZone;
 

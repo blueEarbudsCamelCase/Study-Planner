@@ -1519,7 +1519,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
+/*
 function openMapPopup() {
   const mapPopup = document.getElementById("mapPopup");
   const mapTime = document.getElementById("mapTime");
@@ -1588,8 +1588,9 @@ function openMapPopup() {
       }
       console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
   addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
-      /*estimatedTime = estimatedTime;
-      zone = selectedZone;*/
+      //these two lines are meant to be commented out.
+      estimatedTime = estimatedTime;
+      zone = selectedZone;
       closeMapPopup();
     }
   }
@@ -1662,4 +1663,4 @@ function tryMapAutoSave() {
     renderDashboardTasks();
     loadStudyTasks();
   }
-}
+} */

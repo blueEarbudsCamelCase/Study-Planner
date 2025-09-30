@@ -51,20 +51,10 @@ document.getElementById('scheduleForm').addEventListener('submit', (e) => {
 });
 
 
-// Fetch the iCal feed when the page loads
+// Replace the top-level "Fetch the iCal feed when the page loads" block with a safe check
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
 if (dashboardContainer) {
   checkIcalFeed();
-
-  fetchIcalFeed()
-    .then(() => {
-      renderDashboardTasks({ scrollToToday: true });
-      loadStudyTasks();
-    })
-    .catch(error => {
-      console.error("Error fetching or parsing iCal feed:", error);
-      // Optionally show an error message elsewhere if needed
-    });
 } else {
   console.error("dashboardContainer not found.");
 }
@@ -346,11 +336,9 @@ backToPlanScreenBtn.addEventListener("click", () => {
 function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
   const taskTime = document.getElementById("taskTime");
-  const priorityCheckbox = document.getElementById("taskPriority");
   let selectedZone = null;
   let timeSelected = false;
   let zoneSelected = false;
-  let prioritySelected = !!task.priority;
 
   // Reset the popup fields
   taskTime.value = "";
@@ -358,8 +346,8 @@ function openTaskPopup(task) {
   timeSelected = false;
   zoneSelected = false;
 
-  // Assign event listeners to time buttons (use .time-btn class in HTML)
-  document.querySelectorAll('.time-btn').forEach(btn => {
+  // Assign event listeners to time buttons (scope to this popup)
+  taskPopup.querySelectorAll('.time-btn').forEach(btn => {
     btn.onclick = () => {
       console.log('[Time Button Clicked]', btn.textContent);
       taskTime.value = btn.textContent;
@@ -369,14 +357,14 @@ function openTaskPopup(task) {
     };
   });
 
-  // Highlight default button (none selected)
-  document.querySelectorAll('.zone-btn').forEach(btn => {
+  // Scope zone buttons to this popup
+  taskPopup.querySelectorAll('.zone-btn').forEach(btn => {
     btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
     btn.onclick = () => {
       console.log('[Zone Button Clicked]', btn.dataset.zone);
       selectedZone = btn.dataset.zone;
       zoneSelected = true;
-      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      taskPopup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
       if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
       if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
       if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
@@ -385,7 +373,7 @@ function openTaskPopup(task) {
     };
   });
 
-  // Listen for time input changes
+  // Listen for time input changes (typing supported)
   taskTime.oninput = () => {
     timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
     tryAutoSave();
@@ -419,14 +407,6 @@ function openTaskPopup(task) {
       task.zone = selectedZone;
       closePopup();
     }
-  }
-
-  if (priorityCheckbox) {
-    priorityCheckbox.checked = prioritySelected;
-    priorityCheckbox.onchange = () => {
-      prioritySelected = !!priorityCheckbox.checked;
-      tryAutoSave();
-    };
   }
 
   // Show the popup
@@ -1223,28 +1203,193 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
+
+  // Custom teacher dropdown logic
+  const teacherInput = document.getElementById('tutorialTeacher');
+  const teacherDropdown = document.getElementById('teacherDropdown');
+
+  if (teacherInput && teacherDropdown) {
+    teacherInput.addEventListener('input', function () {
+      const value = this.value.trim().toLowerCase();
+      teacherDropdown.innerHTML = '';
+      if (value.length === 0) {
+        teacherDropdown.classList.add('hidden');
+        return;
+      }
+      const matches = teacherList.filter(name => name.toLowerCase().includes(value));
+      if (matches.length === 0) {
+        teacherDropdown.classList.add('hidden');
+        return;
+      }
+      matches.forEach(name => {
+        const option = document.createElement('div');
+        option.textContent = name;
+        option.className = 'px-3 py-2 cursor-pointer hover:bg-blue-100';
+        option.onclick = () => {
+          teacherInput.value = name;
+          teacherDropdown.classList.add('hidden');
+        };
+        teacherDropdown.appendChild(option);
+      });
+      // Position dropdown below input
+      const rect = teacherInput.getBoundingClientRect();
+      teacherDropdown.style.top = (teacherInput.offsetTop + teacherInput.offsetHeight) + 'px';
+      teacherDropdown.style.left = teacherInput.offsetLeft + 'px';
+      teacherDropdown.style.width = teacherInput.offsetWidth + 'px';
+      teacherDropdown.classList.remove('hidden');
+    });
+
+    teacherInput.addEventListener('blur', function () {
+      setTimeout(() => teacherDropdown.classList.add('hidden'), 150);
+    });
+  }
 });
 
-function updateIframeSrc(grade) {
-  const bookingsIframe = document.getElementById('bookingsIframe');
-  if (!bookingsIframe) return;
-  let src = "";
-  switch (grade) {
-    case "7-8":
-      src = "https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
-      break;
-    case "9-10":
-      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
-      break;
-    case "11-12":
-      src = "https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
-      break;
-    default:
-      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
-  }
-  bookingsIframe.src = src;
+
+function openMapPopup() {
+  const mapPopup = document.getElementById("mapPopup");
+  // Use the module-scoped elements/vars defined earlier
+  if (!mapPopup || !mapTime || !mapZoneButtonGroup) return;
+
+  // Reset the popup fields (use outer-scope mapSelectedZone/mapTimeSelected/mapZoneSelected)
+  mapTime.value = "";
+  mapSelectedZone = null;
+  mapTimeSelected = false;
+  mapZoneSelected = false;
+
+  // Scope time buttons to the mapPopup
+  mapPopup.querySelectorAll('.time-btn').forEach(btn => {
+    btn.onclick = () => {
+      mapTime.value = btn.textContent;
+      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+      tryMapAutoSave();
+    };
+  });
+
+  // Scope zone buttons to the map popup group
+  mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
+    btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
+    btn.onclick = () => {
+      mapSelectedZone = btn.dataset.zone;
+      mapZoneSelected = true;
+      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+      if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+      if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      tryMapAutoSave();
+    };
+  });
+
+  // Listen for typed input
+  mapTime.oninput = () => {
+    mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+    tryMapAutoSave();
+  };
+
+  // Reset ring state on open
+  mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+
+  // Show popup
+  mapPopup.classList.remove('hidden');
+
+  // Outside click handling using the inner wrapper class
+  setTimeout(() => {
+    function outsideClickListener(e) {
+      if (!mapPopup.querySelector('.map-popup-inner').contains(e.target)) {
+        closeMapPopup();
+      }
+    }
+    document.addEventListener("mousedown", outsideClickListener);
+
+    function closeMapPopup() {
+      mapPopup.classList.add("hidden");
+      document.removeEventListener("mousedown", outsideClickListener);
+    }
+
+    // Attach closeMapPopup to the outer scope so cancel button can call it
+    mapPopup._closeMapPopup = closeMapPopup;
+  }, 0);
 }
 
+// Wire map button to openMapPopup (guarded)
+if (mapButton) {
+  mapButton.addEventListener('click', openMapPopup);
+}
+
+// Ensure tryMapAutoSave uses the outer-scope map vars (no change needed but confirm presence)
+function tryMapAutoSave() {
+  console.log('[tryMapAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
+  if (mapTimeSelected && mapZoneSelected) {
+    const estimatedTime = parseInt(mapTime.value, 10);
+    console.log('[tryMapAutoSave] estimatedTime:', estimatedTime, 'mapSelectedZone:', mapSelectedZone);
+    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+      alert("Please enter a valid estimated time.");
+      return;
+    }
+
+    // Calculate the total minutes already scheduled
+    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
+      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+      return sum + taskTime;
+    }, 0);
+
+    if (currentTotalMinutes + estimatedTime > 60) {
+      alert("This task would go past the end of the Study.");
+      return;
+    }
+
+    // Create a MAP Practice task object and add to agenda
+    const mapTask = {
+      summary: "MAP Practice",
+      startDate: new Date().toISOString()
+    };
+
+    addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
+    mapTask.estimatedTime = estimatedTime;
+    mapTask.zone = mapSelectedZone;
+
+    // Close and reset the MAP popup UI
+    const mapPopupEl = document.getElementById('mapPopup');
+    if (mapPopupEl && typeof mapPopupEl._closeMapPopup === 'function') mapPopupEl._closeMapPopup();
+
+    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+    if (mapTime) mapTime.value = "";
+    mapSelectedZone = null;
+    mapTimeSelected = false;
+    mapZoneSelected = false;
+
+    renderDashboardTasks();
+    loadStudyTasks();
+  }
+}
+
+// Edit User Data: only clear grade and ical URL (do not clear completed/custom/ical tasks)
+const editInputsBtn = document.getElementById('editInputsBtn');
+if (editInputsBtn) {
+  editInputsBtn.addEventListener('click', () => {
+    localStorage.removeItem('userGrade');
+    localStorage.removeItem('icalFeedUrl');
+    // Keep completedTasks, customTasks, icalTasks, editedIcalTasks etc.
+    location.reload();
+  });
+}
+
+// Improve instant UI update after editing tasks: match by dataset rather than attribute selector
+function updateTaskElementsSummary(startDateKey, newTitle) {
+  document.querySelectorAll('[data-start-date]').forEach(el => {
+    if (el.dataset.startDate === startDateKey) {
+      // find the first span in the element and update text if present
+      const span = el.querySelector('span');
+      if (span) {
+        const parts = span.textContent.split(' - ');
+        parts[0] = newTitle;
+        span.textContent = parts.join(' - ');
+      }
+    }
+  });
+}
+
+// Update openEditTaskPopup save logic to call updateTaskElementsSummary
 function openEditTaskPopup(task) {
   const editPopup = document.getElementById("editTaskPopup");
   const editTitleInput = document.getElementById("editTaskTitle");
@@ -1522,144 +1667,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function openMapPopup() {
   const mapPopup = document.getElementById("mapPopup");
-  const mapTime = document.getElementById("mapTime");
-  let mapSelectedZone = null;
-  let mapTimeSelected = false;
-  let mapZoneSelected = false;
+  // Use the module-scoped elements/vars defined earlier
+  if (!mapPopup || !mapTime || !mapZoneButtonGroup) return;
 
-  // Reset the popup fields
+  // Reset the popup fields (use outer-scope mapSelectedZone/mapTimeSelected/mapZoneSelected)
   mapTime.value = "";
   mapSelectedZone = null;
   mapTimeSelected = false;
   mapZoneSelected = false;
 
-  // Assign event listeners to time buttons (use .time-btn class in HTML)
-  document.querySelectorAll('.time-btn').forEach(btn => {
+  // Scope time buttons to the mapPopup
+  mapPopup.querySelectorAll('.time-btn').forEach(btn => {
     btn.onclick = () => {
-      console.log('[Time Button Clicked]', btn.textContent);
-      taskTime.value = btn.textContent;
-      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
-      tryAutoSave();
+      mapTime.value = btn.textContent;
+      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+      tryMapAutoSave();
     };
   });
 
-  // Highlight default button (none selected)
-  document.querySelectorAll('.zone-btn').forEach(btn => {
+  // Scope zone buttons to the map popup group
+  mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
     btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
     btn.onclick = () => {
-      console.log('[Zone Button Clicked]', btn.dataset.zone);
-      selectedZone = btn.dataset.zone;
-      zoneSelected = true;
-      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-      if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-      if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-      if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
-      tryAutoSave();
+      mapSelectedZone = btn.dataset.zone;
+      mapZoneSelected = true;
+      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
+      if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
+      if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
+      if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
+      tryMapAutoSave();
     };
   });
 
-  // Listen for time input changes
+  // Listen for typed input
   mapTime.oninput = () => {
-    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-    tryAutoSave();
+    mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
+    tryMapAutoSave();
   };
 
-  // Try to auto-save when both are selected
-  function tryAutoSave() {
-    console.log('[tryAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
-    if (mapTimeSelected && mapZoneSelected) {
-      const estimatedTime = parseInt(taskTime.value, 10);
-      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
-      if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-        alert("Please enter a valid estimated time.");
-        return;
-      }
-      // Calculate the total time if this task is added
-      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-        return sum + taskTime;
-      }, 0);
+  // Reset ring state on open
+  mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
 
-      if (currentTotalMinutes + estimatedTime > 60) {
-        alert("This task would go past the end of the Study.");
-        return;
-      }
-      console.log('[tryAutoSave] Saving MAP Practice:', estimatedTime, selectedZone);
-  addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
-      /*estimatedTime = estimatedTime;
-      zone = selectedZone;*/
-      closeMapPopup();
-    }
-  }
+  // Show popup
+  mapPopup.classList.remove('hidden');
 
-  // Show the popup
-  mapPopup.classList.remove("hidden");
-
-  // Close popup when clicking outside the inner box
+  // Outside click handling using the inner wrapper class
   setTimeout(() => {
-    document.addEventListener("mousedown", outsideClickListener);
-  }, 0);
-
-  function outsideClickListener(e) {
-    if (!mapPopup.querySelector('.bg-white').contains(e.target)) {
-      closeMapPopup();
+    function outsideClickListener(e) {
+      if (!mapPopup.querySelector('.map-popup-inner').contains(e.target)) {
+        closeMapPopup();
+      }
     }
-  }
+    document.addEventListener("mousedown", outsideClickListener);
 
-  function closeMapPopup() {
-    mapPopup.classList.add("hidden");
-    document.removeEventListener("mousedown", outsideClickListener);
-  }
+    function closeMapPopup() {
+      mapPopup.classList.add("hidden");
+      document.removeEventListener("mousedown", outsideClickListener);
+    }
+
+    // Attach closeMapPopup to the outer scope so cancel button can call it
+    mapPopup._closeMapPopup = closeMapPopup;
+  }, 0);
 }
 
-// Add this helper to support the MAP popup auto-save flow
-function tryMapAutoSave() {
-  console.log('[tryMapAutoSave] timeSelected:', mapTimeSelected, 'zoneSelected:', mapZoneSelected);
-  if (mapTimeSelected && mapZoneSelected) {
-    const estimatedTime = parseInt(mapTime.value, 10);
-    console.log('[tryMapAutoSave] estimatedTime:', estimatedTime, 'mapSelectedZone:', mapSelectedZone);
-    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
-      alert("Please enter a valid estimated time.");
-      return;
-    }
+// Wire map button to openMapPopup (guarded)
+if (mapButton) {
+  mapButton.addEventListener('click', openMapPopup);
+}
 
-    // Calculate the total minutes already scheduled
-    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-      const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-      return sum + taskTime;
-    }, 0);
-
-    if (currentTotalMinutes + estimatedTime > 60) {
-      alert("This task would go past the end of the Study.");
-      return;
-    }
-
-    // Create a MAP Practice task object and add to agenda
-    const mapTask = {
-      summary: "MAP Practice",
-      startDate: new Date().toISOString()
-    };
-
-  addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
-    mapTask.estimatedTime = estimatedTime;
-    mapTask.zone = mapSelectedZone;
-
-    // Close and reset the MAP popup UI
-    if (mapPopup) {
-      mapPopup.classList.add('hidden');
-    }
-    if (mapZoneButtonGroup) {
-      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-    }
-    if (mapTime) mapTime.value = "";
-    mapSelectedZone = null;
-    mapTimeSelected = false;
-    mapZoneSelected = false;
-
-    // Refresh UI state
-    renderDashboardTasks();
-    loadStudyTasks();
-  }
+// Wire save/cancel buttons for map popup
+const cancelMapBtn = document.getElementById('cancelMapBtn');
+const saveMapBtn = document.getElementById('saveMapBtn');
+if (cancelMapBtn) {
+  cancelMapBtn.addEventListener('click', () => {
+    const mapPopupEl = document.getElementById('mapPopup');
+    if (mapPopupEl && typeof mapPopupEl._closeMapPopup === 'function') mapPopupEl._closeMapPopup();
+  });
+}
+if (saveMapBtn) {
+  saveMapBtn.addEventListener('click', () => {
+    tryMapAutoSave();
+  });
 }

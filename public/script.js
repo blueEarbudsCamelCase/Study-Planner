@@ -58,7 +58,12 @@ if (dashboardContainer) {
 
   fetchIcalFeed()
     .then(() => {
-      renderDashboardTasks({ scrollToToday: true });
+      // Guarded call: renderDashboardTasks may be declared later as a const/arrow function
+      if (typeof renderDashboardTasks === "function") {
+        renderDashboardTasks({ scrollToToday: true });
+      } else if (window.renderDashboardTasks && typeof window.renderDashboardTasks === "function") {
+        window.renderDashboardTasks({ scrollToToday: true });
+      }
       loadStudyTasks();
     })
     .catch(error => {

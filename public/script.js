@@ -243,7 +243,7 @@ const startStudyBtn = document.getElementById("startStudyBtn");
 const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
 const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
-const mapButton = document.getElementById('mapButton');
+//const mapButton = document.getElementById('mapButton');
 const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
 let baseTimer = document.querySelector('.base-timer')
 
@@ -252,6 +252,9 @@ startStudyBtn.addEventListener("click", () => {
   studyScreen.classList.remove("hidden"); // Show the study setup screen
   loadStudyTasks();
 });
+
+/* i realise now that there seem to be two map practice functions, this one and the one at the bottom. I'll look and see if theyre the same or different. need to compare them and see what one should be kept. 
+
 
 mapButton.addEventListener("click", () => {
   mapPopup.classList.remove("hidden");
@@ -303,7 +306,7 @@ mapButton.addEventListener("click", () => {
       mapZoneSelected = false;
       mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
     });
-  }
+  } */
 
 backToDashboardBtn.addEventListener("click", () => {
   studyScreen.classList.add("hidden"); // Hide the study planner section

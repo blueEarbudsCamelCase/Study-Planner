@@ -243,8 +243,6 @@ const startStudyBtn = document.getElementById("startStudyBtn");
 const backToDashboardBtn = document.getElementById("backToDashboardBtn");
 const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
 const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
-//const mapButton = document.getElementById('mapButton');
-const mapPopup = document.getElementById("mapPopup"); // Reference the task popup
 let baseTimer = document.querySelector('.base-timer')
 
 startStudyBtn.addEventListener("click", () => {
@@ -252,61 +250,6 @@ startStudyBtn.addEventListener("click", () => {
   studyScreen.classList.remove("hidden"); // Show the study setup screen
   loadStudyTasks();
 });
-
-/* i realise now that there seem to be two map practice functions, this one and the one at the bottom. I'll look and see if theyre the same or different. need to compare them and see what one should be kept. 
-
-
-mapButton.addEventListener("click", () => {
-  mapPopup.classList.remove("hidden");
-});
-
-
-  // MAP Practice Popup logic (match Task popup behavior)
-  const mapTime = document.getElementById("mapTime");
-  const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
-  let mapSelectedZone = null;
-  let mapTimeSelected = false;
-  let mapZoneSelected = false;
-
-  if (mapPopup && mapTime && mapZoneButtonGroup) {
-    // Assign event listeners to time buttons
-    mapPopup.querySelectorAll('.time-btn').forEach(btn => {
-      btn.onclick = () => {
-        mapTime.value = btn.textContent;
-        mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-        tryMapAutoSave();
-      };
-    });
-
-    // Assign event listeners to zone buttons
-    mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(btn => {
-      btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
-      btn.onclick = () => {
-        mapSelectedZone = btn.dataset.zone;
-        mapZoneSelected = true;
-        mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-        if (mapSelectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-        if (mapSelectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-        if (mapSelectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-        tryMapAutoSave();
-      };
-    });
-
-    // Listen for time input changes
-    mapTime.oninput = () => {
-      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-      tryMapAutoSave();
-    };
-
-    // Reset Save button on popup open
-    document.getElementById("mapButton").addEventListener("click", () => {
-      mapTime.value = "";
-      mapSelectedZone = null;
-      mapTimeSelected = false;
-      mapZoneSelected = false;
-      mapZoneButtonGroup.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-    });
-  } */
 
 backToDashboardBtn.addEventListener("click", () => {
   studyScreen.classList.add("hidden"); // Hide the study planner section
@@ -1226,6 +1169,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
+
+  // Custom teacher dropdown logic
+  const teacherInput = document.getElementById('tutorialTeacher');
+  const teacherDropdown = document.getElementById('teacherDropdown');
+
+  if (teacherInput && teacherDropdown) {
+    teacherInput.addEventListener('input', function () {
+      const value = this.value.trim().toLowerCase();
+      teacherDropdown.innerHTML = '';
+      if (value.length === 0) {
+        teacherDropdown.classList.add('hidden');
+        return;
+      }
+      const matches = teacherList.filter(name => name.toLowerCase().includes(value));
+      if (matches.length === 0) {
+        teacherDropdown.classList.add('hidden');
+        return;
+      }
+      matches.forEach(name => {
+        const option = document.createElement('div');
+        option.textContent = name;
+        option.className = 'px-3 py-2 cursor-pointer hover:bg-blue-100';
+        option.onclick = () => {
+          teacherInput.value = name;
+          teacherDropdown.classList.add('hidden');
+        };
+        teacherDropdown.appendChild(option);
+      });
+      // Position dropdown below input
+      const rect = teacherInput.getBoundingClientRect();
+      teacherDropdown.style.top = (teacherInput.offsetTop + teacherInput.offsetHeight) + 'px';
+      teacherDropdown.style.left = teacherInput.offsetLeft + 'px';
+      teacherDropdown.style.width = teacherInput.offsetWidth + 'px';
+      teacherDropdown.classList.remove('hidden');
+    });
+
+    teacherInput.addEventListener('blur', function () {
+      setTimeout(() => teacherDropdown.classList.add('hidden'), 150);
+    });
+  }
 });
 
 function updateIframeSrc(grade) {

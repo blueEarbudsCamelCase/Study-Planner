@@ -3,15 +3,15 @@ const scheduleSetupSection = document.getElementById("scheduleSetupSection");
 
 // Define fetchIcalFeed globally
 function fetchIcalFeed() {
-  const icalUrl = localStorage.getItem('icalFeedUrl');
+  const icalUrl = localStorage.getItem("icalFeedUrl");
   if (!icalUrl) {
     console.error("No iCal URL found in localStorage.");
     return Promise.reject("No iCal URL found in localStorage.");
   }
 
   return fetch(`/proxy?url=${encodeURIComponent(icalUrl)}`)
-    .then(response => response.text())
-    .then(data => {
+    .then((response) => response.text())
+    .then((data) => {
       if (!data) {
         console.error("No data received from the iCal feed.");
         throw new Error("No data received from the iCal feed.");
@@ -19,8 +19,8 @@ function fetchIcalFeed() {
       parseIcalFeed(data);
       return data; // Return the raw iCal data
     })
-    .catch(error => {
-      console.error('Error fetching iCal feed:', error);
+    .catch((error) => {
+      console.error("Error fetching iCal feed:", error);
       throw error;
     });
 }
@@ -42,14 +42,13 @@ function checkIcalFeed() {
   }
 }
 
-document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+document.getElementById("scheduleForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const icalUrl = document.getElementById('icalUrl').value;
-  localStorage.setItem('icalFeedUrl', icalUrl);
+  const icalUrl = document.getElementById("icalUrl").value;
+  localStorage.setItem("icalFeedUrl", icalUrl);
   console.log("iCal URL saved:", icalUrl);
 });
-
 
 // Fetch the iCal feed when the page loads
 const dashboardContainer = document.getElementById("dashboardContainer"); // Ensure this element exists
@@ -61,7 +60,7 @@ if (dashboardContainer) {
       renderDashboardTasks({ scrollToToday: true });
       loadStudyTasks();
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Error fetching or parsing iCal feed:", error);
       // Optionally show an error message elsewhere if needed
     });
@@ -72,7 +71,7 @@ if (dashboardContainer) {
 
 // Helper function to parse iCal dates
 function parseIcalDate(rawDate) {
-  if (rawDate.includes('T')) {
+  if (rawDate.includes("T")) {
     // Handle full date-time format (e.g., 20250423T193000Z)
     const year = parseInt(rawDate.substring(0, 4), 10);
     const month = parseInt(rawDate.substring(4, 6), 10) - 1; // Month is zero-based
@@ -80,7 +79,9 @@ function parseIcalDate(rawDate) {
     const hours = parseInt(rawDate.substring(9, 11), 10);
     const minutes = parseInt(rawDate.substring(11, 13), 10);
     const seconds = parseInt(rawDate.substring(13, 15), 10);
-    return new Date(Date.UTC(year, month, day, hours, minutes, seconds)).toISOString();
+    return new Date(
+      Date.UTC(year, month, day, hours, minutes, seconds)
+    ).toISOString();
   } else {
     // Handle date-only format (e.g., 20250422)
     const year = parseInt(rawDate.substring(0, 4), 10);
@@ -96,40 +97,46 @@ window.parseIcalFeed = function parseIcalFeed(data) {
     return;
   }
 
-  const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
-  const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
+  const completedTasks = JSON.parse(
+    localStorage.getItem("completedTasks") || "[]"
+  );
+  const completedTaskKeys = completedTasks.map(
+    (task) => `${task.summary}-${task.startDate}`
+  );
 
   // Load previous edits
-  const editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+  const editedIcalTasks = JSON.parse(
+    localStorage.getItem("editedIcalTasks") || "{}"
+  );
 
   const events = [];
-  const lines = data.split('\n');
+  const lines = data.split("\n");
   let event = {};
 
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  lines.forEach(line => {
-    if (line.startsWith('SUMMARY:')) {
-      let summary = line.replace('SUMMARY:', '').trim();
-      if (summary.includes('[')) {
-        summary = summary.split('[')[0].trim();
+  lines.forEach((line) => {
+    if (line.startsWith("SUMMARY:")) {
+      let summary = line.replace("SUMMARY:", "").trim();
+      if (summary.includes("[")) {
+        summary = summary.split("[")[0].trim();
       }
       event.summary = summary;
     }
-    if (line.startsWith('DTSTART')) {
-      const start = line.includes(':') ? line.split(':')[1].trim() : null;
+    if (line.startsWith("DTSTART")) {
+      const start = line.includes(":") ? line.split(":")[1].trim() : null;
       if (start) {
         event.startDate = parseIcalDate(start);
       }
     }
-    if (line.startsWith('DTEND')) {
-      const end = line.includes(':') ? line.split(':')[1].trim() : null;
+    if (line.startsWith("DTEND")) {
+      const end = line.includes(":") ? line.split(":")[1].trim() : null;
       if (end) {
         event.endDate = parseIcalDate(end);
       }
     }
-    if (line.trim() === 'END:VEVENT') {
+    if (line.trim() === "END:VEVENT") {
       const taskKey = `${event.startDate}`;
       const eventStartDate = new Date(event.startDate);
 
@@ -138,7 +145,10 @@ window.parseIcalFeed = function parseIcalFeed(data) {
         event.summary = editedIcalTasks[taskKey];
       }
 
-      if (!completedTaskKeys.includes(`${event.summary}-${event.startDate}`) && eventStartDate >= sevenDaysAgo) {
+      if (
+        !completedTaskKeys.includes(`${event.summary}-${event.startDate}`) &&
+        eventStartDate >= sevenDaysAgo
+      ) {
         events.push(event);
       }
       event = {};
@@ -184,7 +194,7 @@ if (localStorage.getItem("darkMode") === "enabled") {
 // --- Added: settings popup open/close handlers ---
 function openSettingsPopup() {
   if (!settingsPopup) return;
-  console.debug('[settings] openSettingsPopup called');
+  console.debug("[settings] openSettingsPopup called");
   settingsPopup.classList.remove("hidden");
   // Add outside click listener
   setTimeout(() => {
@@ -196,7 +206,7 @@ function openSettingsPopup() {
 
 function closeSettingsPopup() {
   if (!settingsPopup) return;
-  console.debug('[settings] closeSettingsPopup called');
+  console.debug("[settings] closeSettingsPopup called");
   settingsPopup.classList.add("hidden");
   document.removeEventListener("mousedown", outsideSettingsClickListener);
   document.removeEventListener("keydown", settingsEscapeListener);
@@ -219,7 +229,7 @@ function settingsEscapeListener(e) {
 // Wire up the buttons (guard for missing elements)
 if (settingsBtn) {
   settingsBtn.addEventListener("click", () => {
-    console.debug('[settings] settingsBtn clicked');
+    console.debug("[settings] settingsBtn clicked");
     // Toggle visibility
     if (settingsPopup && settingsPopup.classList.contains("hidden")) {
       openSettingsPopup();
@@ -236,14 +246,14 @@ if (closeSettingsBtn) {
 }
 
 const runButton = document.getElementById("runButton");
-const studyScreen = document.getElementById('studyPlannerSection');
-const runScreen = document.getElementById('runScreen');
+const studyScreen = document.getElementById("studyPlannerSection");
+const runScreen = document.getElementById("runScreen");
 const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
 const startStudyBtn = document.getElementById("startStudyBtn");
 const backToDashboardBtn = document.getElementById("backToDashboardBtn");
-const backToPlanScreenBtn = document.getElementById('backToPlanScreenBtn');
+const backToPlanScreenBtn = document.getElementById("backToPlanScreenBtn");
 const studyPlanDisplay = document.getElementById("studyPlanDisplay"); // Move this to the top
-let baseTimer = document.querySelector('.base-timer')
+let baseTimer = document.querySelector(".base-timer");
 
 startStudyBtn.addEventListener("click", () => {
   dashboardSection.classList.add("hidden"); // Hide the dashboard section
@@ -254,23 +264,25 @@ startStudyBtn.addEventListener("click", () => {
 backToDashboardBtn.addEventListener("click", () => {
   studyScreen.classList.add("hidden"); // Hide the study planner section
   dashboardSection.classList.remove("hidden"); // Show the dashboard section
-  studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-  runScreenTasks.innerHTML = '';
+  studyPlanDisplay.innerHTML =
+    '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+  runScreenTasks.innerHTML = "";
 
   updateMinutesLeftDisplay();
 });
 
 backToPlanScreenBtn.addEventListener("click", () => {
-  runScreen.classList.add('hidden');
-  dashboardSection.classList.remove('hidden');
-  studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-  runScreenTasks.innerHTML = '';
+  runScreen.classList.add("hidden");
+  dashboardSection.classList.remove("hidden");
+  studyPlanDisplay.innerHTML =
+    '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+  runScreenTasks.innerHTML = "";
   runButtonColorCheck();
   updateMinutesLeftDisplay();
 
   // Exit PiP mode if active
   if (document.pictureInPictureElement) {
-    document.exitPictureInPicture().catch(error => {
+    document.exitPictureInPicture().catch((error) => {
       console.error("Error exiting Picture-in-Picture:", error);
     });
   }
@@ -283,11 +295,10 @@ backToPlanScreenBtn.addEventListener("click", () => {
       parseIcalFeed();
       loadStudyTasks();
     })
-    .catch(error => {
+    .catch((error) => {
       console.error("Error fetching or parsing tasks:", error);
     });
 });
-
 
 function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
@@ -305,28 +316,57 @@ function openTaskPopup(task) {
   zoneSelected = false;
 
   // Assign event listeners to time buttons (use .time-btn class in HTML)
-  document.querySelectorAll('.time-btn').forEach(btn => {
+  document.querySelectorAll(".time-btn").forEach((btn) => {
     btn.onclick = () => {
-      console.log('[Time Button Clicked]', btn.textContent);
+      console.log("[Time Button Clicked]", btn.textContent);
       taskTime.value = btn.textContent;
       timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
-      console.log('[Time Selected]', timeSelected, 'Zone Selected', zoneSelected);
+      console.log(
+        "[Time Selected]",
+        timeSelected,
+        "Zone Selected",
+        zoneSelected
+      );
       tryAutoSave();
     };
   });
 
   // Highlight default button (none selected)
-  document.querySelectorAll('.zone-btn').forEach(btn => {
-    btn.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300');
+  document.querySelectorAll(".zone-btn").forEach((btn) => {
+    btn.classList.remove(
+      "ring",
+      "ring-offset-2",
+      "ring-blue-300",
+      "ring-green-300",
+      "ring-red-300"
+    );
     btn.onclick = () => {
-      console.log('[Zone Button Clicked]', btn.dataset.zone);
+      console.log("[Zone Button Clicked]", btn.dataset.zone);
       selectedZone = btn.dataset.zone;
       zoneSelected = true;
-      document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('ring', 'ring-offset-2', 'ring-blue-300', 'ring-green-300', 'ring-red-300'));
-      if (selectedZone === "Independent") btn.classList.add('ring', 'ring-offset-2', 'ring-blue-300');
-      if (selectedZone === "Semi-Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-green-300');
-      if (selectedZone === "Collaborative") btn.classList.add('ring', 'ring-offset-2', 'ring-red-300');
-      console.log('[Zone Selected]', zoneSelected, 'Time Selected', timeSelected);
+      document
+        .querySelectorAll(".zone-btn")
+        .forEach((b) =>
+          b.classList.remove(
+            "ring",
+            "ring-offset-2",
+            "ring-blue-300",
+            "ring-green-300",
+            "ring-red-300"
+          )
+        );
+      if (selectedZone === "Independent")
+        btn.classList.add("ring", "ring-offset-2", "ring-blue-300");
+      if (selectedZone === "Semi-Collaborative")
+        btn.classList.add("ring", "ring-offset-2", "ring-green-300");
+      if (selectedZone === "Collaborative")
+        btn.classList.add("ring", "ring-offset-2", "ring-red-300");
+      console.log(
+        "[Zone Selected]",
+        zoneSelected,
+        "Time Selected",
+        timeSelected
+      );
       tryAutoSave();
     };
   });
@@ -339,25 +379,43 @@ function openTaskPopup(task) {
 
   // Try to auto-save when both are selected
   function tryAutoSave() {
-    console.log('[tryAutoSave] timeSelected:', timeSelected, 'zoneSelected:', zoneSelected);
+    console.log(
+      "[tryAutoSave] timeSelected:",
+      timeSelected,
+      "zoneSelected:",
+      zoneSelected
+    );
     if (timeSelected && zoneSelected) {
       const estimatedTime = parseInt(taskTime.value, 10);
-      console.log('[tryAutoSave] estimatedTime:', estimatedTime, 'selectedZone:', selectedZone);
+      console.log(
+        "[tryAutoSave] estimatedTime:",
+        estimatedTime,
+        "selectedZone:",
+        selectedZone
+      );
       if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
         alert("Please enter a valid estimated time.");
         return;
       }
       // Calculate the total time if this task is added
-      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-        return sum + taskTime;
-      }, 0);
+      const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce(
+        (sum, child) => {
+          const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+          return sum + taskTime;
+        },
+        0
+      );
 
       if (currentTotalMinutes + estimatedTime > 60) {
         alert("This task would go past the end of the Study.");
         return;
       }
-      console.log('[tryAutoSave] Saving task:', task, estimatedTime, selectedZone);
+      console.log(
+        "[tryAutoSave] Saving task:",
+        task,
+        estimatedTime,
+        selectedZone
+      );
       // assign priority to the task
       task.priority = !!prioritySelected;
       addToAgenda(task, estimatedTime, selectedZone, task.priority);
@@ -384,7 +442,7 @@ function openTaskPopup(task) {
   }, 0);
 
   function outsideClickListener(e) {
-    if (!taskPopup.querySelector('.bg-white').contains(e.target)) {
+    if (!taskPopup.querySelector(".bg-white").contains(e.target)) {
       closePopup();
     }
   }
@@ -396,12 +454,14 @@ function openTaskPopup(task) {
 }
 
 function runButtonColorCheck() {
-
   // Calculate the total time of tasks
-  const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-    const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0; // Use the dataset value
-    return sum + estimatedTime;
-  }, 0);
+  const totalMinutes = Array.from(studyPlanDisplay.children).reduce(
+    (sum, child) => {
+      const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0; // Use the dataset value
+      return sum + estimatedTime;
+    },
+    0
+  );
 
   console.log("Total Minutes:", totalMinutes);
 
@@ -416,8 +476,13 @@ function runButtonColorCheck() {
 }
 
 function addToAgenda(task, estimatedTime, zone, priority = false) {
-  console.log("Adding task to agenda:", { task, estimatedTime, zone, priority }); // Debugging log
-  const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container. 
+  console.log("Adding task to agenda:", {
+    task,
+    estimatedTime,
+    zone,
+    priority,
+  }); // Debugging log
+  const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container.
 
   // Remove the placeholder text if it exists
   const placeholder = studyPlanDisplay.querySelector("p");
@@ -453,7 +518,7 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
   agendaItem.dataset.priority = priority ? "true" : "false";
 
   if (priority) {
-    agendaItem.classList.add('priority-task');
+    agendaItem.classList.add("priority-task");
   }
 
   // Calculate the proportional height based on the estimated time
@@ -478,12 +543,20 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
 
   // Set the content of the agenda item
   agendaItem.innerHTML = `
-      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.     </span>
+      <span>${priorityMark}${
+    task.summary || "Unnamed Task"
+  } - ${estimatedTime} min.     </span>
 
-      <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString([], {
+      <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString(
+        [],
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      )} - ${taskEndTime.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
-  })} - ${taskEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+  })}</span>
     `;
 
   // Append the agenda item to the agenda box
@@ -495,18 +568,22 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
 
 // Utility to get all tasks (ical + custom)
 function getAllTasks() {
-  const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
-  const completedTaskKeys = completedTasks.map(task => `${task.summary}-${task.startDate}`);
+  const completedTasks = JSON.parse(
+    localStorage.getItem("completedTasks") || "[]"
+  );
+  const completedTaskKeys = completedTasks.map(
+    (task) => `${task.summary}-${task.startDate}`
+  );
 
   const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
   const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
 
   // Filter out completed tasks from both sources
   const filteredIcalTasks = icalTasks.filter(
-    t => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
+    (t) => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
   );
   const filteredCustomTasks = customTasks.filter(
-    t => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
+    (t) => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
   );
 
   return [...filteredIcalTasks, ...filteredCustomTasks];
@@ -533,22 +610,27 @@ function renderDashboardTasks({ scrollToToday = false } = {}) {
   let todayHeading = null;
   Object.keys(tasksByDate)
     .sort((a, b) => new Date(a) - new Date(b))
-    .forEach(date => {
+    .forEach((date) => {
       const parsedDate = new Date(date);
       const dateHeading = document.createElement("h3");
-      dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
+      dateHeading.textContent =
+        parsedDate.toDateString() === today.toDateString() ? "Today" : date;
       dateHeading.className = "font-bold text-lg mt-4 mb-2";
       dashboardTasks.appendChild(dateHeading);
       if (parsedDate.toDateString() === today.toDateString()) {
         todayHeading = dateHeading;
       }
-      if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
+      if (
+        tasksByDate[date].length === 0 &&
+        parsedDate.toDateString() === today.toDateString()
+      ) {
         const placeholder = document.createElement("li");
-        placeholder.textContent = "You've completed all of today's tasks. Great job!";
+        placeholder.textContent =
+          "You've completed all of today's tasks. Great job!";
         placeholder.className = "text-gray-500 italic";
         dashboardTasks.appendChild(placeholder);
       }
-      tasksByDate[date].forEach(task => {
+      tasksByDate[date].forEach((task) => {
         const li = document.createElement("li");
         li.className = "mb-1 flex items-center";
         const checkbox = document.createElement("input");
@@ -556,13 +638,14 @@ function renderDashboardTasks({ scrollToToday = false } = {}) {
         checkbox.className = "mr-2";
         checkbox.addEventListener("change", () => {
           moveToCompleted(task, li, true);
-          li.classList.add('fade-out');
+          li.classList.add("fade-out");
           setTimeout(() => {
             renderDashboardTasks({ scrollToToday: true }); // Always refresh and scroll to today
           }, 500);
         });
         const button = document.createElement("button");
-        button.className = "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
+        button.className =
+          "w-full text-left bg-gray-100 dark:bg-gray-800 dark:text-gray-200 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700";
         button.textContent = task.summary || "Unnamed Event";
         button.onclick = () => openEditTaskPopup(task);
         li.appendChild(checkbox);
@@ -612,12 +695,13 @@ function loadStudyTasks() {
   // Render tasks with headings
   Object.keys(tasksByDate)
     .sort((a, b) => new Date(a) - new Date(b)) // Sort dates chronologically
-    .forEach(date => {
+    .forEach((date) => {
       const parsedDate = new Date(date);
       const dateHeading = document.createElement("h3");
 
       // Replace today's date with "Today"
-      dateHeading.textContent = parsedDate.toDateString() === today.toDateString() ? "Today" : date;
+      dateHeading.textContent =
+        parsedDate.toDateString() === today.toDateString() ? "Today" : date;
       dateHeading.className = "font-bold text-lg mt-4 mb-2";
       tasksList.appendChild(dateHeading);
 
@@ -625,15 +709,19 @@ function loadStudyTasks() {
         todayHeading = dateHeading;
       }
 
-      if (tasksByDate[date].length === 0 && parsedDate.toDateString() === today.toDateString()) {
+      if (
+        tasksByDate[date].length === 0 &&
+        parsedDate.toDateString() === today.toDateString()
+      ) {
         // Add a placeholder if there are no tasks for today
         const placeholder = document.createElement("li");
-        placeholder.textContent = "You've completed all of today's tasks. Great job!";
+        placeholder.textContent =
+          "You've completed all of today's tasks. Great job!";
         placeholder.className = "text-gray-500 italic";
         tasksList.appendChild(placeholder);
       }
 
-      tasksByDate[date].forEach(task => {
+      tasksByDate[date].forEach((task) => {
         const li = document.createElement("li");
         li.className = "mb-1 flex items-center";
 
@@ -643,7 +731,8 @@ function loadStudyTasks() {
         checkbox.addEventListener("change", () => moveToCompleted(task, li));
 
         const button = document.createElement("button");
-        button.className = "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
+        button.className =
+          "w-full text-left bg-gray-100 p-2 rounded hover:bg-gray-200";
         button.textContent = task.summary || "Unnamed Event";
 
         button.addEventListener("click", () => {
@@ -668,7 +757,7 @@ function loadStudyTasks() {
 function playBeep() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = ctx.createOscillator();
-  oscillator.type = 'sine';
+  oscillator.type = "sine";
   oscillator.frequency.value = 880; // Hz
   oscillator.connect(ctx.destination);
   oscillator.start();
@@ -677,27 +766,39 @@ function playBeep() {
 }
 
 function moveToCompleted(task, taskElement, isDashboard = false) {
-  console.log("[moveToCompleted] Called for:", task.summary, task.startDate, "isDashboard:", isDashboard);
-  const completedTasks = JSON.parse(localStorage.getItem("completedTasks") || "[]");
+  console.log(
+    "[moveToCompleted] Called for:",
+    task.summary,
+    task.startDate,
+    "isDashboard:",
+    isDashboard
+  );
+  const completedTasks = JSON.parse(
+    localStorage.getItem("completedTasks") || "[]"
+  );
   completedTasks.push(task);
   localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
 
   // Remove from customTasks if present
   let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-  customTasks = customTasks.filter(t => !(t.startDate === task.startDate && t.summary === task.summary));
+  customTasks = customTasks.filter(
+    (t) => !(t.startDate === task.startDate && t.summary === task.summary)
+  );
   localStorage.setItem("customTasks", JSON.stringify(customTasks));
 
   // Remove from iCal tasks if present
   let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
-  icalTasks = icalTasks.filter(t => !(t.startDate === task.startDate && t.summary === task.summary));
+  icalTasks = icalTasks.filter(
+    (t) => !(t.startDate === task.startDate && t.summary === task.summary)
+  );
   localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
 
   if (taskElement) {
-    // animation for ryland :) this animation adds a checkmark to the commpleted task. 
-    const checkmark = document.createElement('div');
-    checkmark.className = 'checkmark';
+    // animation for ryland :) this animation adds a checkmark to the commpleted task.
+    const checkmark = document.createElement("div");
+    checkmark.className = "checkmark";
     taskElement.appendChild(checkmark);
-    taskElement.classList.add('fade-out');
+    taskElement.classList.add("fade-out");
     setTimeout(() => {
       if (taskElement.parentElement) {
         taskElement.parentElement.removeChild(taskElement);
@@ -741,7 +842,9 @@ function calculateTimeFraction() {
 
 // Update the circle's dash array
 function setCircleDasharray() {
-  const circleDasharray = `${(calculateTimeFraction() * FULL_DASH_ARRAY).toFixed(0)} 283`;
+  const circleDasharray = `${(
+    calculateTimeFraction() * FULL_DASH_ARRAY
+  ).toFixed(0)} 283`;
   baseTimer
     .querySelector("#base-timer-path-remaining")
     .setAttribute("stroke-dasharray", circleDasharray);
@@ -795,7 +898,6 @@ function getSixthTaskDuration() {
   return 0;
 }
 
-
 function startTaskTimer(taskIndex) {
   const taskDurations = [
     getFirstTaskDuration(),
@@ -817,7 +919,8 @@ function startTaskTimer(taskIndex) {
   timeLeft = TIME_LIMIT;
 
   // Update the timer label
-  baseTimer.querySelector("#base-timer-label").textContent = formatTimeLeft(timeLeft);
+  baseTimer.querySelector("#base-timer-label").textContent =
+    formatTimeLeft(timeLeft);
   setCircleDasharray();
 
   // Clear any existing timer
@@ -829,7 +932,8 @@ function startTaskTimer(taskIndex) {
     timeLeft = TIME_LIMIT - timePassed;
 
     // Update the timer label
-    baseTimer.querySelector("#base-timer-label").textContent = formatTimeLeft(timeLeft);
+    baseTimer.querySelector("#base-timer-label").textContent =
+      formatTimeLeft(timeLeft);
 
     // Update the circle dash array
     if (timeLeft > 0) {
@@ -847,56 +951,63 @@ function startTaskTimer(taskIndex) {
 
 let runSessionTasks = [];
 
-
 // Initialize the timer when the runScreen is shown
 runButton.onclick = () => {
   studyScreen.classList.add("hidden");
   runScreen.classList.remove("hidden");
   // Build the runSessionTasks array from the DOM
-  runSessionTasks = Array.from(studyPlanDisplay.children).map(child => ({
+  runSessionTasks = Array.from(studyPlanDisplay.children).map((child) => ({
     summary: child.textContent.split(" - ")[0],
     startDate: child.dataset.startDate,
     estimatedTime: parseInt(child.dataset.estimatedTime, 10),
     zone: child.dataset.zone,
-    completed: false
+    completed: false,
   }));
   updateRunScreenDisplay(0);
   startTaskTimer(0);
 };
 
-const runScreenTasks = document.getElementById("runScreenTasks")
+const runScreenTasks = document.getElementById("runScreenTasks");
 
 function updateRunScreenDisplay(taskIndex) {
   // Only show tasks that are not completed
-  const incompleteTasks = runSessionTasks.filter(task => !task.completed);
+  const incompleteTasks = runSessionTasks.filter((task) => !task.completed);
   const currentTask = incompleteTasks[taskIndex];
   const upcomingTasks = incompleteTasks.slice(taskIndex + 1);
 
   runScreenTasks.innerHTML = `
     <div class="current-task">
       <h2 class="font-bold text-lg mb-2">Current Task</h2>
-      ${currentTask
-      ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(currentTask.zone)};">
+      ${
+        currentTask
+          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(
+              currentTask.zone
+            )};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
-                <label for="currentTaskCheckbox">${currentTask.summary} - ${currentTask.estimatedTime} min.</label>
+                <label for="currentTaskCheckbox">${currentTask.summary} - ${
+              currentTask.estimatedTime
+            } min.</label>
               </div>`
-      : `<p class="text-gray-500 italic">No current task.</p>`
-    }
+          : `<p class="text-gray-500 italic">No current task.</p>`
+      }
     </div>
     <div class="upcoming-tasks">
       <h2 class="font-bold text-lg mb-2">Upcoming Tasks</h2>
-      ${upcomingTasks.length > 0
-      ? upcomingTasks
-        .map(
-          (task) => `
-                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(task.zone)};">
+      ${
+        upcomingTasks.length > 0
+          ? upcomingTasks
+              .map(
+                (task) => `
+                <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(
+                  task.zone
+                )};">
                   <label>${task.summary} - ${task.estimatedTime} min.</label>
                 </div>
               `
-        )
-        .join("")
-      : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
-    }
+              )
+              .join("")
+          : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
+      }
     </div>
   `;
 
@@ -911,13 +1022,19 @@ function updateRunScreenDisplay(taskIndex) {
 
         // Wait for fade-out animation (500ms), then update display and timer
         setTimeout(() => {
-          const stillIncomplete = runSessionTasks.filter(task => !task.completed);
+          const stillIncomplete = runSessionTasks.filter(
+            (task) => !task.completed
+          );
           if (stillIncomplete.length === 0) {
             clearInterval(timerInterval);
             baseTimer.querySelector("#base-timer-label").textContent = "00:00";
-            alert('You finished your study! Click exit to go back to the planning screen.');
+            alert(
+              "You finished your study! Click exit to go back to the planning screen."
+            );
           } else {
-            const nextTaskIndex = runSessionTasks.findIndex(task => !task.completed);
+            const nextTaskIndex = runSessionTasks.findIndex(
+              (task) => !task.completed
+            );
             updateRunScreenDisplay(taskIndex); // Always use the same index
             startTaskTimer(nextTaskIndex);
           }
@@ -941,84 +1058,97 @@ function getTaskZoneColor(zone) {
   }
 }
 // Add an event listener to the PiP button
-const pipButton = document.getElementById('enablePiPButton');
-const runScreenBox = document.getElementById('runScreenBox');
+const pipButton = document.getElementById("enablePiPButton");
+const runScreenBox = document.getElementById("runScreenBox");
 if (pipButton) {
   // If the browser supports the documentPictureInPicture API, wire it up; otherwise provide a no-op/fallback
-  if (typeof window.documentPictureInPicture !== 'undefined') {
-    pipButton.addEventListener('click', () => {
+  if (typeof window.documentPictureInPicture !== "undefined") {
+    pipButton.addEventListener("click", () => {
       try {
         if (window.documentPictureInPicture.window) {
           window.documentPictureInPicture.window.close();
           pipButton.textContent = "Show Popup";
           return;
         }
-        window.documentPictureInPicture.requestWindow().then(pipWindow => {
-          pipButton.textContent = "Hide Popup"; // Update button text
-          for (let styleSheet of document.querySelectorAll("link[rel=stylesheet]")) {
-            let newStyleSheet = document.createElement("link");
-            newStyleSheet.rel = "stylesheet";
-            newStyleSheet.href = styleSheet.href;
-            pipWindow.document.body.append(newStyleSheet);
-          }
-          pipWindow.document.body.append(baseTimer);
-          baseTimer = pipWindow.document.querySelector(".base-timer");
-          pipWindow.addEventListener("pagehide", () => {
-            if (runScreenBox && runScreenBox.children[0]) {
-              runScreenBox.children[0].insertBefore(baseTimer, runScreenBox.children[0].children[0]);
+        window.documentPictureInPicture
+          .requestWindow()
+          .then((pipWindow) => {
+            pipButton.textContent = "Hide Popup"; // Update button text
+            for (let styleSheet of document.querySelectorAll(
+              "link[rel=stylesheet]"
+            )) {
+              let newStyleSheet = document.createElement("link");
+              newStyleSheet.rel = "stylesheet";
+              newStyleSheet.href = styleSheet.href;
+              pipWindow.document.body.append(newStyleSheet);
             }
-            pipButton.textContent = "Show Popup";
+            pipWindow.document.body.append(baseTimer);
+            baseTimer = pipWindow.document.querySelector(".base-timer");
+            pipWindow.addEventListener("pagehide", () => {
+              if (runScreenBox && runScreenBox.children[0]) {
+                runScreenBox.children[0].insertBefore(
+                  baseTimer,
+                  runScreenBox.children[0].children[0]
+                );
+              }
+              pipButton.textContent = "Show Popup";
+            });
+          })
+          .catch((error) => {
+            console.error("Error enabling Picture-in-Picture:", error);
+            alert("Picture-in-Picture could not be enabled.");
           });
-        }).catch(error => {
-          console.error("Error enabling Picture-in-Picture:", error);
-          alert('Picture-in-Picture could not be enabled.');
-        });
       } catch (err) {
-        console.error('PiP error:', err);
+        console.error("PiP error:", err);
       }
     });
   } else {
     // Fallback: avoid throwing and provide a user-friendly message
-    pipButton.addEventListener('click', () => {
-      alert('Picture-in-Picture is not supported by this browser.');
+    pipButton.addEventListener("click", () => {
+      alert("Picture-in-Picture is not supported by this browser.");
     });
   }
 }
 function updateMinutesLeftDisplay() {
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");
-  const totalMinutes = Array.from(studyPlanDisplay.children).reduce((sum, child) => {
-    const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0;
-    return sum + estimatedTime;
-  }, 0);
+  const totalMinutes = Array.from(studyPlanDisplay.children).reduce(
+    (sum, child) => {
+      const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+      return sum + estimatedTime;
+    },
+    0
+  );
   const minutesLeft = Math.max(60 - totalMinutes, 0);
-  minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? '' : 's'} left to plan.`;
+  minutesLeftDisplay.textContent = `${minutesLeft} minute${
+    minutesLeft === 1 ? "" : "s"
+  } left to plan.`;
 }
 
-const gradeSelect = document.getElementById('gradeSelect');
-const bookingsIframe = document.getElementById('bookingsIframe');
+const gradeSelect = document.getElementById("gradeSelect");
+const bookingsIframe = document.getElementById("bookingsIframe");
 
 // Save grade selection on form submit
-document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+document.getElementById("scheduleForm").addEventListener("submit", (e) => {
   const selectedGrade = gradeSelect.value;
-  localStorage.setItem('userGrade', selectedGrade);
+  localStorage.setItem("userGrade", selectedGrade);
   // ...existing code...
 });
 
 // Set grade selection from localStorage on load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // DOM elements
   const dashboardSection = document.getElementById("dashboardSection");
   const scheduleSetupSection = document.getElementById("scheduleSetupSection");
   const dashboardContainer = document.getElementById("dashboardContainer");
   const startStudyBtn = document.getElementById("startStudyBtn");
   const backToDashboardBtn = document.getElementById("backToDashboardBtn");
-  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyScreen = document.getElementById("studyPlannerSection");
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const runScreenTasks = document.getElementById("runScreenTasks");
   const runButton = document.getElementById("runButton");
-  const gradeSelect = document.getElementById('gradeSelect');
-  const bookingsIframe = document.getElementById('bookingsIframe');
+  const gradeSelect = document.getElementById("gradeSelect");
+  const bookingsIframe = document.getElementById("bookingsIframe");
 
   // Only run if dashboardContainer exists
   if (dashboardContainer) {
@@ -1029,7 +1159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboardTasks({ scrollToToday: true });
         loadStudyTasks();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching or parsing iCal feed:", error);
         // Optionally show an error message elsewhere if needed
       });
@@ -1048,14 +1178,15 @@ document.addEventListener('DOMContentLoaded', () => {
     backToDashboardBtn.addEventListener("click", () => {
       studyScreen.classList.add("hidden");
       dashboardSection.classList.remove("hidden");
-      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-      runScreenTasks.innerHTML = '';
+      studyPlanDisplay.innerHTML =
+        '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = "";
       updateMinutesLeftDisplay();
     });
   }
 
   // Set grade selection from localStorage
-  const savedGrade = localStorage.getItem('userGrade');
+  const savedGrade = localStorage.getItem("userGrade");
   if (savedGrade && gradeSelect) {
     gradeSelect.value = savedGrade;
     updateIframeSrc(savedGrade || gradeSelect.value);
@@ -1063,9 +1194,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add grade change listener
   if (gradeSelect) {
-    gradeSelect.addEventListener('change', (e) => {
+    gradeSelect.addEventListener("change", (e) => {
       const grade = e.target.value;
-      localStorage.setItem('userGrade', grade);
+      localStorage.setItem("userGrade", grade);
       updateIframeSrc(grade);
     });
   }
@@ -1074,64 +1205,77 @@ document.addEventListener('DOMContentLoaded', () => {
   const addTutorialBtn = document.getElementById("addTutorialBtn");
   const cancelTutorialBtn = document.getElementById("cancelTutorialBtn");
   const saveTutorialBtn = document.getElementById("saveTutorialBtn");
-  if (addTutorialBtn) addTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.remove("hidden");
-  if (cancelTutorialBtn) cancelTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.add("hidden");
-  if (saveTutorialBtn) saveTutorialBtn.onclick = () => {
-    const date = document.getElementById("tutorialDate").value;
-    const teacher = document.getElementById("tutorialTeacher").value.trim();
-    if (!date) return alert("Please select a date.");
-    if (!teacher) return alert("Please enter the teacher's name.");
-    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    // Always save as UTC 23:59
-    const startDate = `${date}T23:59:00.000Z`;
-    customTasks.push({
-      summary: `Tutorial (${teacher})`,
-      startDate,
-      teacher
-    });
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    document.getElementById("addTutorialPopup").classList.add("hidden");
-    document.getElementById("tutorialDate").value = "";
-    document.getElementById("tutorialTeacher").value = "";
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
+  if (addTutorialBtn)
+    addTutorialBtn.onclick = () =>
+      document.getElementById("addTutorialPopup").classList.remove("hidden");
+  if (cancelTutorialBtn)
+    cancelTutorialBtn.onclick = () =>
+      document.getElementById("addTutorialPopup").classList.add("hidden");
+  if (saveTutorialBtn)
+    saveTutorialBtn.onclick = () => {
+      const date = document.getElementById("tutorialDate").value;
+      const teacher = document.getElementById("tutorialTeacher").value.trim();
+      if (!date) return alert("Please select a date.");
+      if (!teacher) return alert("Please enter the teacher's name.");
+      const customTasks = JSON.parse(
+        localStorage.getItem("customTasks") || "[]"
+      );
+      // Always save as UTC 23:59
+      const startDate = `${date}T23:59:00.000Z`;
+      customTasks.push({
+        summary: `Tutorial (${teacher})`,
+        startDate,
+        teacher,
+      });
+      localStorage.setItem("customTasks", JSON.stringify(customTasks));
+      document.getElementById("addTutorialPopup").classList.add("hidden");
+      document.getElementById("tutorialDate").value = "";
+      document.getElementById("tutorialTeacher").value = "";
+      renderDashboardTasks();
+      loadStudyTasks();
+    };
 
   // Add Task Popup logic
   const addTaskBtn = document.getElementById("addTaskBtn");
   const cancelTaskBtn = document.getElementById("cancelTaskBtn");
   const saveTaskBtn = document.getElementById("saveTaskBtn");
-  if (addTaskBtn) addTaskBtn.onclick = () => document.getElementById("addTaskPopup").classList.remove("hidden");
-  if (cancelTaskBtn) cancelTaskBtn.onclick = () => {
-    document.getElementById("addTaskPopup").classList.add("hidden");
-    document.getElementById("customTaskTitle").value = "";
-    document.getElementById("customTaskDate").value = "";
-  };
-  if (saveTaskBtn) saveTaskBtn.onclick = () => {
-    const title = document.getElementById("customTaskTitle").value.trim();
-    const date = document.getElementById("customTaskDate").value;
-    if (!title || !date) {
-      alert("Please enter a title and date.");
-      return;
-    }
-    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    if (customTasks.some(t => t.summary === title)) {
-      alert("Custom task titles must be unique.");
-      return;
-    }
-    // Always save as UTC 23:59
-    const startDate = `${date}T23:59:00.000Z`;
-    customTasks.push({
-      summary: title,
-      startDate
-    });
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    document.getElementById("addTaskPopup").classList.add("hidden");
-    document.getElementById("customTaskTitle").value = "";
-    document.getElementById("customTaskDate").value = "";
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
+  if (addTaskBtn)
+    addTaskBtn.onclick = () =>
+      document.getElementById("addTaskPopup").classList.remove("hidden");
+  if (cancelTaskBtn)
+    cancelTaskBtn.onclick = () => {
+      document.getElementById("addTaskPopup").classList.add("hidden");
+      document.getElementById("customTaskTitle").value = "";
+      document.getElementById("customTaskDate").value = "";
+    };
+  if (saveTaskBtn)
+    saveTaskBtn.onclick = () => {
+      const title = document.getElementById("customTaskTitle").value.trim();
+      const date = document.getElementById("customTaskDate").value;
+      if (!title || !date) {
+        alert("Please enter a title and date.");
+        return;
+      }
+      const customTasks = JSON.parse(
+        localStorage.getItem("customTasks") || "[]"
+      );
+      if (customTasks.some((t) => t.summary === title)) {
+        alert("Custom task titles must be unique.");
+        return;
+      }
+      // Always save as UTC 23:59
+      const startDate = `${date}T23:59:00.000Z`;
+      customTasks.push({
+        summary: title,
+        startDate,
+      });
+      localStorage.setItem("customTasks", JSON.stringify(customTasks));
+      document.getElementById("addTaskPopup").classList.add("hidden");
+      document.getElementById("customTaskTitle").value = "";
+      document.getElementById("customTaskDate").value = "";
+      renderDashboardTasks();
+      loadStudyTasks();
+    };
 
   // Add refresh button logic for dashboard
   const refreshTasksBtn = document.getElementById("refreshTasksBtn");
@@ -1158,10 +1302,16 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchIcalFeed()
         .then(() => {
           loadStudyTasks();
-          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+          setTimeout(
+            () => refreshStudyTasksBtn.classList.remove("fa-spin"),
+            500
+          );
         })
         .catch(() => {
-          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+          setTimeout(
+            () => refreshStudyTasksBtn.classList.remove("fa-spin"),
+            500
+          );
         });
     };
   }
@@ -1171,62 +1321,69 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStudyTasks();
 
   // Custom teacher dropdown logic
-  const teacherInput = document.getElementById('tutorialTeacher');
-  const teacherDropdown = document.getElementById('teacherDropdown');
+  const teacherInput = document.getElementById("tutorialTeacher");
+  const teacherDropdown = document.getElementById("teacherDropdown");
 
   if (teacherInput && teacherDropdown) {
-    teacherInput.addEventListener('input', function () {
+    teacherInput.addEventListener("input", function () {
       const value = this.value.trim().toLowerCase();
-      teacherDropdown.innerHTML = '';
+      teacherDropdown.innerHTML = "";
       if (value.length === 0) {
-        teacherDropdown.classList.add('hidden');
+        teacherDropdown.classList.add("hidden");
         return;
       }
-      const matches = teacherList.filter(name => name.toLowerCase().includes(value));
+      const matches = teacherList.filter((name) =>
+        name.toLowerCase().includes(value)
+      );
       if (matches.length === 0) {
-        teacherDropdown.classList.add('hidden');
+        teacherDropdown.classList.add("hidden");
         return;
       }
-      matches.forEach(name => {
-        const option = document.createElement('div');
+      matches.forEach((name) => {
+        const option = document.createElement("div");
         option.textContent = name;
-        option.className = 'px-3 py-2 cursor-pointer hover:bg-blue-100';
+        option.className = "px-3 py-2 cursor-pointer hover:bg-blue-100";
         option.onclick = () => {
           teacherInput.value = name;
-          teacherDropdown.classList.add('hidden');
+          teacherDropdown.classList.add("hidden");
         };
         teacherDropdown.appendChild(option);
       });
       // Position dropdown below input
       const rect = teacherInput.getBoundingClientRect();
-      teacherDropdown.style.top = (teacherInput.offsetTop + teacherInput.offsetHeight) + 'px';
-      teacherDropdown.style.left = teacherInput.offsetLeft + 'px';
-      teacherDropdown.style.width = teacherInput.offsetWidth + 'px';
-      teacherDropdown.classList.remove('hidden');
+      teacherDropdown.style.top =
+        teacherInput.offsetTop + teacherInput.offsetHeight + "px";
+      teacherDropdown.style.left = teacherInput.offsetLeft + "px";
+      teacherDropdown.style.width = teacherInput.offsetWidth + "px";
+      teacherDropdown.classList.remove("hidden");
     });
 
-    teacherInput.addEventListener('blur', function () {
-      setTimeout(() => teacherDropdown.classList.add('hidden'), 150);
+    teacherInput.addEventListener("blur", function () {
+      setTimeout(() => teacherDropdown.classList.add("hidden"), 150);
     });
   }
 });
 
 function updateIframeSrc(grade) {
-  const bookingsIframe = document.getElementById('bookingsIframe');
+  const bookingsIframe = document.getElementById("bookingsIframe");
   if (!bookingsIframe) return;
   let src = "";
   switch (grade) {
     case "7-8":
-      src = "https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      src =
+        "https://outlook.office.com/book/Grade9TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
       break;
     case "9-10":
-      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      src =
+        "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
       break;
     case "11-12":
-      src = "https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      src =
+        "https://outlook.office.com/book/Grade1112Tutorials@na.oneschoolglobal.com/?ismsaljsauthenabled";
       break;
     default:
-      src = "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
+      src =
+        "https://outlook.office.com/book/Grade910TutorialsCopy@na.oneschoolglobal.com/?ismsaljsauthenabled";
   }
   bookingsIframe.src = src;
 }
@@ -1258,7 +1415,7 @@ function openEditTaskPopup(task) {
     // Update in customTasks if present
     let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
     let updated = false;
-    customTasks = customTasks.map(t => {
+    customTasks = customTasks.map((t) => {
       if (t.startDate === task.startDate) {
         updated = true;
         return { ...t, summary: newTitle };
@@ -1268,21 +1425,33 @@ function openEditTaskPopup(task) {
     if (updated) {
       localStorage.setItem("customTasks", JSON.stringify(customTasks));
       // Update the UI immediately for custom tasks
-      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
-      taskElements.forEach(el => {
-        const summarySpan = el.querySelector('span');
-        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
+      const taskElements = document.querySelectorAll(
+        `[data-start-date='${task.startDate}']`
+      );
+      taskElements.forEach((el) => {
+        const summarySpan = el.querySelector("span");
+        if (summarySpan)
+          summarySpan.textContent = `${newTitle} - ${
+            el.dataset.estimatedTime || ""
+          } min.`;
       });
     } else {
       // If not a custom task, update editedIcalTasks
-      let editedIcalTasks = JSON.parse(localStorage.getItem("editedIcalTasks") || "{}");
+      let editedIcalTasks = JSON.parse(
+        localStorage.getItem("editedIcalTasks") || "{}"
+      );
       editedIcalTasks[task.startDate] = newTitle;
       localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
       // Update the UI immediately for iCal tasks
-      const taskElements = document.querySelectorAll(`[data-start-date='${task.startDate}']`);
-      taskElements.forEach(el => {
-        const summarySpan = el.querySelector('span');
-        if (summarySpan) summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ''} min.`;
+      const taskElements = document.querySelectorAll(
+        `[data-start-date='${task.startDate}']`
+      );
+      taskElements.forEach((el) => {
+        const summarySpan = el.querySelector("span");
+        if (summarySpan)
+          summarySpan.textContent = `${newTitle} - ${
+            el.dataset.estimatedTime || ""
+          } min.`;
       });
     }
 
@@ -1297,22 +1466,141 @@ function openEditTaskPopup(task) {
 
 // Custom teacher dropdown logic
 const teacherList = [
-  "Adam Miskic","Aimee Lissel","Alex Avila","Alex Hutchinson","Alison Quinn","Allison Rhoades","Amanda Edwin","Amanda Lishamer","Andrea Tucker","Andrew Kralik","Angela Conry","Anne Lenihan","Anthony Newman","April Enochs","Ashlie Kaul","Bailey Kobs","Benjamin Yule","Boram Kim","Brian Boutette","Brian Kim","Brian Merryweather","Brian Naismith","Brodie Ogg","Cara Johnson","Cassandra Montello","Chris Gamble","Courtney Garrah","Craig Smale","Craig Wall","Dalton Fitting","Damien Jordan","Dan Larson-Knight","Dani Idler","David Macfarlane","Desiree Lemieux","Devin Tide","Dilenny De La Cruz","Ebony Bennett","Elie MacLean","Emily Atchue","Erin Martin","Evan Rogers","Isaac Hager","Jaimmie-Lee Jordan","James Fraser","Jane Ballou","Jane Zegers","Janet Valdez","Jascenth McKenzie","Jenelle Jeffrey","Jess Meissner","Jessica McCullough","Joanie Wolfram","John Van Ess","Josanne Timothy","Joseph Raygada","Juanika Joseph","Karen Lake","Kate Nelson","Kathleen Vivian","Kayla Jansky","Kelle Patrick","Keri Deskins","Kessandra Blackman","Khadija Darlington","Kristen Jakala","Kristin Iula","Kyle Craig","Kyle Gay","Kyler Johnson","Latasha Whiting","Leanna Laidlow","Lindsay Ebata","MacKenzie Screpnek","Maria Caoagdan","Maria Luepke","Martha Blue","Matthew Robinson","Matthew Windsor","Michael Froberg","Michele Weiss","Michelle Meadows","Michelle Panting","Nicholas Delouis","Nicole Chevrier","Nicole Danks","Olivia Garside","Pam Small/Freger","Patricia Stuhl","Peter Henninger","Rachelle Liski","Rhea Goodridge","Rheanne Foth","Rob Pothaar","Roxanne Catellier","Ryan Coombs","Ryanne Marchan","Sam Farelli","Samuel Poole","Sara Alfaro","Scott Fransky","Shakeira Waithe","Sharlene Kistow","Sharie Snagg","Stephanie Bakonyi","Steven Reeder","Suzan Brown","Taryn Fenwick","Thomas Coroneos","Tina Liu","Tishauna Petrie-Barrant","Tonia Manges","Tres Barker","Wendy Omland","William Nagel","William Swidorski","Woody Arrowood","Zakk Taylor","Zaleena Esahack"
+  "Adam Miskic",
+  "Aimee Lissel",
+  "Alex Avila",
+  "Alex Hutchinson",
+  "Alison Quinn",
+  "Allison Rhoades",
+  "Amanda Edwin",
+  "Amanda Lishamer",
+  "Andrea Tucker",
+  "Andrew Kralik",
+  "Angela Conry",
+  "Anne Lenihan",
+  "Anthony Newman",
+  "April Enochs",
+  "Ashlie Kaul",
+  "Bailey Kobs",
+  "Benjamin Yule",
+  "Boram Kim",
+  "Brian Boutette",
+  "Brian Kim",
+  "Brian Merryweather",
+  "Brian Naismith",
+  "Brodie Ogg",
+  "Cara Johnson",
+  "Cassandra Montello",
+  "Chris Gamble",
+  "Courtney Garrah",
+  "Craig Smale",
+  "Craig Wall",
+  "Dalton Fitting",
+  "Damien Jordan",
+  "Dan Larson-Knight",
+  "Dani Idler",
+  "David Macfarlane",
+  "Desiree Lemieux",
+  "Devin Tide",
+  "Dilenny De La Cruz",
+  "Ebony Bennett",
+  "Elie MacLean",
+  "Emily Atchue",
+  "Erin Martin",
+  "Evan Rogers",
+  "Isaac Hager",
+  "Jaimmie-Lee Jordan",
+  "James Fraser",
+  "Jane Ballou",
+  "Jane Zegers",
+  "Janet Valdez",
+  "Jascenth McKenzie",
+  "Jenelle Jeffrey",
+  "Jess Meissner",
+  "Jessica McCullough",
+  "Joanie Wolfram",
+  "John Van Ess",
+  "Josanne Timothy",
+  "Joseph Raygada",
+  "Juanika Joseph",
+  "Karen Lake",
+  "Kat Bailey",
+  "Kate Nelson",
+  "Kathleen Vivian",
+  "Kayla Jansky",
+  "Kelle Patrick",
+  "Keri Deskins",
+  "Kessandra Blackman",
+  "Khadija Darlington",
+  "Kristen Jakala",
+  "Kristin Iula",
+  "Kyle Craig",
+  "Kyle Gay",
+  "Kyler Johnson",
+  "Latasha Whiting",
+  "Leanna Laidlow",
+  "Lindsay Ebata",
+  "MacKenzie Screpnek",
+  "Maria Caoagdan",
+  "Maria Luepke",
+  "Martha Blue",
+  "Matthew Robinson",
+  "Matthew Windsor",
+  "Michael Froberg",
+  "Michele Weiss",
+  "Michelle Meadows",
+  "Michelle Panting",
+  "Nicholas Delouis",
+  "Nicole Chevrier",
+  "Nicole Danks",
+  "Olivia Garside",
+  "Pam Small/Freger",
+  "Patricia Stuhl",
+  "Peter Henninger",
+  "Rachelle Liski",
+  "Rhea Goodridge",
+  "Rheanne Foth",
+  "Rob Pothaar",
+  "Roxanne Catellier",
+  "Ryan Coombs",
+  "Ryanne Marchan",
+  "Sam Farelli",
+  "Samuel Poole",
+  "Sara Alfaro",
+  "Scott Fransky",
+  "Shakeira Waithe",
+  "Sharlene Kistow",
+  "Sharie Snagg",
+  "Stephanie Bakonyi",
+  "Steven Reeder",
+  "Suzan Brown",
+  "Taryn Fenwick",
+  "Thomas Coroneos",
+  "Tina Liu",
+  "Tishauna Petrie-Barrant",
+  "Tonia Manges",
+  "Tres Barker",
+  "Wendy Omland",
+  "William Nagel",
+  "William Swidorski",
+  "Woody Arrowood",
+  "Zakk Taylor",
+  "Zaleena Esahack",
 ];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // DOM elements
   const dashboardSection = document.getElementById("dashboardSection");
   const scheduleSetupSection = document.getElementById("scheduleSetupSection");
   const dashboardContainer = document.getElementById("dashboardContainer");
   const startStudyBtn = document.getElementById("startStudyBtn");
   const backToDashboardBtn = document.getElementById("backToDashboardBtn");
-  const studyScreen = document.getElementById('studyPlannerSection');
+  const studyScreen = document.getElementById("studyPlannerSection");
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const runScreenTasks = document.getElementById("runScreenTasks");
   const runButton = document.getElementById("runButton");
-  const gradeSelect = document.getElementById('gradeSelect');
-  const bookingsIframe = document.getElementById('bookingsIframe');
+  const gradeSelect = document.getElementById("gradeSelect");
+  const bookingsIframe = document.getElementById("bookingsIframe");
 
   // Only run if dashboardContainer exists
   if (dashboardContainer) {
@@ -1323,7 +1611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboardTasks({ scrollToToday: true });
         loadStudyTasks();
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching or parsing iCal feed:", error);
         // Optionally show an error message elsewhere if needed
       });
@@ -1342,14 +1630,15 @@ document.addEventListener('DOMContentLoaded', () => {
     backToDashboardBtn.addEventListener("click", () => {
       studyScreen.classList.add("hidden");
       dashboardSection.classList.remove("hidden");
-      studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
-      runScreenTasks.innerHTML = '';
+      studyPlanDisplay.innerHTML =
+        '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+      runScreenTasks.innerHTML = "";
       updateMinutesLeftDisplay();
     });
   }
 
   // Set grade selection from localStorage
-  const savedGrade = localStorage.getItem('userGrade');
+  const savedGrade = localStorage.getItem("userGrade");
   if (savedGrade && gradeSelect) {
     gradeSelect.value = savedGrade;
     updateIframeSrc(savedGrade || gradeSelect.value);
@@ -1357,9 +1646,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add grade change listener
   if (gradeSelect) {
-    gradeSelect.addEventListener('change', (e) => {
+    gradeSelect.addEventListener("change", (e) => {
       const grade = e.target.value;
-      localStorage.setItem('userGrade', grade);
+      localStorage.setItem("userGrade", grade);
       updateIframeSrc(grade);
     });
   }
@@ -1368,64 +1657,77 @@ document.addEventListener('DOMContentLoaded', () => {
   const addTutorialBtn = document.getElementById("addTutorialBtn");
   const cancelTutorialBtn = document.getElementById("cancelTutorialBtn");
   const saveTutorialBtn = document.getElementById("saveTutorialBtn");
-  if (addTutorialBtn) addTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.remove("hidden");
-  if (cancelTutorialBtn) cancelTutorialBtn.onclick = () => document.getElementById("addTutorialPopup").classList.add("hidden");
-  if (saveTutorialBtn) saveTutorialBtn.onclick = () => {
-    const date = document.getElementById("tutorialDate").value;
-    const teacher = document.getElementById("tutorialTeacher").value.trim();
-    if (!date) return alert("Please select a date.");
-    if (!teacher) return alert("Please enter the teacher's name.");
-    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    // Always save as UTC 23:59
-    const startDate = `${date}T23:59:00.000Z`;
-    customTasks.push({
-      summary: `Tutorial (${teacher})`,
-      startDate,
-      teacher
-    });
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    document.getElementById("addTutorialPopup").classList.add("hidden");
-    document.getElementById("tutorialDate").value = "";
-    document.getElementById("tutorialTeacher").value = "";
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
+  if (addTutorialBtn)
+    addTutorialBtn.onclick = () =>
+      document.getElementById("addTutorialPopup").classList.remove("hidden");
+  if (cancelTutorialBtn)
+    cancelTutorialBtn.onclick = () =>
+      document.getElementById("addTutorialPopup").classList.add("hidden");
+  if (saveTutorialBtn)
+    saveTutorialBtn.onclick = () => {
+      const date = document.getElementById("tutorialDate").value;
+      const teacher = document.getElementById("tutorialTeacher").value.trim();
+      if (!date) return alert("Please select a date.");
+      if (!teacher) return alert("Please enter the teacher's name.");
+      const customTasks = JSON.parse(
+        localStorage.getItem("customTasks") || "[]"
+      );
+      // Always save as UTC 23:59
+      const startDate = `${date}T23:59:00.000Z`;
+      customTasks.push({
+        summary: `Tutorial (${teacher})`,
+        startDate,
+        teacher,
+      });
+      localStorage.setItem("customTasks", JSON.stringify(customTasks));
+      document.getElementById("addTutorialPopup").classList.add("hidden");
+      document.getElementById("tutorialDate").value = "";
+      document.getElementById("tutorialTeacher").value = "";
+      renderDashboardTasks();
+      loadStudyTasks();
+    };
 
   // Add Task Popup logic
   const addTaskBtn = document.getElementById("addTaskBtn");
   const cancelTaskBtn = document.getElementById("cancelTaskBtn");
   const saveTaskBtn = document.getElementById("saveTaskBtn");
-  if (addTaskBtn) addTaskBtn.onclick = () => document.getElementById("addTaskPopup").classList.remove("hidden");
-  if (cancelTaskBtn) cancelTaskBtn.onclick = () => {
-    document.getElementById("addTaskPopup").classList.add("hidden");
-    document.getElementById("customTaskTitle").value = "";
-    document.getElementById("customTaskDate").value = "";
-  };
-  if (saveTaskBtn) saveTaskBtn.onclick = () => {
-    const title = document.getElementById("customTaskTitle").value.trim();
-    const date = document.getElementById("customTaskDate").value;
-    if (!title || !date) {
-      alert("Please enter a title and date.");
-      return;
-    }
-    const customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
-    if (customTasks.some(t => t.summary === title)) {
-      alert("Custom task titles must be unique.");
-      return;
-    }
-    // Always save as UTC 23:59
-    const startDate = `${date}T23:59:00.000Z`;
-    customTasks.push({
-      summary: title,
-      startDate
-    });
-    localStorage.setItem("customTasks", JSON.stringify(customTasks));
-    document.getElementById("addTaskPopup").classList.add("hidden");
-    document.getElementById("customTaskTitle").value = "";
-    document.getElementById("customTaskDate").value = "";
-    renderDashboardTasks();
-    loadStudyTasks();
-  };
+  if (addTaskBtn)
+    addTaskBtn.onclick = () =>
+      document.getElementById("addTaskPopup").classList.remove("hidden");
+  if (cancelTaskBtn)
+    cancelTaskBtn.onclick = () => {
+      document.getElementById("addTaskPopup").classList.add("hidden");
+      document.getElementById("customTaskTitle").value = "";
+      document.getElementById("customTaskDate").value = "";
+    };
+  if (saveTaskBtn)
+    saveTaskBtn.onclick = () => {
+      const title = document.getElementById("customTaskTitle").value.trim();
+      const date = document.getElementById("customTaskDate").value;
+      if (!title || !date) {
+        alert("Please enter a title and date.");
+        return;
+      }
+      const customTasks = JSON.parse(
+        localStorage.getItem("customTasks") || "[]"
+      );
+      if (customTasks.some((t) => t.summary === title)) {
+        alert("Custom task titles must be unique.");
+        return;
+      }
+      // Always save as UTC 23:59
+      const startDate = `${date}T23:59:00.000Z`;
+      customTasks.push({
+        summary: title,
+        startDate,
+      });
+      localStorage.setItem("customTasks", JSON.stringify(customTasks));
+      document.getElementById("addTaskPopup").classList.add("hidden");
+      document.getElementById("customTaskTitle").value = "";
+      document.getElementById("customTaskDate").value = "";
+      renderDashboardTasks();
+      loadStudyTasks();
+    };
 
   // Add refresh button logic for dashboard
   const refreshTasksBtn = document.getElementById("refreshTasksBtn");
@@ -1452,10 +1754,16 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchIcalFeed()
         .then(() => {
           loadStudyTasks();
-          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+          setTimeout(
+            () => refreshStudyTasksBtn.classList.remove("fa-spin"),
+            500
+          );
         })
         .catch(() => {
-          setTimeout(() => refreshStudyTasksBtn.classList.remove("fa-spin"), 500);
+          setTimeout(
+            () => refreshStudyTasksBtn.classList.remove("fa-spin"),
+            500
+          );
         });
     };
   }
@@ -1465,42 +1773,45 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStudyTasks();
 
   // Custom teacher dropdown logic
-  const teacherInput = document.getElementById('tutorialTeacher');
-  const teacherDropdown = document.getElementById('teacherDropdown');
+  const teacherInput = document.getElementById("tutorialTeacher");
+  const teacherDropdown = document.getElementById("teacherDropdown");
 
   if (teacherInput && teacherDropdown) {
-    teacherInput.addEventListener('input', function () {
+    teacherInput.addEventListener("input", function () {
       const value = this.value.trim().toLowerCase();
-      teacherDropdown.innerHTML = '';
+      teacherDropdown.innerHTML = "";
       if (value.length === 0) {
-        teacherDropdown.classList.add('hidden');
+        teacherDropdown.classList.add("hidden");
         return;
       }
-      const matches = teacherList.filter(name => name.toLowerCase().includes(value));
+      const matches = teacherList.filter((name) =>
+        name.toLowerCase().includes(value)
+      );
       if (matches.length === 0) {
-        teacherDropdown.classList.add('hidden');
+        teacherDropdown.classList.add("hidden");
         return;
       }
-      matches.forEach(name => {
-        const option = document.createElement('div');
+      matches.forEach((name) => {
+        const option = document.createElement("div");
         option.textContent = name;
-        option.className = 'px-3 py-2 cursor-pointer hover:bg-blue-100';
+        option.className = "px-3 py-2 cursor-pointer hover:bg-blue-100";
         option.onclick = () => {
           teacherInput.value = name;
-          teacherDropdown.classList.add('hidden');
+          teacherDropdown.classList.add("hidden");
         };
         teacherDropdown.appendChild(option);
       });
       // Position dropdown below input
       const rect = teacherInput.getBoundingClientRect();
-      teacherDropdown.style.top = (teacherInput.offsetTop + teacherInput.offsetHeight) + 'px';
-      teacherDropdown.style.left = teacherInput.offsetLeft + 'px';
-      teacherDropdown.style.width = teacherInput.offsetWidth + 'px';
-      teacherDropdown.classList.remove('hidden');
+      teacherDropdown.style.top =
+        teacherInput.offsetTop + teacherInput.offsetHeight + "px";
+      teacherDropdown.style.left = teacherInput.offsetLeft + "px";
+      teacherDropdown.style.width = teacherInput.offsetWidth + "px";
+      teacherDropdown.classList.remove("hidden");
     });
 
-    teacherInput.addEventListener('blur', function () {
-      setTimeout(() => teacherDropdown.classList.add('hidden'), 150);
+    teacherInput.addEventListener("blur", function () {
+      setTimeout(() => teacherDropdown.classList.add("hidden"), 150);
     });
   }
 });

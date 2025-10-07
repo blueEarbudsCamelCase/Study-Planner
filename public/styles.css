@@ -1052,3 +1052,55 @@ body.dark-mode #dashboardTasks button:hover {
   box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.3);
 
 }*/
+
+/* Schedule Table Styles */
+.schedule-row-even {
+  background-color: #f9fafb; /* bg-gray-50 */
+}
+
+.schedule-row-odd {
+  background-color: #ffffff; /* bg-white */
+}
+
+.schedule-period {
+  color: #374151; /* text-gray-700 */
+}
+
+.schedule-border {
+  border-color: #d1d5db; /* border-gray-300 */
+}
+
+.schedule-empty {
+  color: #9ca3af; /* text-gray-400 */
+  font-style: italic;
+}
+
+.schedule-filled {
+  color: #1f2937; /* text-gray-800 */
+  font-weight: 500;
+}
+
+/* Dark Mode Schedule Styles */
+body.dark-mode .schedule-row-even {
+  background-color: #374151; /* dark:bg-gray-700 */
+}
+
+body.dark-mode .schedule-row-odd {
+  background-color: #1f2937; /* dark:bg-gray-800 */
+}
+
+body.dark-mode .schedule-period {
+  color: #d1d5db; /* dark:text-gray-300 */
+}
+
+body.dark-mode .schedule-border {
+  border-color: #4b5563; /* dark:border-gray-600 */
+}
+
+body.dark-mode .schedule-empty {
+  color: #6b7280; /* dark:text-gray-500 */
+}
+
+body.dark-mode .schedule-filled {
+  color: #e5e7eb; /* dark:text-gray-200 */
+}

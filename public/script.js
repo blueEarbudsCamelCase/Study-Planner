@@ -2081,6 +2081,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Add MAP Practice button event listener
+document.addEventListener("DOMContentLoaded", () => {
+  const mapButton = document.getElementById("mapButton");
+  if (mapButton) {
+    mapButton.addEventListener("click", () => {
+      openMapPopup();
+    });
+  }
+});
+
 function openMapPopup() {
   const mapPopup = document.getElementById("mapPopup");
   const mapTime = document.getElementById("mapTime");

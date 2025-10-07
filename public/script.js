@@ -2108,13 +2108,13 @@ function openMapPopup() {
   document.querySelectorAll(".time-btn").forEach((btn) => {
     btn.onclick = () => {
       console.log("[Time Button Clicked]", btn.textContent);
-      taskTime.value = btn.textContent;
-      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+      mapTask.value = btn.textContent;
+      mapTimeSelected = !!mapTask.value && parseInt(mapTask.value, 10) > 0;
       console.log(
         "[Time Selected]",
-        timeSelected,
+        mapTimeSelected,
         "Zone Selected",
-        zoneSelected
+        mapZoneSelected
       );
       tryAutoSave();
     };
@@ -2131,8 +2131,8 @@ function openMapPopup() {
     );
     btn.onclick = () => {
       console.log("[Zone Button Clicked]", btn.dataset.zone);
-      selectedZone = btn.dataset.zone;
-      zoneSelected = true;
+      mapSelectedZone = btn.dataset.zone;
+      mapZoneSelected = true;
       document
         .querySelectorAll(".zone-btn")
         .forEach((b) =>
@@ -2144,17 +2144,17 @@ function openMapPopup() {
             "ring-red-300"
           )
         );
-      if (selectedZone === "Independent")
+      if (mapSelectedZone === "Independent")
         btn.classList.add("ring", "ring-offset-2", "ring-blue-300");
-      if (selectedZone === "Semi-Collaborative")
+      if (mapSelectedZone === "Semi-Collaborative")
         btn.classList.add("ring", "ring-offset-2", "ring-green-300");
-      if (selectedZone === "Collaborative")
+      if (mapSelectedZone === "Collaborative")
         btn.classList.add("ring", "ring-offset-2", "ring-red-300");
       console.log(
         "[Zone Selected]",
-        zoneSelected,
+        mapZoneSelected,
         "Time Selected",
-        timeSelected
+        mapTimeSelected
       );
       tryAutoSave();
     };
@@ -2162,7 +2162,7 @@ function openMapPopup() {
 
   // Listen for time input changes
   mapTime.oninput = () => {
-    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+    mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
     tryAutoSave();
   };
 
@@ -2202,12 +2202,12 @@ function openMapPopup() {
       console.log(
         "[tryAutoSave] Saving MAP Practice:",
         estimatedTime,
-        selectedZone
+        mapSelectedZone
       );
-      addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
+      addToAgenda("MAP Practice - ", estimatedTime, mapSelectedZone, false);
       //these two lines are meant to be commented out.
       estimatedTime = estimatedTime;
-      zone = selectedZone;
+      zone = mapSelectedZone;
       closeMapPopup();
     }
   }

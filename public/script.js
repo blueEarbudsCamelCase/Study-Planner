@@ -316,7 +316,7 @@ function openTaskPopup(task) {
   zoneSelected = false;
 
   // Assign event listeners to time buttons (use .time-btn class in HTML)
-  taskPopup.querySelectorAll(".time-btn").forEach((btn) => {
+  document.querySelectorAll(".time-btn").forEach((btn) => {
     btn.onclick = () => {
       console.log("[Time Button Clicked]", btn.textContent);
       taskTime.value = btn.textContent;
@@ -332,7 +332,7 @@ function openTaskPopup(task) {
   });
 
   // Highlight default button (none selected)
-  taskPopup.querySelectorAll(".zone-btn").forEach((btn) => {
+  document.querySelectorAll(".zone-btn").forEach((btn) => {
     btn.classList.remove(
       "ring",
       "ring-offset-2",
@@ -344,7 +344,7 @@ function openTaskPopup(task) {
       console.log("[Zone Button Clicked]", btn.dataset.zone);
       selectedZone = btn.dataset.zone;
       zoneSelected = true;
-      taskPopup
+      document
         .querySelectorAll(".zone-btn")
         .forEach((b) =>
           b.classList.remove(
@@ -1320,6 +1320,271 @@ document.addEventListener("DOMContentLoaded", () => {
   renderDashboardTasks();
   loadStudyTasks();
 
+  // Schedule form functionality
+  function getPeriodLabels() {
+    // Get the user's timezone
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    // Map timezones to period numbers
+    const timezonePeriods = {
+      // Pacific Time (PST/PDT)
+      'America/Los_Angeles': [4, 5, 6, 7, 8],
+      'America/Vancouver': [4, 5, 6, 7, 8],
+      
+      // Mountain Time (MST/MDT)
+      'America/Denver': [4, 5, 6, 7, 8],
+      'America/Phoenix': [4, 5, 6, 7, 8],
+      'America/Edmonton': [4, 5, 6, 7, 8],
+      
+      // Central Time (CST/CDT)
+      'America/Chicago': [3, 4, 5, 6, 7],
+      'America/Mexico_City': [3, 4, 5, 6, 7],
+      'America/Winnipeg': [3, 4, 5, 6, 7],
+      
+      // Eastern Time (EST/EDT)
+      'America/New_York': [2, 3, 4, 5, 6],
+      'America/Toronto': [2, 3, 4, 5, 6],
+      'America/Montreal': [2, 3, 4, 5, 6],
+      
+      // Atlantic Time
+      'America/Halifax': [2, 3, 4, 5, 6],
+      
+      // Default fallback (Pacific Time)
+      'default': [4, 5, 6, 7, 8]
+    };
+    
+    // Get periods for the timezone, fallback to default if not found
+    const periods = timezonePeriods[timezone] || timezonePeriods['default'];
+    
+    // Convert to period labels
+    return periods.map(period => `P${period}`);
+  }
+
+  function saveScheduleData() {
+    const scheduleInputs = document.querySelectorAll('.schedule-input');
+    const scheduleData = {};
+    
+    scheduleInputs.forEach(input => {
+      if (input.value.trim()) {
+        scheduleData[input.name] = input.value.trim();
+      }
+    });
+    
+    localStorage.setItem("userSchedule", JSON.stringify(scheduleData));
+    console.log("Schedule saved:", scheduleData);
+    
+    // Switch to display panel
+    const formPanel = document.getElementById("scheduleFormPanel");
+    const displayPanel = document.getElementById("scheduleDisplayPanel");
+    
+    if (formPanel) formPanel.classList.add("hidden");
+    if (displayPanel) {
+      displayPanel.classList.remove("hidden");
+      displaySavedSchedule();
+    }
+  }
+
+  function displaySavedSchedule() {
+    const savedSchedule = localStorage.getItem("userSchedule");
+    const displayPanel = document.getElementById("scheduleDisplayPanel");
+    
+    if (!savedSchedule || !displayPanel) return;
+    
+    const scheduleData = JSON.parse(savedSchedule);
+    
+    // Create schedule table HTML with full height and beautiful styling
+    let scheduleHTML = `
+      <div class="h-full flex flex-col">        
+        <div class="flex-1 overflow-hidden">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+            <table class="w-full h-full table-fixed">
+              <thead class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <tr class="h-16">
+                  <th class="w-20 text-center font-bold text-lg border-r border-blue-400">Period</th>
+                  <th class="text-center font-bold text-lg border-r border-blue-400">Monday</th>
+                  <th class="text-center font-bold text-lg border-r border-blue-400">Tuesday</th>
+                  <th class="text-center font-bold text-lg border-r border-blue-400">Wednesday</th>
+                  <th class="text-center font-bold text-lg border-r border-blue-400">Thursday</th>
+                  <th class="text-center font-bold text-lg">Friday</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+    `;
+    
+    // Get dynamic period labels based on timezone
+    const periodLabels = getPeriodLabels();
+    
+    // Define periods and their corresponding input names
+    const periods = [
+      { period: periodLabels[0], inputs: ['period4Monday', 'period4Tuesday', 'period4Wednesday', 'period4Thursday', 'period4Friday'] },
+      { period: periodLabels[1], inputs: ['period5Monday', 'period5Tuesday', 'period5Wednesday', 'period5Thursday', 'period5Friday'] },
+      { period: periodLabels[2], inputs: ['period6Monday', 'period6Tuesday', 'period6Wednesday', 'period6Thursday', 'period6Friday'] },
+      { period: periodLabels[3], inputs: ['period7Monday', 'period7Tuesday', 'period7Wednesday', 'period7Thursday', 'period7Friday'] },
+      { period: periodLabels[4], inputs: ['period8Monday', 'period8Tuesday', 'period8Wednesday', 'period8Thursday', 'period8Friday'] }
+    ];
+    
+    periods.forEach((periodData, index) => {
+      const rowHeight = 'h-20'; // Fixed height for each row
+      const isEvenRow = index % 2 === 0;
+      
+      scheduleHTML += `
+        <tr class="${rowHeight} schedule-row ${isEvenRow ? 'schedule-row-even' : 'schedule-row-odd'}">
+          <td class="w-20 text-center font-bold text-lg schedule-period border-r schedule-border align-middle">
+            ${periodData.period}
+          </td>
+      `;
+      
+      periodData.inputs.forEach((inputName, dayIndex) => {
+        const className = scheduleData[inputName] || '';
+        const isEmpty = !className.trim();
+        const textClass = isEmpty ? 'schedule-empty' : 'schedule-filled';
+        const borderClass = dayIndex < 4 ? 'border-r schedule-border' : '';
+        
+        scheduleHTML += `
+          <td class="text-center ${textClass} ${borderClass} align-middle px-4 py-4">
+            <span class="truncate block">${isEmpty ? 'Free Period' : className}</span>
+          </td>
+        `;
+      });
+      
+      scheduleHTML += '</tr>';
+    });
+    
+    scheduleHTML += `
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    displayPanel.innerHTML = scheduleHTML;
+  }
+
+  // Add Enter key listeners to schedule inputs
+  function addScheduleInputListeners() {
+    const scheduleInputs = document.querySelectorAll('.schedule-input');
+    
+    scheduleInputs.forEach(input => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveScheduleData();
+        }
+      });
+    });
+  }
+
+  // Update HTML form with dynamic period labels
+  function updateScheduleFormLabels() {
+    const periodLabels = getPeriodLabels();
+    const periodCells = document.querySelectorAll('#scheduleFormPanel tbody tr td:first-child');
+    
+    periodCells.forEach((cell, index) => {
+      if (index < periodLabels.length) {
+        cell.textContent = periodLabels[index];
+      }
+    });
+  }
+
+  // Initialize schedule functionality
+  addScheduleInputListeners();
+  updateScheduleFormLabels();
+
+  // Make the left headings act like tabs (clickable)
+  (function () {
+    const KEY = "activeLeftTab";
+    const headings = document.querySelectorAll("[data-target='#bookingsContent'], [data-target='#scheduleContent']");
+    const panels = { bookings: document.getElementById("bookingsContent"), schedule: document.getElementById("scheduleContent") };
+    const addTutorialBtn = document.getElementById("addTutorialBtn");
+
+    function showScheduleContent() {
+      // Check if schedule exists in localStorage
+      const savedSchedule = localStorage.getItem("userSchedule");
+      const formPanel = document.getElementById("scheduleFormPanel");
+      const displayPanel = document.getElementById("scheduleDisplayPanel");
+      
+      if (savedSchedule) {
+        // Show display panel if schedule exists
+        if (formPanel) formPanel.classList.add("hidden");
+        if (displayPanel) {
+          displayPanel.classList.remove("hidden");
+          displaySavedSchedule();
+        }
+      } else {
+        // Show form panel if no schedule exists
+        if (formPanel) formPanel.classList.remove("hidden");
+        if (displayPanel) displayPanel.classList.add("hidden");
+      }
+    }
+
+    function showScheduleForm() {
+      // Always show form panel and pre-fill with saved data
+      const formPanel = document.getElementById("scheduleFormPanel");
+      const displayPanel = document.getElementById("scheduleDisplayPanel");
+      const savedSchedule = localStorage.getItem("userSchedule");
+      
+      if (formPanel) formPanel.classList.remove("hidden");
+      if (displayPanel) displayPanel.classList.add("hidden");
+      
+      // Pre-fill form with saved data if it exists
+      if (savedSchedule) {
+        const scheduleData = JSON.parse(savedSchedule);
+        Object.keys(scheduleData).forEach(inputName => {
+          const input = document.querySelector(`[name="${inputName}"]`);
+          if (input) {
+            input.value = scheduleData[inputName];
+          }
+        });
+      }
+    }
+
+    function setActive(targetSelector, persist = true) {
+      // show/hide main panels
+      Object.values(panels).forEach((el) => el && el.classList.add("hidden"));
+      const target = document.querySelector(targetSelector);
+      if (target) target.classList.remove("hidden");
+
+      // If schedule panel selected, decide whether to show form or display
+      if (targetSelector === "#scheduleContent") {
+        // Show display if schedule exists, form if not
+        showScheduleContent();
+        // hide add tutorial when schedule is active
+        if (addTutorialBtn) addTutorialBtn.classList.add("hidden");
+      } else {
+        if (addTutorialBtn) addTutorialBtn.classList.remove("hidden");
+      }
+
+      // visual active state on headings: selected = black & bold; unselected = gray & normal weight
+      headings.forEach((h) => {
+        // ensure consistent font size
+        h.classList.add("text-xl");
+        // remove previous color/weight classes we control
+        h.classList.remove("text-gray-500", "text-black", "font-bold");
+        if (h.dataset.target === targetSelector) {
+          // active
+          h.classList.add("text-black", "font-bold");
+        } else {
+          // inactive
+          h.classList.add("text-gray-500");
+        }
+      });
+
+      // persist
+      if (persist) localStorage.setItem(KEY, targetSelector);
+    }
+
+    headings.forEach((h) => {
+      h.addEventListener("click", () => setActive(h.dataset.target, true));
+      h.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") setActive(h.dataset.target, true);
+      });
+    });
+
+    const persisted = localStorage.getItem(KEY) || "#bookingsContent";
+    setActive(persisted, false);
+  })();
+
   // Custom teacher dropdown logic
   const teacherInput = document.getElementById("tutorialTeacher");
   const teacherDropdown = document.getElementById("teacherDropdown");
@@ -1819,43 +2084,34 @@ document.addEventListener("DOMContentLoaded", () => {
 function openMapPopup() {
   const mapPopup = document.getElementById("mapPopup");
   const mapTime = document.getElementById("mapTime");
-  const mapZoneButtonGroup = document.getElementById("mapZoneButtonGroup");
   let mapSelectedZone = null;
   let mapTimeSelected = false;
   let mapZoneSelected = false;
 
   // Reset the popup fields
-  if (mapTime) mapTime.value = "";
+  mapTime.value = "";
   mapSelectedZone = null;
   mapTimeSelected = false;
   mapZoneSelected = false;
 
-  // Assign event listeners to time buttons scoped to the map popup
-  const timeButtons = mapPopup ? mapPopup.querySelectorAll(".time-btn") : [];
-  timeButtons.forEach((btn) => {
+  // Assign event listeners to time buttons (use .time-btn class in HTML)
+  document.querySelectorAll(".time-btn").forEach((btn) => {
     btn.onclick = () => {
       console.log("[Time Button Clicked]", btn.textContent);
-      if (mapTime) mapTime.value = btn.textContent;
-      mapTimeSelected = !!(mapTime && mapTime.value) && parseInt(mapTime.value, 10) > 0;
+      taskTime.value = btn.textContent;
+      timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
       console.log(
         "[Time Selected]",
-        mapTimeSelected,
+        timeSelected,
         "Zone Selected",
-        mapZoneSelected
+        zoneSelected
       );
-      tryMapAutoSave();
+      tryAutoSave();
     };
   });
 
-  function closeMapPopup() {
-    if (mapPopup) mapPopup.classList.add("hidden");
-    document.removeEventListener("mousedown", outsideClickListener);
-  }
-
-  // Highlight default button (none selected) — scope to map popup or the group
-  const zoneRoot = mapZoneButtonGroup || mapPopup;
-  const zoneBtns = zoneRoot ? zoneRoot.querySelectorAll(".zone-btn") : [];
-  zoneBtns.forEach((btn) => {
+  // Highlight default button (none selected)
+  document.querySelectorAll(".zone-btn").forEach((btn) => {
     btn.classList.remove(
       "ring",
       "ring-offset-2",
@@ -1865,82 +2121,62 @@ function openMapPopup() {
     );
     btn.onclick = () => {
       console.log("[Zone Button Clicked]", btn.dataset.zone);
-      // Use map-scoped variables here
-      mapSelectedZone = btn.dataset.zone;
-      mapZoneSelected = true;
-      const zoneButtons = mapZoneButtonGroup
-        ? mapZoneButtonGroup.querySelectorAll(".zone-btn")
-        : zoneRoot.querySelectorAll(".zone-btn");
-      zoneButtons.forEach((b) =>
-        b.classList.remove(
-          "ring",
-          "ring-offset-2",
-          "ring-blue-300",
-          "ring-green-300",
-          "ring-red-300"
-        )
-      );
-      if (mapSelectedZone === "Independent")
+      selectedZone = btn.dataset.zone;
+      zoneSelected = true;
+      document
+        .querySelectorAll(".zone-btn")
+        .forEach((b) =>
+          b.classList.remove(
+            "ring",
+            "ring-offset-2",
+            "ring-blue-300",
+            "ring-green-300",
+            "ring-red-300"
+          )
+        );
+      if (selectedZone === "Independent")
         btn.classList.add("ring", "ring-offset-2", "ring-blue-300");
-      if (mapSelectedZone === "Semi-Collaborative")
+      if (selectedZone === "Semi-Collaborative")
         btn.classList.add("ring", "ring-offset-2", "ring-green-300");
-      if (mapSelectedZone === "Collaborative")
+      if (selectedZone === "Collaborative")
         btn.classList.add("ring", "ring-offset-2", "ring-red-300");
       console.log(
         "[Zone Selected]",
-        mapZoneSelected,
+        zoneSelected,
         "Time Selected",
-        mapTimeSelected
+        timeSelected
       );
-      tryMapAutoSave();
+      tryAutoSave();
     };
   });
 
   // Listen for time input changes
-  if (mapTime) {
-    mapTime.oninput = () => {
-      mapTimeSelected = !!mapTime.value && parseInt(mapTime.value, 10) > 0;
-      tryMapAutoSave();
-    };
-  }
+  mapTime.oninput = () => {
+    timeSelected = !!taskTime.value && parseInt(taskTime.value, 10) > 0;
+    tryAutoSave();
+  };
 
-  // Show the popup
-  if (mapPopup) mapPopup.classList.remove("hidden");
-
-  // Close popup when clicking outside the inner box
-  setTimeout(() => {
-    document.addEventListener("mousedown", outsideClickListener);
-  }, 0);
-
-  function outsideClickListener(e) {
-    if (!mapPopup) return;
-    if (!mapPopup.querySelector(".bg-white").contains(e.target)) {
-      closeMapPopup();
-    }
-  }
-
-  // Add this helper to support the MAP popup auto-save flow (nested so it can access map state)
-  function tryMapAutoSave() {
+  // Try to auto-save when both are selected
+  function tryAutoSave() {
     console.log(
-      "[tryMapAutoSave] timeSelected:",
+      "[tryAutoSave] timeSelected:",
       mapTimeSelected,
       "zoneSelected:",
       mapZoneSelected
     );
     if (mapTimeSelected && mapZoneSelected) {
-      const estimatedTime = parseInt(mapTime ? mapTime.value : "", 10);
+      const estimatedTime = parseInt(taskTime.value, 10);
       console.log(
-        "[tryMapAutoSave] estimatedTime:",
+        "[tryAutoSave] estimatedTime:",
         estimatedTime,
-        "mapSelectedZone:",
-        mapSelectedZone
+        "selectedZone:",
+        selectedZone
       );
       if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
         alert("Please enter a valid estimated time.");
         return;
       }
-
-      // Calculate the total minutes already scheduled
+      // Calculate the total time if this task is added
       const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce(
         (sum, child) => {
           const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
@@ -1953,47 +2189,108 @@ function openMapPopup() {
         alert("This task would go past the end of the Study.");
         return;
       }
-
-      // Create a MAP Practice task object and add to agenda
-      const mapTask = {
-        summary: "MAP Practice",
-        startDate: new Date().toISOString(),
-      };
-
-      addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
-      mapTask.estimatedTime = estimatedTime;
-      mapTask.zone = mapSelectedZone;
-
-      // Close and reset the MAP popup UI
-      if (mapPopup) {
-        mapPopup.classList.add("hidden");
-      }
-      if (mapZoneButtonGroup) {
-        mapZoneButtonGroup
-          .querySelectorAll(".zone-btn")
-          .forEach((b) =>
-            b.classList.remove(
-              "ring",
-              "ring-offset-2",
-              "ring-blue-300",
-              "ring-green-300",
-              "ring-red-300"
-            )
-          );
-      }
-      if (mapTime) mapTime.value = "";
-      mapSelectedZone = null;
-      mapTimeSelected = false;
-      mapZoneSelected = false;
-
-      // Refresh UI state
-      renderDashboardTasks();
-      loadStudyTasks();
+      console.log(
+        "[tryAutoSave] Saving MAP Practice:",
+        estimatedTime,
+        selectedZone
+      );
+      addToAgenda("MAP Practice - ", estimatedTime, selectedZone, false);
+      //these two lines are meant to be commented out.
+      estimatedTime = estimatedTime;
+      zone = selectedZone;
+      closeMapPopup();
     }
+  }
+
+  // Show the popup
+  mapPopup.classList.remove("hidden");
+
+  // Close popup when clicking outside the inner box
+  setTimeout(() => {
+    document.addEventListener("mousedown", outsideClickListener);
+  }, 0);
+
+  function outsideClickListener(e) {
+    if (!mapPopup.querySelector(".bg-white").contains(e.target)) {
+      closeMapPopup();
+    }
+  }
+
+  function closeMapPopup() {
+    mapPopup.classList.add("hidden");
+    document.removeEventListener("mousedown", outsideClickListener);
   }
 }
 
-const mapButton = document.getElementById("mapButton");
-if (mapButton) {
-  mapButton.addEventListener("click", openMapPopup);
+// Add this helper to support the MAP popup auto-save flow
+function tryMapAutoSave() {
+  console.log(
+    "[tryMapAutoSave] timeSelected:",
+    mapTimeSelected,
+    "zoneSelected:",
+    mapZoneSelected
+  );
+  if (mapTimeSelected && mapZoneSelected) {
+    const estimatedTime = parseInt(mapTime.value, 10);
+    console.log(
+      "[tryMapAutoSave] estimatedTime:",
+      estimatedTime,
+      "mapSelectedZone:",
+      mapSelectedZone
+    );
+    if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
+      alert("Please enter a valid estimated time.");
+      return;
+    }
+
+    // Calculate the total minutes already scheduled
+    const currentTotalMinutes = Array.from(studyPlanDisplay.children).reduce(
+      (sum, child) => {
+        const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
+        return sum + taskTime;
+      },
+      0
+    );
+
+    if (currentTotalMinutes + estimatedTime > 60) {
+      alert("This task would go past the end of the Study.");
+      return;
+    }
+
+    // Create a MAP Practice task object and add to agenda
+    const mapTask = {
+      summary: "MAP Practice",
+      startDate: new Date().toISOString(),
+    };
+
+    addToAgenda(mapTask, estimatedTime, mapSelectedZone, false);
+    mapTask.estimatedTime = estimatedTime;
+    mapTask.zone = mapSelectedZone;
+
+    // Close and reset the MAP popup UI
+    if (mapPopup) {
+      mapPopup.classList.add("hidden");
+    }
+    if (mapZoneButtonGroup) {
+      mapZoneButtonGroup
+        .querySelectorAll(".zone-btn")
+        .forEach((b) =>
+          b.classList.remove(
+            "ring",
+            "ring-offset-2",
+            "ring-blue-300",
+            "ring-green-300",
+            "ring-red-300"
+          )
+        );
+    }
+    if (mapTime) mapTime.value = "";
+    mapSelectedZone = null;
+    mapTimeSelected = false;
+    mapZoneSelected = false;
+
+    // Refresh UI state
+    renderDashboardTasks();
+    loadStudyTasks();
+  }
 }

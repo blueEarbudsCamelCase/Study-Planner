@@ -1028,9 +1028,6 @@ function updateRunScreenDisplay(taskIndex) {
           if (stillIncomplete.length === 0) {
             clearInterval(timerInterval);
             baseTimer.querySelector("#base-timer-label").textContent = "00:00";
-            alert(
-              "You finished your study! Click exit to go back to the planning screen."
-            );
           } else {
             const nextTaskIndex = runSessionTasks.findIndex(
               (task) => !task.completed

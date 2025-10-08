@@ -1299,6 +1299,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (refreshStudyTasksBtn) {
     refreshStudyTasksBtn.onclick = () => {
       refreshStudyTasksBtn.classList.add("fa-spin");
+            
+      // Clear the study plan display
+      const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+      if (studyPlanDisplay) {
+        studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+        updateMinutesLeftDisplay();
+      }
+      
       fetchIcalFeed()
         .then(() => {
           loadStudyTasks();

@@ -1498,9 +1498,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add Enter key listeners and dropdown functionality to schedule inputs
   function addScheduleInputListeners() {
     const scheduleInputs = document.querySelectorAll('.schedule-input');
-    const scheduleDropdown = document.getElementById('scheduleDropdown');
     
     scheduleInputs.forEach(input => {
+      // Create individual dropdown for this input
+      const dropdown = document.createElement('div');
+      dropdown.className = 'schedule-dropdown hidden absolute bg-white border border-gray-300 rounded shadow-lg z-50';
+      dropdown.style.maxHeight = '200px';
+      dropdown.style.overflowY = 'auto';
+      
+      // Insert dropdown right after the input
+      input.parentNode.insertBefore(dropdown, input.nextSibling);
+      
       // Enter key listener
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -1512,10 +1520,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Dropdown functionality
       input.addEventListener('input', function () {
         const value = this.value.trim().toLowerCase();
-        scheduleDropdown.innerHTML = "";
+        dropdown.innerHTML = "";
         
         if (value.length === 0) {
-          scheduleDropdown.classList.add("hidden");
+          dropdown.classList.add("hidden");
           return;
         }
         
@@ -1524,7 +1532,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         
         if (matches.length === 0) {
-          scheduleDropdown.classList.add("hidden");
+          dropdown.classList.add("hidden");
           return;
         }
         
@@ -1534,22 +1542,22 @@ document.addEventListener("DOMContentLoaded", () => {
           option.className = "px-3 py-2 cursor-pointer hover:bg-blue-100";
           option.onclick = () => {
             input.value = name;
-            scheduleDropdown.classList.add("hidden");
+            dropdown.classList.add("hidden");
           };
-          scheduleDropdown.appendChild(option);
+          dropdown.appendChild(option);
         });
         
-        // Position dropdown below input
+        // Position dropdown directly below this input
         const rect = input.getBoundingClientRect();
-        scheduleDropdown.style.top = (rect.bottom + window.scrollY) + "px";
-        scheduleDropdown.style.left = rect.left + "px";
-        scheduleDropdown.style.width = rect.width + "px";
-        scheduleDropdown.classList.remove("hidden");
+        dropdown.style.top = (rect.bottom + window.scrollY) + "px";
+        dropdown.style.left = rect.left + "px";
+        dropdown.style.width = rect.width + "px";
+        dropdown.classList.remove("hidden");
       });
 
       // Hide dropdown when input loses focus
       input.addEventListener('blur', function () {
-        setTimeout(() => scheduleDropdown.classList.add("hidden"), 150);
+        setTimeout(() => dropdown.classList.add("hidden"), 150);
       });
     });
   }

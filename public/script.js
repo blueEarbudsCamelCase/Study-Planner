@@ -1548,10 +1548,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         
         // Position dropdown directly below this input
-        const rect = input.getBoundingClientRect();
-        dropdown.style.top = (rect.bottom + window.scrollY) + "px";
-        dropdown.style.left = rect.left + "px";
-        dropdown.style.width = rect.width + "px";
+        dropdown.style.top = (input.offsetTop + input.offsetHeight) + "px";
+        dropdown.style.left = input.offsetLeft + "px";
+        dropdown.style.width = input.offsetWidth + "px";
         dropdown.classList.remove("hidden");
       });
 

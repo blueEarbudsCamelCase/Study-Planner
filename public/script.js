@@ -259,6 +259,7 @@ startStudyBtn.addEventListener("click", () => {
   dashboardSection.classList.add("hidden"); // Hide the dashboard section
   studyScreen.classList.remove("hidden"); // Show the study setup screen
   loadStudyTasks();
+  updateMinutesLeftDisplay(); // Always update the minutes display
 });
 
 backToDashboardBtn.addEventListener("click", () => {
@@ -1168,6 +1169,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dashboardSection.classList.add("hidden");
       studyScreen.classList.remove("hidden");
       loadStudyTasks();
+      updateMinutesLeftDisplay(); // Always update the minutes display
     });
   }
 
@@ -1323,6 +1325,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
+  updateMinutesLeftDisplay(); // Initialize the minutes display
 
   // Schedule form functionality
   function getPeriodLabels() {

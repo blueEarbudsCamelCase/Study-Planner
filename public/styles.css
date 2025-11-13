@@ -163,7 +163,6 @@ body.dark-mode .text-blue-500 {
   /* Lighter blue for links */
 }
 
-
 /* Dark Mode Styles for Dashboard Section */
 body.dark-mode #dashboardSection,
 body.dark-mode #dashboardContainer,
@@ -443,7 +442,7 @@ body.dark-mode #taskPopup {
   /* Center-align items vertically */
 }
 
-#studyPlannerSection li input[type="checkbox"] {
+#studyPlannerSection li input[type='checkbox'] {
   margin-right: 0.5rem;
   /* Add spacing between the checkbox and text */
 }
@@ -1014,7 +1013,6 @@ body.dark-mode #dashboardTasks button {
 body.dark-mode #dashboardTasks button:hover {
   background-color: #2d3748 !important;
 }
-
 
 #darkModeToggle {
   appearance: none;

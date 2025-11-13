@@ -67,10 +67,11 @@
 
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center space-x-6">
-              <h3 class="text-xl" data-target="#bookingsContent" role="button" tabindex="0">Book a Tutorial</h3>
               <h3 class="text-xl" data-target="#scheduleContent" role="button" tabindex="0">Schedule</h3>
+              <h3 class="text-xl" data-target="#bookingsContent" role="button" tabindex="0">Book a Tutorial</h3>
             </div>
-            <button id="addTutorialBtn" title="Add Tutorial" aria-label="Add Tutorial" class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">+</button>
+            <button id="addTutorialBtn" title="Add Tutorial" aria-label="Add Tutorial"
+              class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">+</button>
           </div>
 
 
@@ -84,63 +85,90 @@
 
           <div id="scheduleContent" class="hidden flex-1 min-h-0">
             <div id="scheduleFormPanel">
-                <h2 class="text-2xl font-bold mb-6">Set Up Your Schedule</h2>
-                <form id="scheduleTableForm">
-                  <table class="w-full mb-6 table-auto">
-                    <thead>
-                      <tr>
-                        <th class="text-left py-2"></th>
-                        <th class="text-left py-2">Monday</th>
-                        <th class="text-left py-2">Tuesday</th>
-                        <th class="text-left py-2">Wednesday</th>
-                        <th class="text-left py-2">Thursday</th>
-                        <th class="text-left py-2">Friday</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td class="py-2">P4</td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period4Monday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period4Tuesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period4Wednesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period4Thursday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period4Friday" placeholder="Enter class"></td>
-                      </tr>
-                      <tr>
-                        <td class="py-2">P5</td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period5Monday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period5Tuesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period5Wednesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period5Thursday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period5Friday" placeholder="Enter class"></td>
-                      </tr>
-                      <tr>
-                        <td class="py-2">P6</td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period6Monday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period6Tuesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period6Wednesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period6Thursday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period6Friday" placeholder="Enter class"></td>
-                      </tr>
-                      <tr>
-                        <td class="py-2">P7</td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period7Monday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period7Tuesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period7Wednesday" value="PE" disabled></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period7Thursday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period7Friday" placeholder="Enter class"></td>
-                      </tr>
-                      <tr>
-                        <td class="py-2">P8</td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period8Monday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period8Tuesday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period8Wednesday" value="PE" disabled></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period8Thursday" placeholder="Enter class"></td>
-                        <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input" name="period8Friday" placeholder="Enter class"></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </form>
+              <h2 class="text-2xl font-bold mb-6">Set Up Your Schedule</h2>
+              <form id="scheduleTableForm">
+                <table class="w-full mb-6 table-auto">
+                  <thead>
+                    <tr>
+                      <th class="text-left py-2"></th>
+                      <th class="text-left py-2">Monday</th>
+                      <th class="text-left py-2">Tuesday</th>
+                      <th class="text-left py-2">Wednesday</th>
+                      <th class="text-left py-2">Thursday</th>
+                      <th class="text-left py-2">Friday</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="py-2">P4</td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period4Monday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period4Tuesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period4Wednesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period4Thursday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period4Friday" placeholder="Enter class"></td>
+                    </tr>
+                    <tr>
+                      <td class="py-2">P5</td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period5Monday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period5Tuesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period5Wednesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period5Thursday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period5Friday" placeholder="Enter class"></td>
+                    </tr>
+                    <tr>
+                      <td class="py-2">P6</td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period6Monday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period6Tuesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period6Wednesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period6Thursday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period6Friday" placeholder="Enter class"></td>
+                    </tr>
+                    <tr>
+                      <td class="py-2">P7</td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period7Monday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period7Tuesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period7Wednesday" value="PE" disabled></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period7Thursday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period7Friday" placeholder="Enter class"></td>
+                    </tr>
+                    <tr>
+                      <td class="py-2">P8</td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period8Monday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period8Tuesday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period8Wednesday" value="PE" disabled></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period8Thursday" placeholder="Enter class"></td>
+                      <td class="py-2"><input type="text" class="w-full p-2 border rounded schedule-input"
+                          name="period8Friday" placeholder="Enter class"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </form>
+              <button id="saveScheduleBtn" type="button"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Schedule</button>
             </div>
             <div id="scheduleDisplayPanel" class="hidden">
               <p>this is a placeholder for the schedule display. </p>
@@ -215,7 +243,7 @@
   <!-- === Study Planner Section === -->
   <section id="studyPlannerSection" class="hidden p-6 container">
     <h1 class="text-2xl font-bold mb-4 flex items-center justify-between">
-      Study Session
+      <span class="session-title">Study</span>
       <button id="refreshStudyTasksBtn" title="Refresh Study Tasks" aria-label="Refresh Study Tasks"
         class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center ml-2 text-lg font-bold">
         <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
@@ -291,7 +319,7 @@
     </div>
   </div>
 
-<!-- Map Popup -->
+  <!-- Map Popup -->
 
   <div id="mapPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full relative">
@@ -368,8 +396,10 @@
       <label class="block mb-2">Date:</label>
       <input type="date" id="tutorialDate" class="w-full border border-gray-300 rounded p-2 mb-4" />
       <label class="block mb-2">Teacher's Name:</label>
-      <input type="text" id="tutorialTeacher" class="w-full border border-gray-300 rounded p-2 mb-4" autocomplete="off" />
-      <div id="teacherDropdown" class="hidden absolute bg-white border border-gray-300 rounded shadow-lg z-50" style="max-height:200px;overflow-y:auto;"></div>
+      <input type="text" id="tutorialTeacher" class="w-full border border-gray-300 rounded p-2 mb-4"
+        autocomplete="off" />
+      <div id="teacherDropdown" class="hidden absolute bg-white border border-gray-300 rounded shadow-lg z-50"
+        style="max-height:200px;overflow-y:auto;"></div>
       <div class="flex justify-end gap-2">
         <button id="cancelTutorialBtn" class="text-gray-600 hover:underline">Cancel</button>
         <button id="saveTutorialBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>

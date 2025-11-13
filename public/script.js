@@ -564,7 +564,14 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
   studyPlanDisplay.appendChild(agendaItem);
 
   runButtonColorCheck();
-  updateMinutesLeftDisplay(); // <-- Add this line
+  updateMinutesLeftDisplay();
+
+  // Persist the current planner if opened for a particular schedule slot
+  try {
+    saveCurrentSlotPlans();
+  } catch (err) {
+    console.error("[studyPlans] saveCurrentSlotPlans error:", err);
+  }
 }
 
 // Utility to get all tasks (ical + custom)
@@ -1107,6 +1114,246 @@ if (pipButton) {
     });
   }
 }
+// --- Added: per-slot study plan persistence & schedule cell handlers ---
+
+// Helper: build slot key from period label and day name
+function getSlotKey(periodLabel, dayName) {
+  return `${periodLabel} - ${dayName}`;
+}
+
+// Load whole studyPlans object from localStorage
+function loadAllStudyPlans() {
+  return JSON.parse(localStorage.getItem("studyPlans") || "{}");
+}
+
+// Save whole studyPlans object to localStorage
+function saveAllStudyPlans(plansObj) {
+  localStorage.setItem("studyPlans", JSON.stringify(plansObj));
+}
+
+// Clear all saved study plans if today is Sunday
+function clearPlansIfSunday() {
+  try {
+    const today = new Date();
+    if (today.getDay() === 0) {
+      // It's Sunday (0), clear saved plans
+      localStorage.removeItem("studyPlans");
+      console.debug("[studyPlans] Cleared studyPlans on Sunday.");
+    }
+  } catch (err) {
+    console.error("[studyPlans] clearPlansIfSunday error:", err);
+  }
+}
+
+// Render an array of saved tasks into the studyPlanDisplay
+function renderStudyPlanFromArray(tasksArray) {
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  if (!studyPlanDisplay) return;
+
+  // Reset placeholder/contents
+  studyPlanDisplay.innerHTML = "";
+
+  if (!Array.isArray(tasksArray) || tasksArray.length === 0) {
+    studyPlanDisplay.innerHTML =
+      '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+    updateMinutesLeftDisplay();
+    runButtonColorCheck();
+    return;
+  }
+
+  // For each saved task, recreate the DOM node similarly to addToAgenda
+  tasksArray.forEach((task) => {
+    const agendaItem = document.createElement("div");
+    agendaItem.className = "p-2 mb-2 rounded text-white";
+    agendaItem.dataset.startDate = task.startDate || new Date().toISOString();
+    agendaItem.dataset.estimatedTime = task.estimatedTime || 0;
+    agendaItem.dataset.endTime = task.endTime || "";
+    agendaItem.dataset.zone = task.zone || "";
+    agendaItem.dataset.priority = task.priority ? "true" : "false";
+    if (task.priority) agendaItem.classList.add("priority-task");
+
+    const estimatedTime = parseInt(agendaItem.dataset.estimatedTime, 10) || 0;
+    // Use same proportional sizing as addToAgenda
+    const totalMinutes = 63;
+    const percentage = (estimatedTime / totalMinutes) * 100;
+    agendaItem.style.flex = `0 0 ${percentage}%`;
+
+    switch (agendaItem.dataset.zone) {
+      case "Independent":
+        agendaItem.style.backgroundColor = "#3182ce";
+        break;
+      case "Semi-Collaborative":
+        agendaItem.style.backgroundColor = "#38a169";
+        break;
+      case "Collaborative":
+        agendaItem.style.backgroundColor = "#e53e3e";
+        break;
+      default:
+        agendaItem.style.backgroundColor = "#718096";
+    }
+
+    const priorityMark = task.priority ? `<span class="priority-star">★</span>` : "";
+
+    agendaItem.innerHTML = `
+      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.</span>
+      <span class="text-sm text-gray-200">${(task.startTimeDisplay || "")} ${task.endTimeDisplay || ""}</span>
+    `;
+
+    studyPlanDisplay.appendChild(agendaItem);
+  });
+
+  runButtonColorCheck();
+  updateMinutesLeftDisplay();
+}
+
+// Load and render study plan for a slot (periodLabel, dayName)
+function loadStudyPlanForSlot(periodLabel, dayName) {
+  const plans = loadAllStudyPlans();
+  const slotKey = getSlotKey(periodLabel, dayName);
+  const tasks = plans[slotKey] || [];
+  renderStudyPlanFromArray(tasks);
+}
+
+// Save current DOM study plan into the active slot
+function saveCurrentSlotPlans() {
+  const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+  const studyPlannerSection = document.getElementById("studyPlannerSection");
+  if (!studyPlanDisplay || !studyPlannerSection) return;
+  const slotKey = studyPlannerSection.dataset.slotKey;
+  if (!slotKey) return; // nothing to save if no active slot
+
+  const tasks = Array.from(studyPlanDisplay.children).map((child) => ({
+    summary: (child.textContent || "").split(" - ")[0].trim(),
+    estimatedTime: parseInt(child.dataset.estimatedTime, 10) || 0,
+    zone: child.dataset.zone || "",
+    priority: child.dataset.priority === "true",
+    startDate: child.dataset.startDate || new Date().toISOString(),
+    endTime: child.dataset.endTime || "",
+  }));
+
+  const plans = loadAllStudyPlans();
+  plans[slotKey] = tasks;
+  saveAllStudyPlans(plans);
+  console.debug(`[studyPlans] Saved ${tasks.length} tasks for slot: ${slotKey}`);
+}
+
+// Attach click handlers to the schedule display/form table cells so they open planner
+function attachScheduleCellHandlers() {
+  // Map column index to weekday names (Monday..Friday)
+  const weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
+  // Use event delegation on the panels so handlers survive re-renders
+  const displayPanel = document.getElementById("scheduleDisplayPanel");
+  const formPanel = document.getElementById("scheduleFormPanel");
+  const panels = [displayPanel, formPanel];
+
+  panels.forEach((panel) => {
+    if (!panel) return;
+
+    // Click listener (delegated)
+    panel.addEventListener("click", (e) => {
+      // Prevent planner opening if the schedule form is visible
+      const formPanel = document.getElementById("scheduleFormPanel");
+      if (formPanel && !formPanel.classList.contains("hidden")) {
+        // Schedule form is visible, allow user to enter schedule, do not open planner
+        return;
+      }
+      const td = e.target.closest("td");
+      if (!td || !panel.contains(td)) return;
+      const tr = td.closest("tr");
+      if (!tr) return;
+      const allTds = Array.from(tr.querySelectorAll("td"));
+      const idx = allTds.indexOf(td);
+      // Ignore first column (period label)
+      if (idx === 0) {
+        console.debug("[schedule] clicked period label cell, ignoring", td.textContent.trim());
+        return;
+      }
+      const periodLabelCell = tr.querySelector("td:first-child");
+      const periodLabel = periodLabelCell ? periodLabelCell.textContent.trim() : null;
+      const dayName = weekdayNames[idx - 1] || `Col${idx}`;
+      console.debug("[schedule] cell clicked", { periodLabel, dayName, idx, text: td.textContent.trim() });
+      if (periodLabel) openStudyPlannerForSlot(periodLabel, dayName);
+    });
+
+    // Keyboard accessibility (delegated)
+    panel.addEventListener("keydown", (e) => {
+      // Prevent planner opening if the schedule form is visible
+      const formPanel = document.getElementById("scheduleFormPanel");
+      if (formPanel && !formPanel.classList.contains("hidden")) {
+        return;
+      }
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const td = e.target.closest("td");
+      if (!td || !panel.contains(td)) return;
+      e.preventDefault();
+      const tr = td.closest("tr");
+      if (!tr) return;
+      const allTds = Array.from(tr.querySelectorAll("td"));
+      const idx = allTds.indexOf(td);
+      if (idx === 0) return;
+      const periodLabelCell = tr.querySelector("td:first-child");
+      const periodLabel = periodLabelCell ? periodLabelCell.textContent.trim() : null;
+      const dayName = weekdayNames[idx - 1] || `Col${idx}`;
+      console.debug("[schedule] key-activate cell", { periodLabel, dayName, idx });
+      if (periodLabel) openStudyPlannerForSlot(periodLabel, dayName);
+    });
+
+    // Set pointer cursor and tabindex for existing table cells to improve UX
+    const table = panel.querySelector("table");
+    if (table) {
+      table.querySelectorAll("td").forEach((td) => {
+        td.style.cursor = td.cellIndex === 0 ? "default" : "pointer";
+        td.tabIndex = 0;
+      });
+    }
+  });
+
+  console.debug("[schedule] attachScheduleCellHandlers completed");
+}
+
+// Open the study planner for a specific slot, load its saved plan, and set active slot
+function openStudyPlannerForSlot(periodLabel, dayName) {
+  console.debug("[openStudyPlannerForSlot] called", { periodLabel, dayName });
+  const dashboardSection = document.getElementById("dashboardSection");
+  const studyScreen = document.getElementById("studyPlannerSection");
+  if (!studyScreen || !dashboardSection) {
+    console.warn("[openStudyPlannerForSlot] missing DOM elements", { studyScreen: !!studyScreen, dashboardSection: !!dashboardSection });
+    return;
+  }
+
+  // Hide dashboard, show planner
+  dashboardSection.classList.add("hidden");
+  studyScreen.classList.remove("hidden");
+
+  // Annotate the planner with the active slot key
+  const slotKey = getSlotKey(periodLabel, dayName);
+  studyScreen.dataset.slotKey = slotKey;
+
+  console.debug("[openStudyPlannerForSlot] opening slot", { slotKey });
+
+  // Update the planner header to show which slot is being planned
+  const titleSpan = studyScreen.querySelector(".session-title");
+  if (titleSpan) {
+    // Look up the user-entered class name for this period and day
+    let className = '';
+    try {
+      const scheduleData = JSON.parse(localStorage.getItem("userSchedule") || '{}');
+      // The input name is like period4Monday, period5Tuesday, etc.
+      // Extract the period number from periodLabel (e.g., P4 -> 4)
+      const periodNum = periodLabel.replace(/[^0-9]/g, '');
+      const key = `period${periodNum}${dayName}`;
+      className = scheduleData[key] || '';
+    } catch (e) { className = ''; }
+    const displayName = className ? `${className} (${periodLabel}, ${dayName})` : `${periodLabel} (${dayName})`;
+    titleSpan.textContent = `${displayName}`;
+  }
+
+  // Load saved plan for the slot
+  loadStudyPlanForSlot(periodLabel, dayName);
+  updateMinutesLeftDisplay();
+}
+
 function updateMinutesLeftDisplay() {
   const studyPlanDisplay = document.getElementById("studyPlanDisplay");
   const minutesLeftDisplay = document.getElementById("minutesLeftDisplay");
@@ -1322,10 +1569,34 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  // Hide the old Start button — scheduling replaces it
+  if (startStudyBtn) {
+    startStudyBtn.classList.add("hidden");
+  }
+
+  // Clear saved plans on Sunday
+  clearPlansIfSunday();
+
+  // Hide the old Start button — scheduling replaces it
+  if (startStudyBtn) {
+    startStudyBtn.classList.add("hidden");
+  }
+
+  // Clear saved plans on Sunday
+  clearPlansIfSunday();
+
   // Initial dashboard render
   renderDashboardTasks();
   loadStudyTasks();
   updateMinutesLeftDisplay(); // Initialize the minutes display
+
+  // Ensure schedule form labels updated and then attach cell handlers (so they open planner)
+  updateScheduleFormLabels();
+  attachScheduleCellHandlers();
+
+  // Ensure schedule form labels updated and then attach cell handlers (so they open planner)
+  updateScheduleFormLabels();
+  attachScheduleCellHandlers();
 
   // Schedule form functionality
   function getPeriodLabels() {
@@ -1407,7 +1678,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <table class="w-full h-full table-fixed">
               <thead class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                 <tr class="h-16">
-                  <th class="w-20 text-center font-bold text-lg border-r border-blue-400">Period</th>
+                  <th class="w-20 text-center font-bold text-lg border-r border-blue-400"> </th>
                   <th class="text-center font-bold text-lg border-r border-blue-400">Monday</th>
                   <th class="text-center font-bold text-lg border-r border-blue-400">Tuesday</th>
                   <th class="text-center font-bold text-lg border-r border-blue-400">Wednesday</th>
@@ -1418,8 +1689,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
     `;
     
-    // Get dynamic period labels based on timezone
-    const periodLabels = getPeriodLabels();
+  // Get dynamic period labels based on timezone
+  const periodLabels = getPeriodLabels();
+  const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
     
     // Define periods and their corresponding input names
     const periods = [
@@ -1448,7 +1720,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const borderClass = dayIndex < 4 ? 'border-r schedule-border' : '';
         
         scheduleHTML += `
-          <td class="text-center ${textClass} ${borderClass} align-middle px-4 py-4">
+          <td class="text-center ${textClass} ${borderClass} align-middle px-4 py-4" data-period="${periodData.period}" data-day="${dayNames[dayIndex]}">
             <span class="truncate block">${isEmpty ? 'Free Period' : className}</span>
           </td>
         `;
@@ -1466,20 +1738,166 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     
     displayPanel.innerHTML = scheduleHTML;
+      // After rendering the schedule, emphasize the current period if any
+      try {
+        emphasizeCurrentPeriod();
+      } catch (err) {
+        console.error("[schedule] emphasizeCurrentPeriod error:", err);
+      }
   }
+
+  // Period times per timezone group (start and end in 24h "HH:MM" local time)
+  // NEST and Homeroom are excluded here
+  const timezonePeriodTimes = {
+    // Atlantic / Eastern style
+    Atlantic: {
+      P1: ['08:25','09:25'],
+      P2: ['09:28','10:28'],
+      P3: ['10:31','11:31'],
+      P4: ['12:21','01:21'],
+      P5: ['02:01','03:01']
+    },
+    Eastern: {
+      P2: ['08:28','09:28'],
+      P3: ['09:31','10:31'],
+      P4: ['11:21','12:21'],
+      P5: ['01:01','02:01'],
+      P6: ['02:04','03:04']
+    },
+    Central: {
+      P3: ['08:31','09:31'],
+      P4: ['10:21','11:21'],
+      P5: ['12:01','01:01'],
+      P6: ['01:04','02:04'],
+      P7: ['02:07','03:07']
+    },
+    Mountain: {
+      P3: ['07:31','08:31'],
+      P4: ['09:21','10:21'],
+      P5: ['11:01','12:01'],
+      P6: ['12:04','01:04'],
+      P7: ['01:07','02:07']
+    },
+    Pacific: {
+      P4: ['08:21','09:21'],
+      P5: ['10:01','11:01'],
+      P6: ['11:04','12:04'],
+      P7: ['12:07','01:07'],
+      P8: ['01:37','02:37']
+    }
+  };
+
+  // Inject highlight CSS once
+  (function ensureHighlightStyle() {
+      if (document.getElementById('schedule-current-style')) return;
+      const style = document.createElement('style');
+      style.id = 'schedule-current-style';
+      style.textContent = `
+        .schedule-current-cell { box-shadow: 0 0 0 3px rgba(59,130,246,0.35) inset; transform: scale(1.02); transition: transform .15s ease; }
+        .schedule-filled:hover, .schedule-empty:hover { background: rgba(59,130,246,0.10); box-shadow: 0 0 0 2px rgba(59,130,246,0.25) inset; cursor: pointer; }
+      `;
+      document.head.appendChild(style);
+    })();
+
+  // Helper to pick the best timezone key for the current user timezone
+  function detectTimezoneKey() {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (/America\/(Los_Angeles|Vancouver)/i.test(tz)) return 'Pacific';
+    if (/America\/(Denver|Phoenix|Edmonton|Boise)/i.test(tz)) return 'Mountain';
+    if (/America\/(Chicago|Winnipeg|Mexico_City)/i.test(tz)) return 'Central';
+    if (/America\/(New_York|Toronto|Montreal|Halifax)/i.test(tz)) return 'Eastern';
+    // default fallback
+    return 'Pacific';
+  }
+
+
+  // Parse HH:MM to minutes since midnight
+  function hhmmToMinutes(hhmm) {
+    const [hh, mm] = hhmm.split(':').map(Number);
+    return hh * 60 + mm;
+  }
+
+  // Emphasize the current period by adding a class to the corresponding TD
+  function emphasizeCurrentPeriod() {
+    // Remove previous highlights
+    document.querySelectorAll('.schedule-current-cell').forEach(el => el.classList.remove('schedule-current-cell'));
+
+    const displayPanel = document.getElementById('scheduleDisplayPanel');
+    if (!displayPanel) return;
+    const table = displayPanel.querySelector('table');
+    if (!table) return;
+
+    const tzKey = detectTimezoneKey();
+    const periodMap = timezonePeriodTimes[tzKey] || {};
+    const now = new Date();
+    const minutesNow = now.getHours() * 60 + now.getMinutes();
+    console.debug('[schedule] emphasizeCurrentPeriod running', { tzKey, minutesNow });
+
+    // Find matching period label (e.g., P4) where now is between start/end
+    let currentPeriodLabel = null;
+    Object.keys(periodMap).forEach((p) => {
+      const [start, end] = periodMap[p];
+      if (!start || !end) return;
+      const startMin = hhmmToMinutes(start);
+      const endMin = hhmmToMinutes(end);
+      if (minutesNow >= startMin && minutesNow < endMin) {
+        currentPeriodLabel = p;
+      }
+    });
+
+    if (!currentPeriodLabel) {
+      console.debug('[schedule] No current period for timezone', tzKey);
+      return;
+    }
+
+    // Prefer data-attribute lookup: find the TD with data-period == currentPeriodLabel and data-day == today
+    const weekday = (new Date()).getDay(); // 0-6
+    const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+    const dayIndex = weekday >= 1 && weekday <=5 ? weekday - 1 : null;
+    if (dayIndex === null) {
+      console.debug('[schedule] Today is weekend, no highlight');
+      return;
+    }
+
+    if (currentPeriodLabel) {
+      const selector = `td[data-period="${currentPeriodLabel}"][data-day="${dayNames[dayIndex]}"]`;
+      const targetTd = table.querySelector(selector);
+      if (targetTd) {
+        targetTd.classList.add('schedule-current-cell');
+        console.debug('[schedule] Highlighted current period via data-attrs', { tzKey, currentPeriodLabel, day: dayNames[dayIndex] });
+        return;
+      }
+      // Fallback: old row-scan method
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      for (const row of rows) {
+        const firstCell = row.querySelector('td:first-child');
+        if (!firstCell) continue;
+        const label = firstCell.textContent.trim();
+        if (label === currentPeriodLabel) {
+          const tds = row.querySelectorAll('td');
+          const fallbackTd = tds[dayIndex + 1]; // +1 because first td is period label
+          if (fallbackTd) {
+            fallbackTd.classList.add('schedule-current-cell');
+            console.debug('[schedule] Highlighted current period via fallback', { tzKey, currentPeriodLabel, dayIndex });
+          }
+          return;
+        }
+      }
+      console.debug('[schedule] Could not find matching row for period label', currentPeriodLabel);
+      return;
+    }
+    console.debug('[schedule] No current period label found for timezone', tzKey);
+  }
+
+  // Update highlight every minute
+  setInterval(() => {
+    try { emphasizeCurrentPeriod(); } catch (err) { /* ignore */ }
+  }, 60 * 1000);
 
   // Add Enter key listeners to schedule inputs
   function addScheduleInputListeners() {
-    const scheduleInputs = document.querySelectorAll('.schedule-input');
-    
-    scheduleInputs.forEach(input => {
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          saveScheduleData();
-        }
-      });
-    });
+    // Remove Enter key save functionality; users must use the Save button
+    // No-op: do not add any keydown listeners to schedule inputs
   }
 
   // Update HTML form with dynamic period labels
@@ -1497,6 +1915,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize schedule functionality
   addScheduleInputListeners();
   updateScheduleFormLabels();
+
+  // Wire Save button in schedule form
+  const saveScheduleBtn = document.getElementById('saveScheduleBtn');
+  if (saveScheduleBtn) {
+    saveScheduleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      try {
+        saveScheduleData();
+        // After saving, focus the display panel for accessibility
+        const displayPanel = document.getElementById('scheduleDisplayPanel');
+        if (displayPanel) displayPanel.focus();
+      } catch (err) {
+        console.error('[schedule] saveScheduleBtn click error', err);
+      }
+    });
+  }
+
+  // Prevent Enter key on the schedule form from submitting
+  const scheduleTableForm = document.getElementById('scheduleTableForm');
+  if (scheduleTableForm) {
+    scheduleTableForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+    });
+  }
 
   // Make the left headings act like tabs (clickable)
   (function () {
@@ -1588,7 +2030,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    const persisted = localStorage.getItem(KEY) || "#bookingsContent";
+    const persisted = localStorage.getItem(KEY) || "#scheduleContent";
     setActive(persisted, false);
   })();
 
@@ -1859,17 +2301,6 @@ const teacherList = [
   "Zakk Taylor",
   "Zaleena Esahack",
 ];
-
-
-// Add MAP Practice button event listener
-document.addEventListener("DOMContentLoaded", () => {
-  const mapButton = document.getElementById("mapButton");
-  if (mapButton) {
-    mapButton.addEventListener("click", () => {
-      openMapPopup();
-    });
-  }
-});
 
 function openMapPopup() {
   const mapPopup = document.getElementById("mapPopup");

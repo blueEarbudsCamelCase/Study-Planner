@@ -304,11 +304,9 @@ backToPlanScreenBtn.addEventListener("click", () => {
 function openTaskPopup(task) {
   const taskPopup = document.getElementById("taskPopup");
   const taskTime = document.getElementById("taskTime");
-  const priorityCheckbox = document.getElementById("taskPriority");
   let selectedZone = null;
   let timeSelected = false;
   let zoneSelected = false;
-  let prioritySelected = !!task.priority;
 
   // Reset the popup fields
   taskTime.value = "";
@@ -417,21 +415,11 @@ function openTaskPopup(task) {
         estimatedTime,
         selectedZone
       );
-      // assign priority to the task
-      task.priority = !!prioritySelected;
-      addToAgenda(task, estimatedTime, selectedZone, task.priority);
+      addToAgenda(task, estimatedTime, selectedZone);
       task.estimatedTime = estimatedTime;
       task.zone = selectedZone;
       closePopup();
     }
-  }
-
-  if (priorityCheckbox) {
-    priorityCheckbox.checked = prioritySelected;
-    priorityCheckbox.onchange = () => {
-      prioritySelected = !!priorityCheckbox.checked;
-      tryAutoSave();
-    };
   }
 
   // Show the popup
@@ -476,13 +464,8 @@ function runButtonColorCheck() {
   }
 }
 
-function addToAgenda(task, estimatedTime, zone, priority = false) {
-  console.log("Adding task to agenda:", {
-    task,
-    estimatedTime,
-    zone,
-    priority,
-  }); // Debugging log
+function addToAgenda(task, estimatedTime, zone) {
+  console.log("Adding task to agenda:", { task, estimatedTime, zone });
   const totalMinutes = 63; // This isn't 60 min. intentionally because the part that calculates the proportional height doesn't count the padding and inevitably ends up putting tasks below the bottom of the container.
 
   // Remove the placeholder text if it exists
@@ -500,27 +483,17 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
     studyStartTime = new Date();
     studyStartTime.setMinutes(studyStartTime.getMinutes() + 1);
   } else {
-    // If there are previous tasks, start after the last task's end time
-    const lastTask = studyPlanDisplayTasks[studyPlanDisplayTasks.length - 1];
-    const lastTaskEndTime = new Date(lastTask.dataset.endTime); // Retrieve the end time from the dataset
-    studyStartTime = new Date(lastTaskEndTime);
+    // If there are previous tasks, continue stacking; we don't track absolute times anymore
+    studyStartTime = new Date();
   }
-  //calculating end time
-  const taskEndTime = new Date(studyStartTime);
-  taskEndTime.setMinutes(taskEndTime.getMinutes() + estimatedTime);
+  // Not storing explicit start/end times any more.
 
   // Create a new agenda item
   const agendaItem = document.createElement("div");
   agendaItem.className = "p-2 mb-2 rounded text-white";
   agendaItem.dataset.startDate = task.startDate; // Store the startDate in the dataset
   agendaItem.dataset.estimatedTime = estimatedTime; // Store the estimated time directly in the dataset
-  agendaItem.dataset.endTime = taskEndTime.toISOString(); // Store the end time in the dataset
   agendaItem.dataset.zone = zone; // Ensure the zone is stored in the dataset
-  agendaItem.dataset.priority = priority ? "true" : "false";
-
-  if (priority) {
-    agendaItem.classList.add("priority-task");
-  }
 
   // Calculate the proportional height based on the estimated time
   const percentage = (estimatedTime / totalMinutes) * 100;
@@ -540,24 +513,9 @@ function addToAgenda(task, estimatedTime, zone, priority = false) {
       agendaItem.style.backgroundColor = "#718096"; // Gray (fallback)
   }
 
-  const priorityMark = priority ? `<span class="priority-star">★</span>` : "";
-
   // Set the content of the agenda item
   agendaItem.innerHTML = `
-      <span>${priorityMark}${
-    task.summary || "Unnamed Task"
-  } - ${estimatedTime} min.     </span>
-
-      <span class="text-sm text-gray-200">${studyStartTime.toLocaleTimeString(
-        [],
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      )} - ${taskEndTime.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}</span>
+      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.</span>
     `;
 
   // Append the agenda item to the agenda box
@@ -986,36 +944,33 @@ function updateRunScreenDisplay(taskIndex) {
   runScreenTasks.innerHTML = `
     <div class="current-task">
       <h2 class="font-bold text-lg mb-2">Current Task</h2>
-      ${
-        currentTask
-          ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(
-              currentTask.zone
-            )};">
+      ${currentTask
+      ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(
+        currentTask.zone
+      )};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
-                <label for="currentTaskCheckbox">${currentTask.summary} - ${
-              currentTask.estimatedTime
-            } min.</label>
+                <label for="currentTaskCheckbox">${currentTask.summary} - ${currentTask.estimatedTime
+      } min.</label>
               </div>`
-          : `<p class="text-gray-500 italic">No current task.</p>`
-      }
+      : `<p class="text-gray-500 italic">No current task.</p>`
+    }
     </div>
     <div class="upcoming-tasks">
       <h2 class="font-bold text-lg mb-2">Upcoming Tasks</h2>
-      ${
-        upcomingTasks.length > 0
-          ? upcomingTasks
-              .map(
-                (task) => `
+      ${upcomingTasks.length > 0
+      ? upcomingTasks
+        .map(
+          (task) => `
                 <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(
-                  task.zone
-                )};">
+            task.zone
+          )};">
                   <label>${task.summary} - ${task.estimatedTime} min.</label>
                 </div>
               `
-              )
-              .join("")
-          : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
-      }
+        )
+        .join("")
+      : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
+    }
     </div>
   `;
 
@@ -1131,6 +1086,28 @@ function saveAllStudyPlans(plansObj) {
   localStorage.setItem("studyPlans", JSON.stringify(plansObj));
 }
 
+// Apply overlays for schedule cells based on saved studyPlans (global helper)
+function applyScheduleOverlays(displayPanel) {
+  if (!displayPanel) return;
+  const plans = loadAllStudyPlans();
+  const cells = displayPanel.querySelectorAll('td[data-period][data-day]');
+  cells.forEach((td) => {
+    const period = td.dataset.period;
+    const day = td.dataset.day;
+    const slotKey = getSlotKey(period, day);
+    const tasks = (plans && plans[slotKey]) || [];
+    const totalMinutes = Array.isArray(tasks)
+      ? tasks.reduce((sum, t) => sum + (parseInt(t.estimatedTime, 10) || 0), 0)
+      : 0;
+    td.classList.remove('plan-partial', 'plan-full');
+    if (totalMinutes >= 60) {
+      td.classList.add('plan-full');
+    } else if (totalMinutes > 0) {
+      td.classList.add('plan-partial');
+    }
+  });
+}
+
 // Clear all saved study plans if today is Sunday
 function clearPlansIfSunday() {
   try {
@@ -1142,6 +1119,107 @@ function clearPlansIfSunday() {
     }
   } catch (err) {
     console.error("[studyPlans] clearPlansIfSunday error:", err);
+  }
+}
+
+// Weekly clearing: keep a week-key in localStorage and clear plans every Monday at 1:00am local time.
+// Also remove any plans (or tasks) that don't contain a timestamp (`startDate`).
+function clearPlansIfWeeklyNeeded() {
+  try {
+    const now = new Date();
+
+    function getISOWeekNumber(d) {
+      // Copy date so don't modify original
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      // Set to nearest Thursday: current date + 4 - current day number
+      const dayNum = date.getUTCDay() || 7;
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
+      return { year: date.getUTCFullYear(), week: weekNo };
+    }
+
+    function getWeekKey(d) {
+      const w = getISOWeekNumber(d);
+      return `${w.year}-W${String(w.week).padStart(2, '0')}`;
+    }
+
+    function getMondayAt1amOfDate(d) {
+      // local time Monday 01:00 for the week containing date d
+      const copy = new Date(d);
+      const day = copy.getDay(); // 0 (Sun) - 6 (Sat)
+      // compute days to subtract to get Monday
+      const daysToMonday = (day + 6) % 7; // 0->6,1->0,2->1,...
+      copy.setHours(1, 0, 0, 0); // set time to 01:00
+      copy.setDate(copy.getDate() - daysToMonday);
+      return copy;
+    }
+
+    const currentWeekKey = getWeekKey(now);
+    const storedWeekKey = localStorage.getItem('studyPlansWeekKey');
+
+    // If stored key is missing, or we have advanced to a new week and it's past Monday 01:00, clear plans
+    const monday1am = getMondayAt1amOfDate(now);
+    if (storedWeekKey !== currentWeekKey && now >= monday1am) {
+      localStorage.removeItem('studyPlans');
+      localStorage.setItem('studyPlansWeekKey', currentWeekKey);
+      console.info('[studyPlans] Weekly clear executed. Updated week key to', currentWeekKey);
+      return; // done, nothing else to sanitize
+    }
+
+    // Additionally, sanitize existing studyPlans: remove tasks without timestamps
+    const plans = loadAllStudyPlans();
+    let changed = false;
+    Object.keys(plans).forEach((slotKey) => {
+      const tasks = plans[slotKey];
+      if (!Array.isArray(tasks)) {
+        // corrupt/non-array entry: remove whole slot
+        delete plans[slotKey];
+        changed = true;
+        return;
+      }
+      // Keep only tasks that have a startDate (timestamp-like)
+      const filtered = tasks.filter((t) => t && (t.startDate || t.savedAt || t.timestamp));
+      if (filtered.length === 0) {
+        delete plans[slotKey];
+        changed = true;
+      } else if (filtered.length !== tasks.length) {
+        plans[slotKey] = filtered;
+        changed = true;
+      }
+    });
+    if (changed) {
+      saveAllStudyPlans(plans);
+      console.info('[studyPlans] Sanitized studyPlans: removed entries without timestamps');
+    }
+  } catch (err) {
+    console.error('[studyPlans] clearPlansIfWeeklyNeeded error:', err);
+  }
+}
+
+// Schedule the next weekly clear to run at the next Monday 01:00 local time (if page stays open)
+function scheduleNextWeeklyClear() {
+  try {
+    const now = new Date();
+    const day = now.getDay();
+    const daysToMonday = (8 - day) % 7; // number of days until next Monday
+    const nextMonday = new Date(now);
+    nextMonday.setDate(now.getDate() + daysToMonday);
+    nextMonday.setHours(1, 0, 0, 0); // Monday 01:00
+    const msUntil = nextMonday.getTime() - now.getTime();
+    if (msUntil <= 0) return; // already past
+    setTimeout(() => {
+      try {
+        clearPlansIfWeeklyNeeded();
+      } catch (e) {
+        console.error('[studyPlans] scheduled weekly clear error:', e);
+      }
+      // re-schedule the next one in 7 days
+      setInterval(clearPlansIfWeeklyNeeded, 7 * 24 * 60 * 60 * 1000);
+    }, msUntil + 50); // slight offset
+    console.debug('[studyPlans] scheduled next weekly clear in ms:', msUntil);
+  } catch (err) {
+    console.error('[studyPlans] scheduleNextWeeklyClear error:', err);
   }
 }
 
@@ -1167,10 +1245,7 @@ function renderStudyPlanFromArray(tasksArray) {
     agendaItem.className = "p-2 mb-2 rounded text-white";
     agendaItem.dataset.startDate = task.startDate || new Date().toISOString();
     agendaItem.dataset.estimatedTime = task.estimatedTime || 0;
-    agendaItem.dataset.endTime = task.endTime || "";
     agendaItem.dataset.zone = task.zone || "";
-    agendaItem.dataset.priority = task.priority ? "true" : "false";
-    if (task.priority) agendaItem.classList.add("priority-task");
 
     const estimatedTime = parseInt(agendaItem.dataset.estimatedTime, 10) || 0;
     // Use same proportional sizing as addToAgenda
@@ -1192,11 +1267,8 @@ function renderStudyPlanFromArray(tasksArray) {
         agendaItem.style.backgroundColor = "#718096";
     }
 
-    const priorityMark = task.priority ? `<span class="priority-star">★</span>` : "";
-
     agendaItem.innerHTML = `
-      <span>${priorityMark}${task.summary || "Unnamed Task"} - ${estimatedTime} min.</span>
-      <span class="text-sm text-gray-200">${(task.startTimeDisplay || "")} ${task.endTimeDisplay || ""}</span>
+      <span>${task.summary || "Unnamed Task"} - ${estimatedTime} min.</span>
     `;
 
     studyPlanDisplay.appendChild(agendaItem);
@@ -1226,15 +1298,20 @@ function saveCurrentSlotPlans() {
     summary: (child.textContent || "").split(" - ")[0].trim(),
     estimatedTime: parseInt(child.dataset.estimatedTime, 10) || 0,
     zone: child.dataset.zone || "",
-    priority: child.dataset.priority === "true",
     startDate: child.dataset.startDate || new Date().toISOString(),
-    endTime: child.dataset.endTime || "",
   }));
 
   const plans = loadAllStudyPlans();
   plans[slotKey] = tasks;
   saveAllStudyPlans(plans);
   console.debug(`[studyPlans] Saved ${tasks.length} tasks for slot: ${slotKey}`);
+  // Update schedule overlays so dashboard reflects this change promptly
+  try {
+    const displayPanel = document.getElementById('scheduleDisplayPanel');
+    if (displayPanel) applyScheduleOverlays(displayPanel);
+  } catch (err) {
+    console.error('[studyPlans] error updating schedule overlays after save:', err);
+  }
 }
 
 // Attach click handlers to the schedule display/form table cells so they open planner
@@ -1365,9 +1442,8 @@ function updateMinutesLeftDisplay() {
     0
   );
   const minutesLeft = Math.max(60 - totalMinutes, 0);
-  minutesLeftDisplay.textContent = `${minutesLeft} minute${
-    minutesLeft === 1 ? "" : "s"
-  } left to plan.`;
+  minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? "" : "s"
+    } left to plan.`;
 }
 
 const gradeSelect = document.getElementById("gradeSelect");
@@ -1561,7 +1637,7 @@ document.addEventListener("DOMContentLoaded", () => {
             500
           );
         });
-        const studyPlanDisplay = document.getElementById("studyPlanDisplay");
+      const studyPlanDisplay = document.getElementById("studyPlanDisplay");
       if (studyPlanDisplay) {
         studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
         updateMinutesLeftDisplay();
@@ -1574,8 +1650,6 @@ document.addEventListener("DOMContentLoaded", () => {
     startStudyBtn.classList.add("hidden");
   }
 
-  // Clear saved plans on Sunday
-  clearPlansIfSunday();
 
   // Hide the old Start button — scheduling replaces it
   if (startStudyBtn) {
@@ -1583,7 +1657,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Clear saved plans on Sunday
-  clearPlansIfSunday();
+  !  // Weekly clearing and sanitization
+    clearPlansIfWeeklyNeeded();
+  scheduleNextWeeklyClear();
 
   // Initial dashboard render
   renderDashboardTasks();
@@ -1602,38 +1678,38 @@ document.addEventListener("DOMContentLoaded", () => {
   function getPeriodLabels() {
     // Get the user's timezone
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
+
     // Map timezones to period numbers
     const timezonePeriods = {
       // Pacific Time (PST/PDT)
       'America/Los_Angeles': [4, 5, 6, 7, 8],
       'America/Vancouver': [4, 5, 6, 7, 8],
-      
+
       // Mountain Time (MST/MDT)
       'America/Denver': [4, 5, 6, 7, 8],
       'America/Phoenix': [4, 5, 6, 7, 8],
       'America/Edmonton': [4, 5, 6, 7, 8],
-      
+
       // Central Time (CST/CDT)
       'America/Chicago': [3, 4, 5, 6, 7],
       'America/Mexico_City': [3, 4, 5, 6, 7],
       'America/Winnipeg': [3, 4, 5, 6, 7],
-      
+
       // Eastern Time (EST/EDT)
       'America/New_York': [2, 3, 4, 5, 6],
       'America/Toronto': [2, 3, 4, 5, 6],
       'America/Montreal': [2, 3, 4, 5, 6],
-      
+
       // Atlantic Time
       'America/Halifax': [2, 3, 4, 5, 6],
-      
+
       // Default fallback (Pacific Time)
       'default': [4, 5, 6, 7, 8]
     };
-    
+
     // Get periods for the timezone, fallback to default if not found
     const periods = timezonePeriods[timezone] || timezonePeriods['default'];
-    
+
     // Convert to period labels
     return periods.map(period => `P${period}`);
   }
@@ -1641,20 +1717,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function saveScheduleData() {
     const scheduleInputs = document.querySelectorAll('.schedule-input');
     const scheduleData = {};
-    
+
     scheduleInputs.forEach(input => {
       if (input.value.trim()) {
         scheduleData[input.name] = input.value.trim();
       }
     });
-    
+
     localStorage.setItem("userSchedule", JSON.stringify(scheduleData));
     console.log("Schedule saved:", scheduleData);
-    
+
     // Switch to display panel
     const formPanel = document.getElementById("scheduleFormPanel");
     const displayPanel = document.getElementById("scheduleDisplayPanel");
-    
+
     if (formPanel) formPanel.classList.add("hidden");
     if (displayPanel) {
       displayPanel.classList.remove("hidden");
@@ -1665,11 +1741,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function displaySavedSchedule() {
     const savedSchedule = localStorage.getItem("userSchedule");
     const displayPanel = document.getElementById("scheduleDisplayPanel");
-    
+
     if (!savedSchedule || !displayPanel) return;
-    
+
     const scheduleData = JSON.parse(savedSchedule);
-    
+
     // Create schedule table HTML with full height and beautiful styling
     let scheduleHTML = `
       <div class="h-full flex flex-col">        
@@ -1688,11 +1764,11 @@ document.addEventListener("DOMContentLoaded", () => {
               </thead>
               <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
     `;
-    
-  // Get dynamic period labels based on timezone
-  const periodLabels = getPeriodLabels();
-  const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-    
+
+    // Get dynamic period labels based on timezone
+    const periodLabels = getPeriodLabels();
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
     // Define periods and their corresponding input names
     const periods = [
       { period: periodLabels[0], inputs: ['period4Monday', 'period4Tuesday', 'period4Wednesday', 'period4Thursday', 'period4Friday'] },
@@ -1701,34 +1777,34 @@ document.addEventListener("DOMContentLoaded", () => {
       { period: periodLabels[3], inputs: ['period7Monday', 'period7Tuesday', 'period7Wednesday', 'period7Thursday', 'period7Friday'] },
       { period: periodLabels[4], inputs: ['period8Monday', 'period8Tuesday', 'period8Wednesday', 'period8Thursday', 'period8Friday'] }
     ];
-    
+
     periods.forEach((periodData, index) => {
       const rowHeight = 'h-20'; // Fixed height for each row
       const isEvenRow = index % 2 === 0;
-      
+
       scheduleHTML += `
         <tr class="${rowHeight} schedule-row ${isEvenRow ? 'schedule-row-even' : 'schedule-row-odd'}">
           <td class="w-20 text-center font-bold text-lg schedule-period border-r schedule-border align-middle">
             ${periodData.period}
           </td>
       `;
-      
+
       periodData.inputs.forEach((inputName, dayIndex) => {
         const className = scheduleData[inputName] || '';
         const isEmpty = !className.trim();
         const textClass = isEmpty ? 'schedule-empty' : 'schedule-filled';
         const borderClass = dayIndex < 4 ? 'border-r schedule-border' : '';
-        
+
         scheduleHTML += `
           <td class="text-center ${textClass} ${borderClass} align-middle px-4 py-4" data-period="${periodData.period}" data-day="${dayNames[dayIndex]}">
             <span class="truncate block">${isEmpty ? 'Free Period' : className}</span>
           </td>
         `;
       });
-      
+
       scheduleHTML += '</tr>';
     });
-    
+
     scheduleHTML += `
               </tbody>
             </table>
@@ -1736,14 +1812,22 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
     `;
-    
+
     displayPanel.innerHTML = scheduleHTML;
-      // After rendering the schedule, emphasize the current period if any
-      try {
-        emphasizeCurrentPeriod();
-      } catch (err) {
-        console.error("[schedule] emphasizeCurrentPeriod error:", err);
-      }
+
+    // Apply visual overlays for saved study plans
+    try {
+      applyScheduleOverlays(displayPanel);
+    } catch (err) {
+      console.error('[schedule] apply overlays error:', err);
+    }
+
+    // After rendering the schedule, emphasize the current period if any
+    try {
+      emphasizeCurrentPeriod();
+    } catch (err) {
+      console.error("[schedule] emphasizeCurrentPeriod error:", err);
+    }
   }
 
   // Period times per timezone group (start and end in 24h "HH:MM" local time)
@@ -1751,53 +1835,53 @@ document.addEventListener("DOMContentLoaded", () => {
   const timezonePeriodTimes = {
     // Atlantic / Eastern style
     Atlantic: {
-      P1: ['08:25','09:25'],
-      P2: ['09:28','10:28'],
-      P3: ['10:31','11:31'],
-      P4: ['12:21','01:21'],
-      P5: ['02:01','03:01']
+      P1: ['08:25', '09:25'],
+      P2: ['09:28', '10:28'],
+      P3: ['10:31', '11:31'],
+      P4: ['12:21', '01:21'],
+      P5: ['02:01', '03:01']
     },
     Eastern: {
-      P2: ['08:28','09:28'],
-      P3: ['09:31','10:31'],
-      P4: ['11:21','12:21'],
-      P5: ['01:01','02:01'],
-      P6: ['02:04','03:04']
+      P2: ['08:28', '09:28'],
+      P3: ['09:31', '10:31'],
+      P4: ['11:21', '12:21'],
+      P5: ['01:01', '02:01'],
+      P6: ['02:04', '03:04']
     },
     Central: {
-      P3: ['08:31','09:31'],
-      P4: ['10:21','11:21'],
-      P5: ['12:01','01:01'],
-      P6: ['01:04','02:04'],
-      P7: ['02:07','03:07']
+      P3: ['08:31', '09:31'],
+      P4: ['10:21', '11:21'],
+      P5: ['12:01', '01:01'],
+      P6: ['01:04', '02:04'],
+      P7: ['02:07', '03:07']
     },
     Mountain: {
-      P3: ['07:31','08:31'],
-      P4: ['09:21','10:21'],
-      P5: ['11:01','12:01'],
-      P6: ['12:04','01:04'],
-      P7: ['01:07','02:07']
+      P3: ['07:31', '08:31'],
+      P4: ['09:21', '10:21'],
+      P5: ['11:01', '12:01'],
+      P6: ['12:04', '01:04'],
+      P7: ['01:07', '02:07']
     },
     Pacific: {
-      P4: ['08:21','09:21'],
-      P5: ['10:01','11:01'],
-      P6: ['11:04','12:04'],
-      P7: ['12:07','01:07'],
-      P8: ['01:37','02:37']
+      P4: ['08:21', '09:21'],
+      P5: ['10:01', '11:01'],
+      P6: ['11:04', '12:04'],
+      P7: ['12:07', '01:07'],
+      P8: ['01:37', '02:37']
     }
   };
 
   // Inject highlight CSS once
   (function ensureHighlightStyle() {
-      if (document.getElementById('schedule-current-style')) return;
-      const style = document.createElement('style');
-      style.id = 'schedule-current-style';
-      style.textContent = `
+    if (document.getElementById('schedule-current-style')) return;
+    const style = document.createElement('style');
+    style.id = 'schedule-current-style';
+    style.textContent = `
         .schedule-current-cell { box-shadow: 0 0 0 3px rgba(59,130,246,0.35) inset; transform: scale(1.02); transition: transform .15s ease; }
         .schedule-filled:hover, .schedule-empty:hover { background: rgba(59,130,246,0.10); box-shadow: 0 0 0 2px rgba(59,130,246,0.25) inset; cursor: pointer; }
       `;
-      document.head.appendChild(style);
-    })();
+    document.head.appendChild(style);
+  })();
 
   // Helper to pick the best timezone key for the current user timezone
   function detectTimezoneKey() {
@@ -1852,8 +1936,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Prefer data-attribute lookup: find the TD with data-period == currentPeriodLabel and data-day == today
     const weekday = (new Date()).getDay(); // 0-6
-    const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-    const dayIndex = weekday >= 1 && weekday <=5 ? weekday - 1 : null;
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const dayIndex = weekday >= 1 && weekday <= 5 ? weekday - 1 : null;
     if (dayIndex === null) {
       console.debug('[schedule] Today is weekend, no highlight');
       return;
@@ -1894,6 +1978,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try { emphasizeCurrentPeriod(); } catch (err) { /* ignore */ }
   }, 60 * 1000);
 
+
+
   // Add Enter key listeners to schedule inputs
   function addScheduleInputListeners() {
     // Remove Enter key save functionality; users must use the Save button
@@ -1904,7 +1990,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateScheduleFormLabels() {
     const periodLabels = getPeriodLabels();
     const periodCells = document.querySelectorAll('#scheduleFormPanel tbody tr td:first-child');
-    
+
     periodCells.forEach((cell, index) => {
       if (index < periodLabels.length) {
         cell.textContent = periodLabels[index];
@@ -1915,6 +2001,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize schedule functionality
   addScheduleInputListeners();
   updateScheduleFormLabels();
+
 
   // Wire Save button in schedule form
   const saveScheduleBtn = document.getElementById('saveScheduleBtn');
@@ -1952,7 +2039,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const savedSchedule = localStorage.getItem("userSchedule");
       const formPanel = document.getElementById("scheduleFormPanel");
       const displayPanel = document.getElementById("scheduleDisplayPanel");
-      
+
       if (savedSchedule) {
         // Show display panel if schedule exists
         if (formPanel) formPanel.classList.add("hidden");
@@ -1972,10 +2059,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const formPanel = document.getElementById("scheduleFormPanel");
       const displayPanel = document.getElementById("scheduleDisplayPanel");
       const savedSchedule = localStorage.getItem("userSchedule");
-      
+
       if (formPanel) formPanel.classList.remove("hidden");
       if (displayPanel) displayPanel.classList.add("hidden");
-      
+
       // Pre-fill form with saved data if it exists
       if (savedSchedule) {
         const scheduleData = JSON.parse(savedSchedule);
@@ -2145,9 +2232,8 @@ function openEditTaskPopup(task) {
       taskElements.forEach((el) => {
         const summarySpan = el.querySelector("span");
         if (summarySpan)
-          summarySpan.textContent = `${newTitle} - ${
-            el.dataset.estimatedTime || ""
-          } min.`;
+          summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ""
+            } min.`;
       });
     } else {
       // If not a custom task, update editedIcalTasks
@@ -2163,9 +2249,8 @@ function openEditTaskPopup(task) {
       taskElements.forEach((el) => {
         const summarySpan = el.querySelector("span");
         if (summarySpan)
-          summarySpan.textContent = `${newTitle} - ${
-            el.dataset.estimatedTime || ""
-          } min.`;
+          summarySpan.textContent = `${newTitle} - ${el.dataset.estimatedTime || ""
+            } min.`;
       });
     }
 

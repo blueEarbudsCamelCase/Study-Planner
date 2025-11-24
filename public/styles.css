@@ -985,18 +985,7 @@ body.dark-mode .bookings-iframe-container iframe {
   /* Light border for iframe in dark mode */
 }
 
-/* Priority styling (high-priority tasks) */
-.priority-star {
-  color: gold;
-  font-weight: 700;
-  margin-right: 6px;
-}
-
-.priority-task {
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.08);
-  border-left: 4px solid gold;
-  font-weight: 700;
-}
+/* Priority styling removed (feature disabled) */
 
 body.dark-mode #dashboardTasks {
   background-color: #2d3748 !important;
@@ -1101,4 +1090,41 @@ body.dark-mode .schedule-empty {
 
 body.dark-mode .schedule-filled {
   color: #e5e7eb; /* dark:text-gray-200 */
+}
+
+/* Visual overlays for planned periods */
+/* Visual overlays for planned periods: use subtle background overlay so hover/outline shines through */
+.plan-partial,
+.plan-full {
+  position: relative;
+  /* Use a background color rather than a giant inset box-shadow so element-level box-shadow (hover) is still visible */
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 120ms ease;
+}
+
+.plan-partial {
+  background-color: rgba(250, 204, 21, 0.44); /* brighter soft yellow for light mode */
+}
+
+.plan-full {
+  background-color: rgba(34, 197, 94, 0.44); /* brighter soft green for light mode */
+}
+
+/* On hover (light mode) keep a visible blue ring but not move text */
+.plan-partial:hover,
+.plan-full:hover {
+  box-shadow: inset 0 0 0 3px rgba(59, 130, 246, 0.28);
+}
+
+/* If a schedule highlight is active (e.g., current period), keep that ring visible above overlays */
+.schedule-current-cell {
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.35) inset;
+}
+
+/* Dark mode: reduce overlay intensity so colors don't clash with dark backgrounds */
+/* Dark-mode overlays: brighter hues but keep same alpha for accessibility */
+
+body.dark-mode .plan-partial:hover,
+body.dark-mode .plan-full:hover {
+  background-color: rgba(59,130,246,0.17) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.28) inset;
 }

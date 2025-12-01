@@ -4,8 +4,9 @@
 }
 
 #dashboardContainer {
-  margin: 0.5rem auto;
-  /* Center the container horizontally and add vertical spacing */
+  margin: 0.5rem 0;
+  /* Use full width horizontally so child cards can expand */
+  width: 100%;
 }
 
 .button {
@@ -442,7 +443,7 @@ body.dark-mode #taskPopup {
   /* Center-align items vertically */
 }
 
-#studyPlannerSection li input[type='checkbox'] {
+#studyPlannerSection li input[type="checkbox"] {
   margin-right: 0.5rem;
   /* Add spacing between the checkbox and text */
 }
@@ -649,7 +650,7 @@ body.dark-mode #taskPopup {
 
 /* Tooltip arrow */
 .task-tooltip .tooltip-text::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 100%;
   /* Arrow at the bottom of the tooltip */
@@ -904,7 +905,7 @@ body.dark-mode #studyPlannerSection h3 {
 }
 
 .checkmark::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 6px;
   height: 12px;
@@ -948,6 +949,11 @@ body.dark-mode #studyPlannerSection h3 {
   /* Light border for cards and iframe */
 }
 
+/* When the bookings container is using the h-full utility class, ensure it fills the parent height */
+.bookings-iframe-container.h-full {
+  height: 100%;
+}
+
 .bookings-iframe-container iframe {
   width: 100%;
   height: 100%;
@@ -964,6 +970,12 @@ body.dark-mode #studyPlannerSection h3 {
   flex-direction: column;
   border: 1px solid #e2e8f0;
   /* Light border for dashboard cards */
+}
+
+/* Utility selector for cards that have h-full to ensure full width/height */
+.bg-white.shadow-2xl.rounded-2xl.p-8.flex-1.h-full {
+  height: 100%;
+  width: 100%;
 }
 
 body.dark-mode .bg-white.shadow-2xl.rounded-2xl.p-8.flex-1 {
@@ -1098,15 +1110,28 @@ body.dark-mode .schedule-filled {
 .plan-full {
   position: relative;
   /* Use a background color rather than a giant inset box-shadow so element-level box-shadow (hover) is still visible */
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 120ms ease;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 120ms ease;
 }
 
 .plan-partial {
-  background-color: rgba(250, 204, 21, 0.44); /* brighter soft yellow for light mode */
+  background-color: rgba(
+    250,
+    204,
+    21,
+    0.44
+  ); /* brighter soft yellow for light mode */
 }
 
 .plan-full {
-  background-color: rgba(34, 197, 94, 0.44); /* brighter soft green for light mode */
+  background-color: rgba(
+    34,
+    197,
+    94,
+    0.44
+  ); /* brighter soft green for light mode */
 }
 
 /* On hover (light mode) keep a visible blue ring but not move text */
@@ -1117,7 +1142,7 @@ body.dark-mode .schedule-filled {
 
 /* If a schedule highlight is active (e.g., current period), keep that ring visible above overlays */
 .schedule-current-cell {
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.35) inset;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) inset;
 }
 
 /* Dark mode: reduce overlay intensity so colors don't clash with dark backgrounds */
@@ -1125,6 +1150,8 @@ body.dark-mode .schedule-filled {
 
 body.dark-mode .plan-partial:hover,
 body.dark-mode .plan-full:hover {
-  background-color: rgba(59,130,246,0.17) !important;
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.28) inset;
+  background-color: rgba(59, 130, 246, 0.17) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.28) inset;
 }
+
+/* The schedule display will use the normal flow; do not center it here */

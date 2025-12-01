@@ -80,7 +80,7 @@ function parseIcalDate(rawDate) {
     const minutes = parseInt(rawDate.substring(11, 13), 10);
     const seconds = parseInt(rawDate.substring(13, 15), 10);
     return new Date(
-      Date.UTC(year, month, day, hours, minutes, seconds)
+      Date.UTC(year, month, day, hours, minutes, seconds),
     ).toISOString();
   } else {
     // Handle date-only format (e.g., 20250422)
@@ -98,15 +98,15 @@ window.parseIcalFeed = function parseIcalFeed(data) {
   }
 
   const completedTasks = JSON.parse(
-    localStorage.getItem("completedTasks") || "[]"
+    localStorage.getItem("completedTasks") || "[]",
   );
   const completedTaskKeys = completedTasks.map(
-    (task) => `${task.summary}-${task.startDate}`
+    (task) => `${task.summary}-${task.startDate}`,
   );
 
   // Load previous edits
   const editedIcalTasks = JSON.parse(
-    localStorage.getItem("editedIcalTasks") || "{}"
+    localStorage.getItem("editedIcalTasks") || "{}",
   );
 
   const events = [];
@@ -324,7 +324,7 @@ function openTaskPopup(task) {
         "[Time Selected]",
         timeSelected,
         "Zone Selected",
-        zoneSelected
+        zoneSelected,
       );
       tryAutoSave();
     };
@@ -337,7 +337,7 @@ function openTaskPopup(task) {
       "ring-offset-2",
       "ring-blue-300",
       "ring-green-300",
-      "ring-red-300"
+      "ring-red-300",
     );
     btn.onclick = () => {
       console.log("[Zone Button Clicked]", btn.dataset.zone);
@@ -351,8 +351,8 @@ function openTaskPopup(task) {
             "ring-offset-2",
             "ring-blue-300",
             "ring-green-300",
-            "ring-red-300"
-          )
+            "ring-red-300",
+          ),
         );
       if (selectedZone === "Independent")
         btn.classList.add("ring", "ring-offset-2", "ring-blue-300");
@@ -364,7 +364,7 @@ function openTaskPopup(task) {
         "[Zone Selected]",
         zoneSelected,
         "Time Selected",
-        timeSelected
+        timeSelected,
       );
       tryAutoSave();
     };
@@ -382,7 +382,7 @@ function openTaskPopup(task) {
       "[tryAutoSave] timeSelected:",
       timeSelected,
       "zoneSelected:",
-      zoneSelected
+      zoneSelected,
     );
     if (timeSelected && zoneSelected) {
       const estimatedTime = parseInt(taskTime.value, 10);
@@ -390,7 +390,7 @@ function openTaskPopup(task) {
         "[tryAutoSave] estimatedTime:",
         estimatedTime,
         "selectedZone:",
-        selectedZone
+        selectedZone,
       );
       if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
         alert("Please enter a valid estimated time.");
@@ -402,7 +402,7 @@ function openTaskPopup(task) {
           const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
           return sum + taskTime;
         },
-        0
+        0,
       );
 
       if (currentTotalMinutes + estimatedTime > 60) {
@@ -413,7 +413,7 @@ function openTaskPopup(task) {
         "[tryAutoSave] Saving task:",
         task,
         estimatedTime,
-        selectedZone
+        selectedZone,
       );
       addToAgenda(task, estimatedTime, selectedZone);
       task.estimatedTime = estimatedTime;
@@ -449,7 +449,7 @@ function runButtonColorCheck() {
       const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0; // Use the dataset value
       return sum + estimatedTime;
     },
-    0
+    0,
   );
 
   console.log("Total Minutes:", totalMinutes);
@@ -535,10 +535,10 @@ function addToAgenda(task, estimatedTime, zone) {
 // Utility to get all tasks (ical + custom)
 function getAllTasks() {
   const completedTasks = JSON.parse(
-    localStorage.getItem("completedTasks") || "[]"
+    localStorage.getItem("completedTasks") || "[]",
   );
   const completedTaskKeys = completedTasks.map(
-    (task) => `${task.summary}-${task.startDate}`
+    (task) => `${task.summary}-${task.startDate}`,
   );
 
   const icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
@@ -546,10 +546,10 @@ function getAllTasks() {
 
   // Filter out completed tasks from both sources
   const filteredIcalTasks = icalTasks.filter(
-    (t) => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
+    (t) => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`),
   );
   const filteredCustomTasks = customTasks.filter(
-    (t) => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`)
+    (t) => !completedTaskKeys.includes(`${t.summary}-${t.startDate}`),
   );
 
   return [...filteredIcalTasks, ...filteredCustomTasks];
@@ -737,10 +737,10 @@ function moveToCompleted(task, taskElement, isDashboard = false) {
     task.summary,
     task.startDate,
     "isDashboard:",
-    isDashboard
+    isDashboard,
   );
   const completedTasks = JSON.parse(
-    localStorage.getItem("completedTasks") || "[]"
+    localStorage.getItem("completedTasks") || "[]",
   );
   completedTasks.push(task);
   localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
@@ -748,14 +748,14 @@ function moveToCompleted(task, taskElement, isDashboard = false) {
   // Remove from customTasks if present
   let customTasks = JSON.parse(localStorage.getItem("customTasks") || "[]");
   customTasks = customTasks.filter(
-    (t) => !(t.startDate === task.startDate && t.summary === task.summary)
+    (t) => !(t.startDate === task.startDate && t.summary === task.summary),
   );
   localStorage.setItem("customTasks", JSON.stringify(customTasks));
 
   // Remove from iCal tasks if present
   let icalTasks = JSON.parse(localStorage.getItem("icalTasks") || "[]");
   icalTasks = icalTasks.filter(
-    (t) => !(t.startDate === task.startDate && t.summary === task.summary)
+    (t) => !(t.startDate === task.startDate && t.summary === task.summary),
   );
   localStorage.setItem("icalTasks", JSON.stringify(icalTasks));
 
@@ -946,7 +946,7 @@ function updateRunScreenDisplay(taskIndex) {
       <h2 class="font-bold text-lg mb-2">Current Task</h2>
       ${currentTask
       ? `<div class="p-4 rounded shadow-md mb-4" style="background-color: ${getTaskZoneColor(
-        currentTask.zone
+        currentTask.zone,
       )};">
                 <input type="checkbox" id="currentTaskCheckbox" class="mr-2">
                 <label for="currentTaskCheckbox">${currentTask.summary} - ${currentTask.estimatedTime
@@ -962,11 +962,11 @@ function updateRunScreenDisplay(taskIndex) {
         .map(
           (task) => `
                 <div class="p-4 rounded shadow-md mb-2" style="background-color: ${getTaskZoneColor(
-            task.zone
+            task.zone,
           )};">
                   <label>${task.summary} - ${task.estimatedTime} min.</label>
                 </div>
-              `
+              `,
         )
         .join("")
       : `<p class="text-gray-500 italic">No upcoming tasks.</p>`
@@ -986,14 +986,14 @@ function updateRunScreenDisplay(taskIndex) {
         // Wait for fade-out animation (500ms), then update display and timer
         setTimeout(() => {
           const stillIncomplete = runSessionTasks.filter(
-            (task) => !task.completed
+            (task) => !task.completed,
           );
           if (stillIncomplete.length === 0) {
             clearInterval(timerInterval);
             baseTimer.querySelector("#base-timer-label").textContent = "00:00";
           } else {
             const nextTaskIndex = runSessionTasks.findIndex(
-              (task) => !task.completed
+              (task) => !task.completed,
             );
             updateRunScreenDisplay(taskIndex); // Always use the same index
             startTaskTimer(nextTaskIndex);
@@ -1035,7 +1035,7 @@ if (pipButton) {
           .then((pipWindow) => {
             pipButton.textContent = "Hide Popup"; // Update button text
             for (let styleSheet of document.querySelectorAll(
-              "link[rel=stylesheet]"
+              "link[rel=stylesheet]",
             )) {
               let newStyleSheet = document.createElement("link");
               newStyleSheet.rel = "stylesheet";
@@ -1048,7 +1048,7 @@ if (pipButton) {
               if (runScreenBox && runScreenBox.children[0]) {
                 runScreenBox.children[0].insertBefore(
                   baseTimer,
-                  runScreenBox.children[0].children[0]
+                  runScreenBox.children[0].children[0],
                 );
               }
               pipButton.textContent = "Show Popup";
@@ -1090,7 +1090,7 @@ function saveAllStudyPlans(plansObj) {
 function applyScheduleOverlays(displayPanel) {
   if (!displayPanel) return;
   const plans = loadAllStudyPlans();
-  const cells = displayPanel.querySelectorAll('td[data-period][data-day]');
+  const cells = displayPanel.querySelectorAll("td[data-period][data-day]");
   cells.forEach((td) => {
     const period = td.dataset.period;
     const day = td.dataset.day;
@@ -1099,11 +1099,11 @@ function applyScheduleOverlays(displayPanel) {
     const totalMinutes = Array.isArray(tasks)
       ? tasks.reduce((sum, t) => sum + (parseInt(t.estimatedTime, 10) || 0), 0)
       : 0;
-    td.classList.remove('plan-partial', 'plan-full');
+    td.classList.remove("plan-partial", "plan-full");
     if (totalMinutes >= 60) {
-      td.classList.add('plan-full');
+      td.classList.add("plan-full");
     } else if (totalMinutes > 0) {
-      td.classList.add('plan-partial');
+      td.classList.add("plan-partial");
     }
   });
 }
@@ -1130,7 +1130,9 @@ function clearPlansIfWeeklyNeeded() {
 
     function getISOWeekNumber(d) {
       // Copy date so don't modify original
-      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const date = new Date(
+        Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()),
+      );
       // Set to nearest Thursday: current date + 4 - current day number
       const dayNum = date.getUTCDay() || 7;
       date.setUTCDate(date.getUTCDate() + 4 - dayNum);
@@ -1141,7 +1143,7 @@ function clearPlansIfWeeklyNeeded() {
 
     function getWeekKey(d) {
       const w = getISOWeekNumber(d);
-      return `${w.year}-W${String(w.week).padStart(2, '0')}`;
+      return `${w.year}-W${String(w.week).padStart(2, "0")}`;
     }
 
     function getMondayAt1amOfDate(d) {
@@ -1156,14 +1158,17 @@ function clearPlansIfWeeklyNeeded() {
     }
 
     const currentWeekKey = getWeekKey(now);
-    const storedWeekKey = localStorage.getItem('studyPlansWeekKey');
+    const storedWeekKey = localStorage.getItem("studyPlansWeekKey");
 
     // If stored key is missing, or we have advanced to a new week and it's past Monday 01:00, clear plans
     const monday1am = getMondayAt1amOfDate(now);
     if (storedWeekKey !== currentWeekKey && now >= monday1am) {
-      localStorage.removeItem('studyPlans');
-      localStorage.setItem('studyPlansWeekKey', currentWeekKey);
-      console.info('[studyPlans] Weekly clear executed. Updated week key to', currentWeekKey);
+      localStorage.removeItem("studyPlans");
+      localStorage.setItem("studyPlansWeekKey", currentWeekKey);
+      console.info(
+        "[studyPlans] Weekly clear executed. Updated week key to",
+        currentWeekKey,
+      );
       return; // done, nothing else to sanitize
     }
 
@@ -1179,7 +1184,9 @@ function clearPlansIfWeeklyNeeded() {
         return;
       }
       // Keep only tasks that have a startDate (timestamp-like)
-      const filtered = tasks.filter((t) => t && (t.startDate || t.savedAt || t.timestamp));
+      const filtered = tasks.filter(
+        (t) => t && (t.startDate || t.savedAt || t.timestamp),
+      );
       if (filtered.length === 0) {
         delete plans[slotKey];
         changed = true;
@@ -1190,10 +1197,12 @@ function clearPlansIfWeeklyNeeded() {
     });
     if (changed) {
       saveAllStudyPlans(plans);
-      console.info('[studyPlans] Sanitized studyPlans: removed entries without timestamps');
+      console.info(
+        "[studyPlans] Sanitized studyPlans: removed entries without timestamps",
+      );
     }
   } catch (err) {
-    console.error('[studyPlans] clearPlansIfWeeklyNeeded error:', err);
+    console.error("[studyPlans] clearPlansIfWeeklyNeeded error:", err);
   }
 }
 
@@ -1212,14 +1221,14 @@ function scheduleNextWeeklyClear() {
       try {
         clearPlansIfWeeklyNeeded();
       } catch (e) {
-        console.error('[studyPlans] scheduled weekly clear error:', e);
+        console.error("[studyPlans] scheduled weekly clear error:", e);
       }
       // re-schedule the next one in 7 days
       setInterval(clearPlansIfWeeklyNeeded, 7 * 24 * 60 * 60 * 1000);
     }, msUntil + 50); // slight offset
-    console.debug('[studyPlans] scheduled next weekly clear in ms:', msUntil);
+    console.debug("[studyPlans] scheduled next weekly clear in ms:", msUntil);
   } catch (err) {
-    console.error('[studyPlans] scheduleNextWeeklyClear error:', err);
+    console.error("[studyPlans] scheduleNextWeeklyClear error:", err);
   }
 }
 
@@ -1304,13 +1313,18 @@ function saveCurrentSlotPlans() {
   const plans = loadAllStudyPlans();
   plans[slotKey] = tasks;
   saveAllStudyPlans(plans);
-  console.debug(`[studyPlans] Saved ${tasks.length} tasks for slot: ${slotKey}`);
+  console.debug(
+    `[studyPlans] Saved ${tasks.length} tasks for slot: ${slotKey}`,
+  );
   // Update schedule overlays so dashboard reflects this change promptly
   try {
-    const displayPanel = document.getElementById('scheduleDisplayPanel');
+    const displayPanel = document.getElementById("scheduleDisplayPanel");
     if (displayPanel) applyScheduleOverlays(displayPanel);
   } catch (err) {
-    console.error('[studyPlans] error updating schedule overlays after save:', err);
+    console.error(
+      "[studyPlans] error updating schedule overlays after save:",
+      err,
+    );
   }
 }
 
@@ -1343,13 +1357,23 @@ function attachScheduleCellHandlers() {
       const idx = allTds.indexOf(td);
       // Ignore first column (period label)
       if (idx === 0) {
-        console.debug("[schedule] clicked period label cell, ignoring", td.textContent.trim());
+        console.debug(
+          "[schedule] clicked period label cell, ignoring",
+          td.textContent.trim(),
+        );
         return;
       }
       const periodLabelCell = tr.querySelector("td:first-child");
-      const periodLabel = periodLabelCell ? periodLabelCell.textContent.trim() : null;
+      const periodLabel = periodLabelCell
+        ? periodLabelCell.textContent.trim()
+        : null;
       const dayName = weekdayNames[idx - 1] || `Col${idx}`;
-      console.debug("[schedule] cell clicked", { periodLabel, dayName, idx, text: td.textContent.trim() });
+      console.debug("[schedule] cell clicked", {
+        periodLabel,
+        dayName,
+        idx,
+        text: td.textContent.trim(),
+      });
       if (periodLabel) openStudyPlannerForSlot(periodLabel, dayName);
     });
 
@@ -1370,9 +1394,15 @@ function attachScheduleCellHandlers() {
       const idx = allTds.indexOf(td);
       if (idx === 0) return;
       const periodLabelCell = tr.querySelector("td:first-child");
-      const periodLabel = periodLabelCell ? periodLabelCell.textContent.trim() : null;
+      const periodLabel = periodLabelCell
+        ? periodLabelCell.textContent.trim()
+        : null;
       const dayName = weekdayNames[idx - 1] || `Col${idx}`;
-      console.debug("[schedule] key-activate cell", { periodLabel, dayName, idx });
+      console.debug("[schedule] key-activate cell", {
+        periodLabel,
+        dayName,
+        idx,
+      });
       if (periodLabel) openStudyPlannerForSlot(periodLabel, dayName);
     });
 
@@ -1395,7 +1425,10 @@ function openStudyPlannerForSlot(periodLabel, dayName) {
   const dashboardSection = document.getElementById("dashboardSection");
   const studyScreen = document.getElementById("studyPlannerSection");
   if (!studyScreen || !dashboardSection) {
-    console.warn("[openStudyPlannerForSlot] missing DOM elements", { studyScreen: !!studyScreen, dashboardSection: !!dashboardSection });
+    console.warn("[openStudyPlannerForSlot] missing DOM elements", {
+      studyScreen: !!studyScreen,
+      dashboardSection: !!dashboardSection,
+    });
     return;
   }
 
@@ -1413,16 +1446,22 @@ function openStudyPlannerForSlot(periodLabel, dayName) {
   const titleSpan = studyScreen.querySelector(".session-title");
   if (titleSpan) {
     // Look up the user-entered class name for this period and day
-    let className = '';
+    let className = "";
     try {
-      const scheduleData = JSON.parse(localStorage.getItem("userSchedule") || '{}');
+      const scheduleData = JSON.parse(
+        localStorage.getItem("userSchedule") || "{}",
+      );
       // The input name is like period4Monday, period5Tuesday, etc.
       // Extract the period number from periodLabel (e.g., P4 -> 4)
-      const periodNum = periodLabel.replace(/[^0-9]/g, '');
+      const periodNum = periodLabel.replace(/[^0-9]/g, "");
       const key = `period${periodNum}${dayName}`;
-      className = scheduleData[key] || '';
-    } catch (e) { className = ''; }
-    const displayName = className ? `${className} (${periodLabel}, ${dayName})` : `${periodLabel} (${dayName})`;
+      className = scheduleData[key] || "";
+    } catch (e) {
+      className = "";
+    }
+    const displayName = className
+      ? `${className} (${periodLabel}, ${dayName})`
+      : `${periodLabel} (${dayName})`;
     titleSpan.textContent = `${displayName}`;
   }
 
@@ -1439,7 +1478,7 @@ function updateMinutesLeftDisplay() {
       const estimatedTime = parseInt(child.dataset.estimatedTime, 10) || 0;
       return sum + estimatedTime;
     },
-    0
+    0,
   );
   const minutesLeft = Math.max(60 - totalMinutes, 0);
   minutesLeftDisplay.textContent = `${minutesLeft} minute${minutesLeft === 1 ? "" : "s"
@@ -1540,7 +1579,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!date) return alert("Please select a date.");
       if (!teacher) return alert("Please enter the teacher's name.");
       const customTasks = JSON.parse(
-        localStorage.getItem("customTasks") || "[]"
+        localStorage.getItem("customTasks") || "[]",
       );
       // Always save as UTC 23:59
       const startDate = `${date}T23:59:00.000Z`;
@@ -1579,7 +1618,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const customTasks = JSON.parse(
-        localStorage.getItem("customTasks") || "[]"
+        localStorage.getItem("customTasks") || "[]",
       );
       if (customTasks.some((t) => t.summary === title)) {
         alert("Custom task titles must be unique.");
@@ -1622,24 +1661,24 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshStudyTasksBtn.onclick = () => {
       refreshStudyTasksBtn.classList.add("fa-spin");
 
-
       fetchIcalFeed()
         .then(() => {
           loadStudyTasks();
           setTimeout(
             () => refreshStudyTasksBtn.classList.remove("fa-spin"),
-            500
+            500,
           );
         })
         .catch(() => {
           setTimeout(
             () => refreshStudyTasksBtn.classList.remove("fa-spin"),
-            500
+            500,
           );
         });
       const studyPlanDisplay = document.getElementById("studyPlanDisplay");
       if (studyPlanDisplay) {
-        studyPlanDisplay.innerHTML = '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
+        studyPlanDisplay.innerHTML =
+          '<p class="text-gray-500 italic">No tasks scheduled yet.</p>';
         updateMinutesLeftDisplay();
       }
     };
@@ -1650,15 +1689,16 @@ document.addEventListener("DOMContentLoaded", () => {
     startStudyBtn.classList.add("hidden");
   }
 
-
   // Hide the old Start button — scheduling replaces it
   if (startStudyBtn) {
     startStudyBtn.classList.add("hidden");
   }
 
   // Clear saved plans on Sunday
-  !  // Weekly clearing and sanitization
-    clearPlansIfWeeklyNeeded();
+  !(
+    // Weekly clearing and sanitization
+    clearPlansIfWeeklyNeeded()
+  );
   scheduleNextWeeklyClear();
 
   // Initial dashboard render
@@ -1682,43 +1722,43 @@ document.addEventListener("DOMContentLoaded", () => {
     // Map timezones to period numbers
     const timezonePeriods = {
       // Pacific Time (PST/PDT)
-      'America/Los_Angeles': [4, 5, 6, 7, 8],
-      'America/Vancouver': [4, 5, 6, 7, 8],
+      "America/Los_Angeles": [4, 5, 6, 7, 8],
+      "America/Vancouver": [4, 5, 6, 7, 8],
 
       // Mountain Time (MST/MDT)
-      'America/Denver': [4, 5, 6, 7, 8],
-      'America/Phoenix': [4, 5, 6, 7, 8],
-      'America/Edmonton': [4, 5, 6, 7, 8],
+      "America/Denver": [4, 5, 6, 7, 8],
+      "America/Phoenix": [4, 5, 6, 7, 8],
+      "America/Edmonton": [4, 5, 6, 7, 8],
 
       // Central Time (CST/CDT)
-      'America/Chicago': [3, 4, 5, 6, 7],
-      'America/Mexico_City': [3, 4, 5, 6, 7],
-      'America/Winnipeg': [3, 4, 5, 6, 7],
+      "America/Chicago": [3, 4, 5, 6, 7],
+      "America/Mexico_City": [3, 4, 5, 6, 7],
+      "America/Winnipeg": [3, 4, 5, 6, 7],
 
       // Eastern Time (EST/EDT)
-      'America/New_York': [2, 3, 4, 5, 6],
-      'America/Toronto': [2, 3, 4, 5, 6],
-      'America/Montreal': [2, 3, 4, 5, 6],
+      "America/New_York": [2, 3, 4, 5, 6],
+      "America/Toronto": [2, 3, 4, 5, 6],
+      "America/Montreal": [2, 3, 4, 5, 6],
 
       // Atlantic Time
-      'America/Halifax': [2, 3, 4, 5, 6],
+      "America/Halifax": [2, 3, 4, 5, 6],
 
       // Default fallback (Pacific Time)
-      'default': [4, 5, 6, 7, 8]
+      default: [4, 5, 6, 7, 8],
     };
 
     // Get periods for the timezone, fallback to default if not found
-    const periods = timezonePeriods[timezone] || timezonePeriods['default'];
+    const periods = timezonePeriods[timezone] || timezonePeriods["default"];
 
     // Convert to period labels
-    return periods.map(period => `P${period}`);
+    return periods.map((period) => `P${period}`);
   }
 
   function saveScheduleData() {
-    const scheduleInputs = document.querySelectorAll('.schedule-input');
+    const scheduleInputs = document.querySelectorAll(".schedule-input");
     const scheduleData = {};
 
-    scheduleInputs.forEach(input => {
+    scheduleInputs.forEach((input) => {
       if (input.value.trim()) {
         scheduleData[input.name] = input.value.trim();
       }
@@ -1767,42 +1807,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Get dynamic period labels based on timezone
     const periodLabels = getPeriodLabels();
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
     // Define periods and their corresponding input names
     const periods = [
-      { period: periodLabels[0], inputs: ['period4Monday', 'period4Tuesday', 'period4Wednesday', 'period4Thursday', 'period4Friday'] },
-      { period: periodLabels[1], inputs: ['period5Monday', 'period5Tuesday', 'period5Wednesday', 'period5Thursday', 'period5Friday'] },
-      { period: periodLabels[2], inputs: ['period6Monday', 'period6Tuesday', 'period6Wednesday', 'period6Thursday', 'period6Friday'] },
-      { period: periodLabels[3], inputs: ['period7Monday', 'period7Tuesday', 'period7Wednesday', 'period7Thursday', 'period7Friday'] },
-      { period: periodLabels[4], inputs: ['period8Monday', 'period8Tuesday', 'period8Wednesday', 'period8Thursday', 'period8Friday'] }
+      {
+        period: periodLabels[0],
+        inputs: [
+          "period4Monday",
+          "period4Tuesday",
+          "period4Wednesday",
+          "period4Thursday",
+          "period4Friday",
+        ],
+      },
+      {
+        period: periodLabels[1],
+        inputs: [
+          "period5Monday",
+          "period5Tuesday",
+          "period5Wednesday",
+          "period5Thursday",
+          "period5Friday",
+        ],
+      },
+      {
+        period: periodLabels[2],
+        inputs: [
+          "period6Monday",
+          "period6Tuesday",
+          "period6Wednesday",
+          "period6Thursday",
+          "period6Friday",
+        ],
+      },
+      {
+        period: periodLabels[3],
+        inputs: [
+          "period7Monday",
+          "period7Tuesday",
+          "period7Wednesday",
+          "period7Thursday",
+          "period7Friday",
+        ],
+      },
+      {
+        period: periodLabels[4],
+        inputs: [
+          "period8Monday",
+          "period8Tuesday",
+          "period8Wednesday",
+          "period8Thursday",
+          "period8Friday",
+        ],
+      },
     ];
 
     periods.forEach((periodData, index) => {
-      const rowHeight = 'h-20'; // Fixed height for each row
+      const rowHeight = "h-20"; // Fixed height for each row
       const isEvenRow = index % 2 === 0;
 
       scheduleHTML += `
-        <tr class="${rowHeight} schedule-row ${isEvenRow ? 'schedule-row-even' : 'schedule-row-odd'}">
+        <tr class="${rowHeight} schedule-row ${isEvenRow ? "schedule-row-even" : "schedule-row-odd"}">
           <td class="w-20 text-center font-bold text-lg schedule-period border-r schedule-border align-middle">
             ${periodData.period}
           </td>
       `;
 
       periodData.inputs.forEach((inputName, dayIndex) => {
-        const className = scheduleData[inputName] || '';
+        const className = scheduleData[inputName] || "";
         const isEmpty = !className.trim();
-        const textClass = isEmpty ? 'schedule-empty' : 'schedule-filled';
-        const borderClass = dayIndex < 4 ? 'border-r schedule-border' : '';
+        const textClass = isEmpty ? "schedule-empty" : "schedule-filled";
+        const borderClass = dayIndex < 4 ? "border-r schedule-border" : "";
 
         scheduleHTML += `
           <td class="text-center ${textClass} ${borderClass} align-middle px-4 py-4" data-period="${periodData.period}" data-day="${dayNames[dayIndex]}">
-            <span class="truncate block">${isEmpty ? 'Free Period' : className}</span>
+            <span class="truncate block">${isEmpty ? "Free Period" : className}</span>
           </td>
         `;
       });
 
-      scheduleHTML += '</tr>';
+      scheduleHTML += "</tr>";
     });
 
     scheduleHTML += `
@@ -1819,7 +1904,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       applyScheduleOverlays(displayPanel);
     } catch (err) {
-      console.error('[schedule] apply overlays error:', err);
+      console.error("[schedule] apply overlays error:", err);
     }
 
     // After rendering the schedule, emphasize the current period if any
@@ -1835,47 +1920,47 @@ document.addEventListener("DOMContentLoaded", () => {
   const timezonePeriodTimes = {
     // Atlantic / Eastern style
     Atlantic: {
-      P1: ['08:25', '09:25'],
-      P2: ['09:28', '10:28'],
-      P3: ['10:31', '11:31'],
-      P4: ['12:21', '01:21'],
-      P5: ['02:01', '03:01']
+      P1: ["08:25", "09:25"],
+      P2: ["09:28", "10:28"],
+      P3: ["10:31", "11:31"],
+      P4: ["12:21", "01:21"],
+      P5: ["02:01", "03:01"],
     },
     Eastern: {
-      P2: ['08:28', '09:28'],
-      P3: ['09:31', '10:31'],
-      P4: ['11:21', '12:21'],
-      P5: ['01:01', '02:01'],
-      P6: ['02:04', '03:04']
+      P2: ["08:28", "09:28"],
+      P3: ["09:31", "10:31"],
+      P4: ["11:21", "12:21"],
+      P5: ["01:01", "02:01"],
+      P6: ["02:04", "03:04"],
     },
     Central: {
-      P3: ['08:31', '09:31'],
-      P4: ['10:21', '11:21'],
-      P5: ['12:01', '01:01'],
-      P6: ['01:04', '02:04'],
-      P7: ['02:07', '03:07']
+      P3: ["08:31", "09:31"],
+      P4: ["10:21", "11:21"],
+      P5: ["12:01", "01:01"],
+      P6: ["01:04", "02:04"],
+      P7: ["02:07", "03:07"],
     },
     Mountain: {
-      P3: ['07:31', '08:31'],
-      P4: ['09:21', '10:21'],
-      P5: ['11:01', '12:01'],
-      P6: ['12:04', '01:04'],
-      P7: ['01:07', '02:07']
+      P3: ["07:31", "08:31"],
+      P4: ["09:21", "10:21"],
+      P5: ["11:01", "12:01"],
+      P6: ["12:04", "01:04"],
+      P7: ["01:07", "02:07"],
     },
     Pacific: {
-      P4: ['08:21', '09:21'],
-      P5: ['10:01', '11:01'],
-      P6: ['11:04', '12:04'],
-      P7: ['12:07', '01:07'],
-      P8: ['01:37', '02:37']
-    }
+      P4: ["08:21", "09:21"],
+      P5: ["10:01", "11:01"],
+      P6: ["11:04", "12:04"],
+      P7: ["12:07", "01:07"],
+      P8: ["01:37", "02:37"],
+    },
   };
 
   // Inject highlight CSS once
   (function ensureHighlightStyle() {
-    if (document.getElementById('schedule-current-style')) return;
-    const style = document.createElement('style');
-    style.id = 'schedule-current-style';
+    if (document.getElementById("schedule-current-style")) return;
+    const style = document.createElement("style");
+    style.id = "schedule-current-style";
     style.textContent = `
         .schedule-current-cell { box-shadow: 0 0 0 3px rgba(59,130,246,0.35) inset; transform: scale(1.02); transition: transform .15s ease; }
         .schedule-filled:hover, .schedule-empty:hover { background: rgba(59,130,246,0.10); box-shadow: 0 0 0 2px rgba(59,130,246,0.25) inset; cursor: pointer; }
@@ -1885,37 +1970,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Helper to pick the best timezone key for the current user timezone
   function detectTimezoneKey() {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    if (/America\/(Los_Angeles|Vancouver)/i.test(tz)) return 'Pacific';
-    if (/America\/(Denver|Phoenix|Edmonton|Boise)/i.test(tz)) return 'Mountain';
-    if (/America\/(Chicago|Winnipeg|Mexico_City)/i.test(tz)) return 'Central';
-    if (/America\/(New_York|Toronto|Montreal|Halifax)/i.test(tz)) return 'Eastern';
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    if (/America\/(Los_Angeles|Vancouver)/i.test(tz)) return "Pacific";
+    if (/America\/(Denver|Phoenix|Edmonton|Boise)/i.test(tz)) return "Mountain";
+    if (/America\/(Chicago|Winnipeg|Mexico_City)/i.test(tz)) return "Central";
+    if (/America\/(New_York|Toronto|Montreal|Halifax)/i.test(tz))
+      return "Eastern";
     // default fallback
-    return 'Pacific';
+    return "Pacific";
   }
-
 
   // Parse HH:MM to minutes since midnight
   function hhmmToMinutes(hhmm) {
-    const [hh, mm] = hhmm.split(':').map(Number);
+    const [hh, mm] = hhmm.split(":").map(Number);
     return hh * 60 + mm;
   }
 
   // Emphasize the current period by adding a class to the corresponding TD
   function emphasizeCurrentPeriod() {
     // Remove previous highlights
-    document.querySelectorAll('.schedule-current-cell').forEach(el => el.classList.remove('schedule-current-cell'));
+    document
+      .querySelectorAll(".schedule-current-cell")
+      .forEach((el) => el.classList.remove("schedule-current-cell"));
 
-    const displayPanel = document.getElementById('scheduleDisplayPanel');
+    const displayPanel = document.getElementById("scheduleDisplayPanel");
     if (!displayPanel) return;
-    const table = displayPanel.querySelector('table');
+    const table = displayPanel.querySelector("table");
     if (!table) return;
 
     const tzKey = detectTimezoneKey();
     const periodMap = timezonePeriodTimes[tzKey] || {};
     const now = new Date();
     const minutesNow = now.getHours() * 60 + now.getMinutes();
-    console.debug('[schedule] emphasizeCurrentPeriod running', { tzKey, minutesNow });
+    console.debug("[schedule] emphasizeCurrentPeriod running", {
+      tzKey,
+      minutesNow,
+    });
 
     // Find matching period label (e.g., P4) where now is between start/end
     let currentPeriodLabel = null;
@@ -1930,16 +2020,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (!currentPeriodLabel) {
-      console.debug('[schedule] No current period for timezone', tzKey);
+      console.debug("[schedule] No current period for timezone", tzKey);
       return;
     }
 
     // Prefer data-attribute lookup: find the TD with data-period == currentPeriodLabel and data-day == today
-    const weekday = (new Date()).getDay(); // 0-6
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const weekday = new Date().getDay(); // 0-6
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     const dayIndex = weekday >= 1 && weekday <= 5 ? weekday - 1 : null;
     if (dayIndex === null) {
-      console.debug('[schedule] Today is weekend, no highlight');
+      console.debug("[schedule] Today is weekend, no highlight");
       return;
     }
 
@@ -1947,38 +2037,53 @@ document.addEventListener("DOMContentLoaded", () => {
       const selector = `td[data-period="${currentPeriodLabel}"][data-day="${dayNames[dayIndex]}"]`;
       const targetTd = table.querySelector(selector);
       if (targetTd) {
-        targetTd.classList.add('schedule-current-cell');
-        console.debug('[schedule] Highlighted current period via data-attrs', { tzKey, currentPeriodLabel, day: dayNames[dayIndex] });
+        targetTd.classList.add("schedule-current-cell");
+        console.debug("[schedule] Highlighted current period via data-attrs", {
+          tzKey,
+          currentPeriodLabel,
+          day: dayNames[dayIndex],
+        });
         return;
       }
       // Fallback: old row-scan method
-      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
       for (const row of rows) {
-        const firstCell = row.querySelector('td:first-child');
+        const firstCell = row.querySelector("td:first-child");
         if (!firstCell) continue;
         const label = firstCell.textContent.trim();
         if (label === currentPeriodLabel) {
-          const tds = row.querySelectorAll('td');
+          const tds = row.querySelectorAll("td");
           const fallbackTd = tds[dayIndex + 1]; // +1 because first td is period label
           if (fallbackTd) {
-            fallbackTd.classList.add('schedule-current-cell');
-            console.debug('[schedule] Highlighted current period via fallback', { tzKey, currentPeriodLabel, dayIndex });
+            fallbackTd.classList.add("schedule-current-cell");
+            console.debug(
+              "[schedule] Highlighted current period via fallback",
+              { tzKey, currentPeriodLabel, dayIndex },
+            );
           }
           return;
         }
       }
-      console.debug('[schedule] Could not find matching row for period label', currentPeriodLabel);
+      console.debug(
+        "[schedule] Could not find matching row for period label",
+        currentPeriodLabel,
+      );
       return;
     }
-    console.debug('[schedule] No current period label found for timezone', tzKey);
+    console.debug(
+      "[schedule] No current period label found for timezone",
+      tzKey,
+    );
   }
 
   // Update highlight every minute
   setInterval(() => {
-    try { emphasizeCurrentPeriod(); } catch (err) { /* ignore */ }
+    try {
+      emphasizeCurrentPeriod();
+    } catch (err) {
+      /* ignore */
+    }
   }, 60 * 1000);
-
-
 
   // Add Enter key listeners to schedule inputs
   function addScheduleInputListeners() {
@@ -1989,7 +2094,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Update HTML form with dynamic period labels
   function updateScheduleFormLabels() {
     const periodLabels = getPeriodLabels();
-    const periodCells = document.querySelectorAll('#scheduleFormPanel tbody tr td:first-child');
+    const periodCells = document.querySelectorAll(
+      "#scheduleFormPanel tbody tr td:first-child",
+    );
 
     periodCells.forEach((cell, index) => {
       if (index < periodLabels.length) {
@@ -2002,27 +2109,198 @@ document.addEventListener("DOMContentLoaded", () => {
   addScheduleInputListeners();
   updateScheduleFormLabels();
 
+  // Zoom helpers: set/reset page zoom using multiple strategies (non-standard behavior)
+  function setPageZoom(percentage) {
+    try {
+      // Try non-standard style.zoom first (works in many browsers)
+      document.body.style.zoom = percentage;
+      // Store applied zoom in localStorage for persistence if desired
+      localStorage.setItem("userZoom", percentage);
+      return true;
+    } catch (e) {
+      // ignore fallthrough
+    }
+
+    try {
+      // Fallback: apply CSS transform scale with transform-origin top-left
+      const scale = parseFloat(String(percentage).replace("%", "")) / 100;
+      if (Number.isFinite(scale) && scale > 0) {
+        document.body.style.transform = `scale(${scale})`;
+        document.body.style.transformOrigin = "0 0";
+        // Compensate for the transform by increasing the width of the html element
+        document.documentElement.style.width = `${(100 / scale).toFixed(4)}%`;
+        localStorage.setItem("userZoom", percentage);
+        return true;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  function resetPageZoom() {
+    try {
+      document.body.style.zoom = "";
+    } catch (e) { }
+    try {
+      document.body.style.transform = "";
+    } catch (e) { }
+    try {
+      document.body.style.transformOrigin = "";
+    } catch (e) { }
+    try {
+      document.documentElement.style.width = "";
+    } catch (e) { }
+    localStorage.removeItem("userZoom");
+  }
+
+  // Return true if element is fully in the viewport
+  function isElementFullyInViewport(el) {
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <=
+      (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  // Apply an 80% zoom automatically only if the Save Schedule button isn't visible
+  function applyAutoZoomIfNeeded() {
+    // Do not auto-zoom on mobile devices; check via userAgent or viewport size
+    const isMobile =
+      /Mobi|Android/i.test(navigator.userAgent) ||
+      Math.max(window.innerWidth, window.innerHeight) < 600;
+    if (isMobile) return;
+
+    const saveBtn = document.getElementById("saveScheduleBtn");
+    if (!saveBtn) return;
+
+    // Respect user's choice to opt out
+    if (localStorage.getItem("autoZoomDisabled") === "true") return;
+
+    // If save button is not fully visible, attempt to apply 80% zoom
+    if (!isElementFullyInViewport(saveBtn)) {
+      // Apply the zoom but keep a record so the user can revert
+      const applied = setPageZoom("80%");
+      if (!applied) {
+        // If we couldn't programmatically zoom, show banner prompting the user to zoom out
+        showScheduleZoomBanner();
+      } else {
+        // applied zoom: hide banner if present
+        hideScheduleZoomBanner();
+      }
+    }
+  }
+
+  // Create show/hide for the zoom banner and wire up its buttons
+  function showScheduleZoomBanner() {
+    const banner = document.getElementById("scheduleZoomBanner");
+    if (!banner) return;
+    banner.classList.remove("hidden");
+    const autoBtn = document.getElementById("scheduleAutoZoomBtn");
+    const dismissBtn = document.getElementById("scheduleDismissZoomBtn");
+    if (autoBtn) {
+      autoBtn.onclick = () => {
+        const applied = setPageZoom("80%");
+        if (applied) {
+          banner.classList.add("hidden");
+        } else {
+          banner.classList.add("hidden");
+        }
+      };
+    }
+    if (dismissBtn) {
+      dismissBtn.onclick = () => {
+        banner.classList.add("hidden");
+        localStorage.setItem("autoZoomDisabled", "true");
+      };
+    }
+  }
+
+  function hideScheduleZoomBanner() {
+    const banner = document.getElementById("scheduleZoomBanner");
+    if (!banner) return;
+    banner.classList.add("hidden");
+  }
+
+  // Reset Zoom button in the settings popup for convenience
+  const resetZoomBtn = document.createElement("button");
+  resetZoomBtn.id = "resetZoomBtn";
+  resetZoomBtn.className =
+    "bg-gray-100 text-gray-800 px-3 py-2 rounded hover:bg-gray-200";
+  resetZoomBtn.textContent = "Reset Zoom";
+  // Append to settings popup footer if it exists
+  (function addResetZoomToSettings() {
+    const settingsPopupInner = document.querySelector(
+      "#settingsPopup .bg-white",
+    );
+    if (!settingsPopupInner) return;
+    const footer = settingsPopupInner.querySelector(".flex.justify-end");
+    if (footer) {
+      footer.insertBefore(resetZoomBtn, footer.firstChild);
+    } else {
+      settingsPopupInner.appendChild(resetZoomBtn);
+    }
+  })();
+  resetZoomBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    resetPageZoom();
+    localStorage.setItem("autoZoomDisabled", "true");
+    alert("Page zoom reset to 100% and auto-zoom disabled.");
+  });
+
+  // When schedule form is toggled to visible, check if auto-zoom is needed
+  function scheduleFormVisibilityObserver() {
+    const formPanel = document.getElementById("scheduleFormPanel");
+    if (!formPanel) return;
+    const observer = new MutationObserver(() => {
+      if (!formPanel.classList.contains("hidden")) {
+        // It became visible
+        setTimeout(() => applyAutoZoomIfNeeded(), 50);
+      }
+    });
+    observer.observe(formPanel, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  }
+
+  // Run the zoom check at initial load: if schedule panel exists and is visible
+  (function initScheduleZoomHandling() {
+    try {
+      scheduleFormVisibilityObserver();
+      const formPanel = document.getElementById("scheduleFormPanel");
+      if (formPanel && !formPanel.classList.contains("hidden")) {
+        applyAutoZoomIfNeeded();
+      }
+    } catch (err) {
+      console.error("[schedule] initScheduleZoomHandling error:", err);
+    }
+  })();
 
   // Wire Save button in schedule form
-  const saveScheduleBtn = document.getElementById('saveScheduleBtn');
+  const saveScheduleBtn = document.getElementById("saveScheduleBtn");
   if (saveScheduleBtn) {
-    saveScheduleBtn.addEventListener('click', (e) => {
+    saveScheduleBtn.addEventListener("click", (e) => {
       e.preventDefault();
       try {
         saveScheduleData();
         // After saving, focus the display panel for accessibility
-        const displayPanel = document.getElementById('scheduleDisplayPanel');
+        const displayPanel = document.getElementById("scheduleDisplayPanel");
         if (displayPanel) displayPanel.focus();
       } catch (err) {
-        console.error('[schedule] saveScheduleBtn click error', err);
+        console.error("[schedule] saveScheduleBtn click error", err);
       }
     });
   }
 
   // Prevent Enter key on the schedule form from submitting
-  const scheduleTableForm = document.getElementById('scheduleTableForm');
+  const scheduleTableForm = document.getElementById("scheduleTableForm");
   if (scheduleTableForm) {
-    scheduleTableForm.addEventListener('submit', (e) => {
+    scheduleTableForm.addEventListener("submit", (e) => {
       e.preventDefault();
     });
   }
@@ -2030,8 +2308,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Make the left headings act like tabs (clickable)
   (function () {
     const KEY = "activeLeftTab";
-    const headings = document.querySelectorAll("[data-target='#bookingsContent'], [data-target='#scheduleContent']");
-    const panels = { bookings: document.getElementById("bookingsContent"), schedule: document.getElementById("scheduleContent") };
+    const headings = document.querySelectorAll(
+      "[data-target='#bookingsContent'], [data-target='#scheduleContent']",
+    );
+    const panels = {
+      bookings: document.getElementById("bookingsContent"),
+      schedule: document.getElementById("scheduleContent"),
+    };
     const addTutorialBtn = document.getElementById("addTutorialBtn");
 
     function showScheduleContent() {
@@ -2066,7 +2349,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Pre-fill form with saved data if it exists
       if (savedSchedule) {
         const scheduleData = JSON.parse(savedSchedule);
-        Object.keys(scheduleData).forEach(inputName => {
+        Object.keys(scheduleData).forEach((inputName) => {
           const input = document.querySelector(`[name="${inputName}"]`);
           if (input) {
             input.value = scheduleData[inputName];
@@ -2113,7 +2396,8 @@ document.addEventListener("DOMContentLoaded", () => {
     headings.forEach((h) => {
       h.addEventListener("click", () => setActive(h.dataset.target, true));
       h.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") setActive(h.dataset.target, true);
+        if (e.key === "Enter" || e.key === " ")
+          setActive(h.dataset.target, true);
       });
     });
 
@@ -2134,7 +2418,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const matches = teacherList.filter((name) =>
-        name.toLowerCase().includes(value)
+        name.toLowerCase().includes(value),
       );
       if (matches.length === 0) {
         teacherDropdown.classList.add("hidden");
@@ -2227,7 +2511,7 @@ function openEditTaskPopup(task) {
       localStorage.setItem("customTasks", JSON.stringify(customTasks));
       // Update the UI immediately for custom tasks
       const taskElements = document.querySelectorAll(
-        `[data-start-date='${task.startDate}']`
+        `[data-start-date='${task.startDate}']`,
       );
       taskElements.forEach((el) => {
         const summarySpan = el.querySelector("span");
@@ -2238,13 +2522,13 @@ function openEditTaskPopup(task) {
     } else {
       // If not a custom task, update editedIcalTasks
       let editedIcalTasks = JSON.parse(
-        localStorage.getItem("editedIcalTasks") || "{}"
+        localStorage.getItem("editedIcalTasks") || "{}",
       );
       editedIcalTasks[task.startDate] = newTitle;
       localStorage.setItem("editedIcalTasks", JSON.stringify(editedIcalTasks));
       // Update the UI immediately for iCal tasks
       const taskElements = document.querySelectorAll(
-        `[data-start-date='${task.startDate}']`
+        `[data-start-date='${task.startDate}']`,
       );
       taskElements.forEach((el) => {
         const summarySpan = el.querySelector("span");
@@ -2407,12 +2691,13 @@ function openMapPopup() {
     btn.onclick = () => {
       console.log("[Time Button Clicked]", btn.textContent);
       if (mapTime) mapTime.value = btn.textContent;
-      mapTimeSelected = !!(mapTime && mapTime.value) && parseInt(mapTime.value, 10) > 0;
+      mapTimeSelected =
+        !!(mapTime && mapTime.value) && parseInt(mapTime.value, 10) > 0;
       console.log(
         "[Time Selected]",
         mapTimeSelected,
         "Zone Selected",
-        mapZoneSelected
+        mapZoneSelected,
       );
       tryMapAutoSave();
     };
@@ -2432,7 +2717,7 @@ function openMapPopup() {
       "ring-offset-2",
       "ring-blue-300",
       "ring-green-300",
-      "ring-red-300"
+      "ring-red-300",
     );
     btn.onclick = () => {
       console.log("[Zone Button Clicked]", btn.dataset.zone);
@@ -2448,8 +2733,8 @@ function openMapPopup() {
           "ring-offset-2",
           "ring-blue-300",
           "ring-green-300",
-          "ring-red-300"
-        )
+          "ring-red-300",
+        ),
       );
       if (mapSelectedZone === "Independent")
         btn.classList.add("ring", "ring-offset-2", "ring-blue-300");
@@ -2461,7 +2746,7 @@ function openMapPopup() {
         "[Zone Selected]",
         mapZoneSelected,
         "Time Selected",
-        mapTimeSelected
+        mapTimeSelected,
       );
       tryMapAutoSave();
     };
@@ -2496,7 +2781,7 @@ function openMapPopup() {
       "[tryMapAutoSave] timeSelected:",
       mapTimeSelected,
       "zoneSelected:",
-      mapZoneSelected
+      mapZoneSelected,
     );
     if (mapTimeSelected && mapZoneSelected) {
       const estimatedTime = parseInt(mapTime ? mapTime.value : "", 10);
@@ -2504,7 +2789,7 @@ function openMapPopup() {
         "[tryMapAutoSave] estimatedTime:",
         estimatedTime,
         "mapSelectedZone:",
-        mapSelectedZone
+        mapSelectedZone,
       );
       if (!estimatedTime || isNaN(estimatedTime) || estimatedTime <= 0) {
         alert("Please enter a valid estimated time.");
@@ -2517,7 +2802,7 @@ function openMapPopup() {
           const taskTime = parseInt(child.dataset.estimatedTime, 10) || 0;
           return sum + taskTime;
         },
-        0
+        0,
       );
 
       if (currentTotalMinutes + estimatedTime > 60) {
@@ -2548,8 +2833,8 @@ function openMapPopup() {
               "ring-offset-2",
               "ring-blue-300",
               "ring-green-300",
-              "ring-red-300"
-            )
+              "ring-red-300",
+            ),
           );
       }
       if (mapTime) mapTime.value = "";
